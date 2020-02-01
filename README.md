@@ -1,4 +1,7 @@
 # radula
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c9beac5f21bc4702b0c3ddb341121fa7)](https://app.codacy.com/gh/glaucuslinux/radula?utm_source=github.com&utm_medium=referral&utm_content=glaucuslinux/radula&utm_campaign=Badge_Grade_Dashboard)
+
 [![Join the chat at https://gitter.im/glaucuslinux/radula](
 https://badges.gitter.im/glaucuslinux/radula.svg)](
 https://gitter.im/glaucuslinux/radula?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
