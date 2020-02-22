@@ -9,22 +9,22 @@ https://gitter.im/glaucuslinux/radula?utm_source=badge&utm_medium=badge&utm_camp
 glaucus's cerata manager
 
 ## Community
-*   [Discord](https://discord.gg/gZSHj65)
-*   [Gitter](https://gitter.im/glaucuslinux/radula)
-*   [Reddit](https://www.reddit.com/r/glaucus)
-*   [Telegram](https://t.me/glaucuslinux)
+* [Discord](https://discord.gg/gZSHj65)
+* [Gitter](https://gitter.im/glaucuslinux/radula)
+* [Reddit](https://www.reddit.com/r/glaucus)
+* [Telegram](https://t.me/glaucuslinux)
 
 ## Donate
-*   [Ko-fi](https://ko-fi.com/glaucuslinux)
-*   [Liberapay](https://liberapay.com/glaucuslinux)
-*   [Patreon](https://www.patreon.com/glaucuslinux)
-*   [PayPal](https://www.paypal.me/glaucuslinux)
+* [Ko-fi](https://ko-fi.com/glaucuslinux)
+* [Liberapay](https://liberapay.com/glaucuslinux)
+* [Patreon](https://www.patreon.com/glaucuslinux)
+* [PayPal](https://www.paypal.me/glaucuslinux)
 
 ## Mirrors
-*   [BitBucket](https://bitbucket.org/glaucuslinux/radula)
-*   [Framagit](https://framagit.org/glaucuslinux/radula)
-*   [GitHub](https://github.com/glaucuslinux/radula)
-*   [GitLab](https://gitlab.com/glaucuslinux/radula)
-*   [NotABug](https://notabug.org/glaucuslinux/radula)
-*   [SourceForge](https://git.code.sf.net/p/glaucuslinux/radula)
-*   [SourceHut](https://git.sr.ht/~glaucuslinux/radula)
+* [BitBucket](https://bitbucket.org/glaucuslinux/radula)
+* [Framagit](https://framagit.org/glaucuslinux/radula)
+* [GitHub](https://github.com/glaucuslinux/radula)
+* [GitLab](https://gitlab.com/glaucuslinux/radula)
+* [NotABug](https://notabug.org/glaucuslinux/radula)
+* [SourceForge](https://git.code.sf.net/p/glaucuslinux/radula)
+* [SourceHut](https://git.sr.ht/~glaucuslinux/radula)
