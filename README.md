@@ -14,12 +14,6 @@ glaucus's cerata manager
 * [Reddit](https://www.reddit.com/r/glaucus)
 * [Telegram](https://t.me/glaucuslinux)
 
-## Donate
-* [Ko-fi](https://ko-fi.com/glaucuslinux)
-* [Liberapay](https://liberapay.com/glaucuslinux)
-* [Patreon](https://www.patreon.com/glaucuslinux)
-* [PayPal](https://www.paypal.me/glaucuslinux)
-
 ## Mirrors
 * [BitBucket](https://bitbucket.org/glaucuslinux/radula)
 * [Framagit](https://framagit.org/glaucuslinux/radula)
