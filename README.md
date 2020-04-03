@@ -9,7 +9,7 @@ https://gitter.im/glaucuslinux/radula?utm_source=badge&utm_medium=badge&utm_camp
 glaucus's cerata manager
 
 ## Community
-* [Discord](https://discord.gg/gZSHj65)
+* [Discord](https://discord.gg/nDKNmNc)
 * [Gitter](https://gitter.im/glaucuslinux/radula)
 * [Reddit](https://www.reddit.com/r/glaucus)
 * [Telegram](https://t.me/glaucuslinux)
