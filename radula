@@ -1,0 +1,59 @@
+#!/bin/dash -e
+
+# Copyright (c) 2018-2020, Firas Khalil Khana
+# Distributed under the terms of the ISC License
+
+help() {
+  echo Copyright \(c\) 2018-2020, Firas Khalil Khana
+  echo Distributed under the terms of the ISC License
+  echo
+  echo Usage:
+  echo '\t./radula (flags)'
+  echo
+  echo Flags:
+  echo '\tg | -g | --genome \tDisplay current genome (arch)'
+  echo '\th | -h | --help \tDisplay this help message'
+  echo '\tl | -l | --list \tList available genomes and species'
+  echo '\ts | -s | --species \tDisplay current species (flags)'
+}
+
+while [ $# -ge 0 ]; do
+  case $1 in
+    '')
+      help
+      exit 0
+      ;;
+    g | -g | --genome)
+      readlink arch/genome
+      exit 0
+      ;;
+    h | -h | --help)
+      help
+      exit 0
+      ;;
+    l | -l | --list)
+      case $2 in
+        '')
+          ./$0 l g
+          echo
+          ./$0 l s
+          ;;
+        g | genome)
+          echo Genomes:
+          ls -1 arch | sed -e /genome/d -e 's/^/\t/' -e "s/$(./$0 g)/& $(behave/contact current)/"
+          ;;
+        s | species)
+          echo Species:
+          ls -1 flags | sed -e /species/d -e 's/^/\t/' -e "s/$(./$0 s)/& $(behave/contact current)/"
+          ;;
+      esac
+      exit 0
+      ;;
+    s | -s | --species)
+      readlink flags/species
+      exit 0
+      ;;
+  esac
+
+  shift
+done
