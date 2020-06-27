@@ -1,4 +1,4 @@
-#!/bin/dash -e
+#!/bin/sh -e
 
 # Copyright (c) 2018-2020, Firas Khalil Khana
 # Distributed under the terms of the ISC License
@@ -47,6 +47,7 @@ while [ $# -ge 0 ]; do
           ls -1 flags | sed -e /species/d -e 's/^/\t/' -e "s/$(./$0 s)/& $(behave/contact current)/"
           ;;
       esac
+
       exit 0
       ;;
     s | -s | --species)
