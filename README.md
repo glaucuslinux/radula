@@ -6,7 +6,7 @@ https://app.codacy.com/gh/glaucuslinux/radula?utm_source=github.com&utm_medium=r
 https://badges.gitter.im/glaucuslinux/radula.svg)](
 https://gitter.im/glaucuslinux/radula?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-glaucus's cerata manager
+glaucus's radula
 
 ## Community
 * [Discord](https://discord.gg/nDKNmNc)
