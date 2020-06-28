@@ -36,7 +36,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.2"
+  rad_open "$0 version 0.3"
 }
 
 # require will be moved to behave bootstrap options
@@ -140,6 +140,155 @@ rad_bootstrap() {
   :
 }
 
+rad_behave_bootstrap_arch() {
+  case $genome in
+    aarch64 | armv8-a | arm64)
+      export ARCH=aarch64
+
+      export CARCH=--with-gcc-arch=armv8-a
+
+      export FARCH='-mabi=lp64 -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -march=armv8-a -mtune=generic'
+
+      export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
+      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+
+      export MARCH=$ARCH
+
+      export LARCH=arm64
+      export LCARCH=
+      export LIARCH=arch/$LARCH/boot/Image
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    armv6zk | arm | bcm2835)
+      export ARCH=armv6zk
+
+      export CARCH=
+
+      export FARCH="-mabi=aapcs-linux -march=$ARCH -mtune=arm1176jzf-s -mcpu=arm1176jzf-s -mfpu=vfpv2 -mfloat-abi=hard"
+
+      export GCARCH="--with-arch=$ARCH --with-tune=arm1176jzf-s --with-abi=aapcs-linux --with-fpu=vfpv2 --with-float=hard"
+      export GPARCH=
+
+      export MARCH=arm
+
+      export LARCH=$MARCH
+      export LCARCH=bcm2835_
+      export LIARCH=arch/$MARCH/boot/zImage
+
+      export TGT=$ARCH-glaucus-linux-musleabihf
+      ;;
+    i686 | i386 | x86)
+      export ARCH=i686
+
+      export CARCH=--with-gcc-arch=$ARCH
+
+      export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
+
+      export GCARCH="--with-arch=$ARCH --with-tune=generic"
+      export GPARCH=
+
+      export MARCH=i386
+
+      export LARCH=$MARCH
+      export LCARCH=${MARCH}_
+      export LIARCH=arch/x86/boot/bzImage
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    powerpc | pmac32 | ppc)
+      export ARCH=powerpc
+
+      export CARCH=
+
+      export FARCH="-mcpu=$ARCH -msecure-plt"
+
+      export GCARCH="--with-cpu=$ARCH --enable-secureplt --without-long-double-128"
+      export GPARCH=
+
+      export MARCH=$ARCH
+
+      export LARCH=$ARCH
+      export LCARCH=pmac32_
+      export LIARCH=vmlinux
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    powerpc64 | g5 | ppc64)
+      export ARCH=powerpc64
+
+      export CARCH=
+
+      export FARCH="-mcpu=$ARCH -mabi=elfv2"
+
+      export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
+      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+
+      export MARCH=$ARCH
+
+      export LARCH=powerpc
+      export LCARCH=g5_
+      export LIARCH=vmlinux
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    powerpc64le | powernv | ppc64le)
+      export ARCH=powerpc64le
+
+      export CARCH=
+
+      export FARCH="-mcpu=$ARCH -mabi=elfv2"
+
+      export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
+      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-powerpc64"
+
+      export MARCH=powerpc64
+
+      export LARCH=powerpc
+      export LCARCH=powernv_
+      export LIARCH=vmlinux
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    riscv64 | rv64imafdc | riscv)
+      export ARCH=riscv64
+
+      export CARCH=--with-gcc-arch=rv64imafdc
+
+      export FARCH='-mabi=lp64d -march=rv64imafdc -mtune=rocket'
+
+      export GCARCH='--with-arch=rv64imafdc --with-tune=rocket --with-abi=lp64d'
+      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+
+      export MARCH=$ARCH
+
+      export LARCH=riscv
+      export LCARCH=
+      export LIARCH=arch/$LARCH/boot/Image
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    x86-64 | x86_64)
+      export ARCH=x86-64
+
+      export CARCH=--with-gcc-arch=$ARCH
+
+      export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
+
+      export GCARCH="--with-arch=$ARCH --with-tune=generic"
+      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+
+      export MARCH=x86_64
+
+      export LARCH=$MARCH
+      export LCARCH=${MARCH}_
+      export LIARCH=arch/x86/boot/bzImage
+
+      export TGT=$MARCH-glaucus-linux-musl
+      ;;
+  esac
+}
+
 # Source the configuration file in /etc/radula.conf
 # Will soon be replaced with /etc/radula.conf (No forward slash for testing atm)
 . etc/radula.conf
@@ -153,7 +302,7 @@ esac
 
 # Our basic and portable argument parser
 # Sets basic behavior variables and prints information only
-# ./rad l q [g, s] doesn't work since list expects genome or species
+# rad l q [g, s] doesn't work since list expects genome or species
 while [ $# -ge 0 ]; do
   case $1 in
     # Don't call $0 b e just to exit with behave envenomate help message,
@@ -264,12 +413,12 @@ while [ $# -ge 0 ]; do
       ;;
     bb | -bb)
       shift
-      $0 b b $@
+      [ $sleep -eq 0 ] && $0 b b $@ || $0 q b b $@
       exit 0
       ;;
     be | -be)
       shift
-      $0 b e $@
+      [ $sleep -eq 0 ] && $0 b e $@ || $0 q b e $@
       exit 0
       ;;
     g | -g | --genome)
@@ -283,30 +432,30 @@ while [ $# -ge 0 ]; do
     l | -l | --list)
       case $2 in
         '')
-          ./$0 l g
+          [ $sleep -eq 0 ] && $0 l g || $0 q l g
 
           rad_open
 
-          ./$0 l s
+          [ $sleep -eq 0 ] && $0 l s || $0 q l s
           ;;
         g | genome)
           rad_open 'Genomes:'
-          rad_open '\taarch64'
-          rad_open '\tarmv6zk'
-          rad_open '\ti686'
-          rad_open '\tpowerpc'
-          rad_open '\tpowerpc64'
-          rad_open '\tpowerpc64le'
-          rad_open '\triscv64'
-          rad_open '\tx86-64 (default)'
+          rad_open '\taarch64,          armv8-a,    arm64'
+          rad_open '\tarmv6zk,          arm,        bcm2835'
+          rad_open '\ti686,             i386,       x86'
+          rad_open '\tpowerpc,          pmac32,     ppc'
+          rad_open '\tpowerpc64,        g5,         ppc64'
+          rad_open '\tpowerpc64le,      powernv,    ppc64le'
+          rad_open '\triscv64,          rv64imafdc, riscv'
+          rad_open '\tx86-64 (default), x86_64'
           ;;
         s | species)
           rad_open 'Species:'
-          rad_open '\talbino'
-          rad_open '\tatlanticus (default)'
-          rad_open '\tbennettae'
-          rad_open '\tmarginatus'
-          rad_open '\tthompsoni'
+          rad_open '\talbino,               libre'
+          rad_open '\tatlanticus (default), performance'
+          rad_open '\tbennettae,            size'
+          rad_open '\tmarginatus,           sane'
+          rad_open '\tthompsoni,            radiology'
           ;;
         *)
           rad_close 'Valid list options are: g, genome, s and species'
