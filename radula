@@ -10,123 +10,130 @@ umask 022
 behavior=envenomate
 sleep=0
 
+# Define the default location for cerata (testing atm)
+CERD=$PWD/../cerata
+
 # Standard output function
-rad_signal() {
+# Opens the radula (mouth)
+rad_open() {
   [ $sleep = 0 ] && printf "\033[0;34m~~\033[0m $1\n" || printf "$1\n"
 }
 
 # Standard error function
-rad_die() {
+# Closes the radula (mouth)
+rad_close() {
   [ $sleep = 0 ] && printf "\033[0;31m~~\033[0m $1\n" || printf "$1\n"
   exit 1
 }
 
 # Information functions
 rad_license() {
-  rad_signal 'Copyright (c) 2018-2020, Firas Khalil Khana'
-  rad_signal 'Distributed under the terms of the ISC License'
+  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
+  rad_open 'Distributed under the terms of the ISC License'
 }
 
 rad_version() {
   rad_license
 
-  rad_signal
-  rad_signal "$0 version 0.1"
+  rad_open
+  rad_open "$0 version 0.2"
 }
 
 # require will be moved to behave bootstrap options
 rad_help() {
   rad_version
 
-  rad_signal
-  rad_signal 'Usage:'
-  rad_signal "\t$0 (Flags)"
-  rad_signal
-  rad_signal 'Flags:'
-  rad_signal '\tb, -b, --behave \tPerform any of the following behaviors:'
-  rad_signal '\t                \tbootstrap, envenomate (default)'
-  rad_signal
-  rad_signal '\tg, -g, --genome \tDisplay current genome'
-  rad_signal '\th, -h, --help   \tDisplay this help message'
-  rad_signal '\tl, -l, --list   \tList available genomes and species'
-  rad_signal '\tq, -q, --quiet  \tDo not prefix output with ~~'
-  rad_signal '\t       --sleep  \tSame as --quiet'
-  rad_signal
-  rad_signal '\tr, -r, --require\tDisplay bootstrap requirements'
-  rad_signal '\ts, -s, --species\tDisplay current species'
-  rad_signal '\tv, -v, --version\tDisplay version number'
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 (Flags)"
+  rad_open
+  rad_open 'Flags:'
+  rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
+  rad_open '\t                \tbootstrap, envenomate (default)'
+  rad_open
+  rad_open '\tg, -g, --genome \tDisplay current genome'
+  rad_open '\th, -h, --help   \tDisplay this help message'
+  rad_open '\tl, -l, --list   \tList available genomes and species'
+  rad_open '\tq, -q, --quiet  \tDo not prefix output with ~~'
+  rad_open '\t       --sleep  \tSame as --quiet'
+  rad_open
+  rad_open '\tr, -r, --require\tDisplay bootstrap requirements'
+  rad_open '\ts, -s, --species\tDisplay current species'
+  rad_open '\tv, -v, --version\tDisplay version number'
 }
 
 rad_behave_help() {
   rad_version
 
-  rad_signal
-  rad_signal 'Usage:'
-  rad_signal "\t$0 b (Options)"
-  rad_signal
-  rad_signal 'Options:'
-  rad_signal "\tb, bootstrap \tPerform bootstrap behavior"
-  rad_signal "\te, envenomate\tPerform envenomate behavior (default)"
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 b (Options)"
+  rad_open
+  rad_open 'Options:'
+  rad_open "\tb, bootstrap \tPerform bootstrap behavior"
+  rad_open "\te, envenomate\tPerform envenomate behavior (default)"
 }
 
 rad_behave_bootstrap_help() {
   rad_version
 
-  rad_signal
-  rad_signal 'Usage:'
-  rad_signal "\t$0 b b (Options)"
-  rad_signal
-  rad_signal 'Options:'
-  rad_signal "\tc, chroot   \tBootstrap a chroot environment"
-  rad_signal "\tt, toolchain\tBootstrap a cross-compiler toolchain"
-  rad_signal "\tx, cross    \tBootstrap a cross-compiled glaucus system (default)"
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 b b (Options)"
+  rad_open
+  rad_open 'Options:'
+  rad_open "\tc, chroot   \tBootstrap a chroot environment"
+  rad_open "\tt, toolchain\tBootstrap a cross-compiler toolchain"
+  rad_open "\tx, cross    \tBootstrap a cross-compiled glaucus system (default)"
 }
 
 rad_behave_envenomate_help() {
   rad_version
 
-  rad_signal
-  rad_signal 'Usage:'
-  rad_signal "\t$0 b e (Options) [Cerata]"
-  rad_signal
-  rad_signal 'Options:'
-  rad_signal "\tn, nom, name               \tDisplay ceras's name"
-  rad_signal "\tv, ver, version            \tDisplay ceras's version"
-  rad_signal "\tu, url, source             \tDisplay ceras's source"
-  rad_signal "\ts, sum, checksum, sha512sum\tDisplay ceras's sha512sum"
-  rad_signal "\tl, lic, license, licenses  \tDisplay ceras's license(s)"
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 b e (Options) [Cerata]"
+  rad_open
+  rad_open 'Options:'
+  rad_open "\tn, nom, name                     \tDisplay ceras's name"
+  rad_open "\tv, ver, version                  \tDisplay ceras's version"
+  rad_open "\tu, url, source                   \tDisplay ceras's source"
+  rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras's sha512sum"
+  rad_open "\ty, cys, cyst, cysts              \tDisplay ceras's cyst(s)"
+  rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
+  rad_open "\tl, lic, license, licenses        \tDisplay ceras's license(s)"
 }
 
 # Action functions
 rad_require() {
-  rad_signal "bash:     \t$(bash --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "bc:       \t$(bc --version | sed 1q | cut -d' ' -f2)"
-  rad_signal "binutils: \t$(ld --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "bison:    \t$(bison --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "bzip2:    \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  rad_signal "ccache:   \t$(ccache --version | sed 1q | cut -d' ' -f3)"
-  rad_signal "coreutils:\t$(ls --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "diffutils:\t$(diff --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "findutils:\t$(find --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "g++:      \t$(g++ --version | sed 1q | cut -d' ' -f3)"
-  rad_signal "gawk:     \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
-  rad_signal "gcc:      \t$(gcc --version | sed 1q | cut -d' ' -f3)"
-  rad_signal "git:      \t$(git --version | cut -d' ' -f3)"
-  rad_signal "glibc:    \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
-  rad_signal "grep:     \t$(grep --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "gzip:     \t$(gzip --version | sed 1q | cut -d' ' -f2)"
-  rad_signal "linux:    \t$(uname -r)"
-  rad_signal "lzip:     \t$(lzip --version | sed 1q | cut -d' ' -f2)"
-  rad_signal "m4:       \t$(m4 --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "make:     \t$(make --version | sed 1q | cut -d' ' -f3)"
-  rad_signal "patch:    \t$(patch --version | sed 1q | cut -d' ' -f3)"
-  rad_signal "perl:     \t$(perl -V:version | cut -d"'" -f2)"
-  rad_signal "rsync:    \t$(rsync --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "sed:      \t$(sed --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "tar:      \t$(tar --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
-  rad_signal "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
+  rad_open "bash:     \t$(bash --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bc:       \t$(bc --version | sed 1q | cut -d' ' -f2)"
+  rad_open "binutils: \t$(ld --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bison:    \t$(bison --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bzip2:    \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
+  rad_open "ccache:   \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+  rad_open "coreutils:\t$(ls --version | sed 1q | cut -d' ' -f4)"
+  rad_open "diffutils:\t$(diff --version | sed 1q | cut -d' ' -f4)"
+  rad_open "findutils:\t$(find --version | sed 1q | cut -d' ' -f4)"
+  rad_open "g++:      \t$(g++ --version | sed 1q | cut -d' ' -f3)"
+  rad_open "gawk:     \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
+  rad_open "gcc:      \t$(gcc --version | sed 1q | cut -d' ' -f3)"
+  rad_open "git:      \t$(git --version | cut -d' ' -f3)"
+  rad_open "glibc:    \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
+  rad_open "grep:     \t$(grep --version | sed 1q | cut -d' ' -f4)"
+  rad_open "gzip:     \t$(gzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "linux:    \t$(uname -r)"
+  rad_open "lzip:     \t$(lzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "m4:       \t$(m4 --version | sed 1q | cut -d' ' -f4)"
+  rad_open "make:     \t$(make --version | sed 1q | cut -d' ' -f3)"
+  rad_open "patch:    \t$(patch --version | sed 1q | cut -d' ' -f3)"
+  rad_open "perl:     \t$(perl -V:version | cut -d"'" -f2)"
+  rad_open "rsync:    \t$(rsync --version | sed 1q | cut -d' ' -f4)"
+  rad_open "sed:      \t$(sed --version | sed 1q | cut -d' ' -f4)"
+  rad_open "tar:      \t$(tar --version | sed 1q | cut -d' ' -f4)"
+  rad_open "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
+  rad_open "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
+  rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
 }
 
 rad_bootstrap() {
@@ -146,26 +153,33 @@ esac
 
 # Our basic and portable argument parser
 # Sets basic behavior variables and prints information only
-# ./rad l q [g, s] doesn't work yet
+# ./rad l q [g, s] doesn't work since list expects genome or species
 while [ $# -ge 0 ]; do
   case $1 in
+    # Don't call $0 b e just to exit with behave envenomate help message,
+    # instead output that help message directly and let the user think radula is
+    # operating in b e mode by default.
+    '')
+      rad_behave_envenomate_help
+      exit 1
+      ;;
     b | -b | --behave)
       case $2 in
         b | bootstrap)
           case $3 in
             t | toolchain)
-              rad_signal 'Setting default behavior to bootstrap...'
-              rad_signal
+              rad_open 'Setting default behavior to bootstrap...'
+              rad_open
 
               behavior=bootstrap
 
-              rad_signal 'Checking if host system has all required packages...'
-              rad_signal
+              rad_open 'Checking if host system has all required packages...'
+              rad_open
 
               rad_require
 
-              rad_signal
-              rad_signal 'Bootstrapping an x86-64 cross-compiler toolchain targetting musl libc...'
+              rad_open
+              rad_open 'Bootstrapping an x86-64 cross-compiler toolchain targetting musl libc...'
               ;;
             *)
               rad_behave_bootstrap_help
@@ -174,22 +188,72 @@ while [ $# -ge 0 ]; do
           esac
           ;;
         e | envenomate)
-          case $3 in
-            l | lic | license | licenses)
-              ;;
-            n | nom | name)
-              ;;
-            s | sum | checksum | sha512sum)
-              ;;
-            u | url | source)
-              ;;
-            v | ver | version)
-              ;;
-            '' | *)
-              rad_behave_envenomate_help
-              exit 1
-              ;;
-          esac
+          # Don't check for the directory $CERD/$4 alone because when $4 is
+          # empty it'll resolve to $CERD which does exist and will cause radula
+          # to fail.
+          if [ -f $CERD/$4/ceras ]; then
+            . $CERD/$4/ceras
+
+            case $3 in
+              n | nom | name)
+                rad_open "Name:        \t$nom"
+                ;;
+              v | ver | version)
+                rad_open "Version:     \t$ver"
+                ;;
+              u | url | source)
+                rad_open "Source:      \t$url"
+                ;;
+              s | sum | checksum | sha512sum)
+                rad_open "sha512sum:   \t$sum"
+                ;;
+              y | cys | cyst | cysts)
+                cys_len=$(printf "$cys" | wc -w)
+                if [ $cys_len -gt 1 ]; then
+                  rad_open "Cysts:       \t$(printf "$cys" | sed 's/ /, /g')"
+                elif [ $cys_len -eq 1 ]; then
+                  rad_open "Cyst:        \t$cys"
+                else
+                  rad_open "Cyst:        \t~~"
+                fi
+                ;;
+              c | cnt | concentrate | concentrates)
+                cnt_len=$(printf "$cnt" | wc -w)
+                if [ $cnt_len -gt 1 ]; then
+                  rad_open "Concentrates:\t$(printf "$cnt" | sed 's/ /, /g')"
+                elif [ $cnt_len -eq 1 ]; then
+                  rad_open "Concentrate: \t$cnt"
+                else
+                  rad_open "Concentrate: \t~~"
+                fi
+                ;;
+              l | lic | license | licenses)
+                lic_len=$(printf "$lic" | wc -w)
+                if [ $lic_len -gt 1 ]; then
+                  rad_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
+                elif [ $lic_len -eq 1 ]; then
+                  rad_open "License:     \t$lic"
+                else
+                  rad_open "License:     \t~~"
+                fi
+                ;;
+              '' | *)
+                rad_behave_envenomate_help
+                exit 1
+                ;;
+            esac
+
+
+          elif [ -d $CERD/$3 ]; then
+            . $CERD/$3/ceras
+
+            for i in n v u s y c l; do
+              [ $sleep -eq 0 ] && $0 b e $i $3 || $0 q b e $i $3
+            done
+          else
+            rad_behave_envenomate_help
+            exit 1
+          fi
           ;;
         *)
           rad_behave_help
@@ -209,7 +273,7 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     g | -g | --genome)
-      rad_signal $genome
+      rad_open $genome
       exit 0
       ;;
     h | -h | --help)
@@ -221,31 +285,31 @@ while [ $# -ge 0 ]; do
         '')
           ./$0 l g
 
-          rad_signal
+          rad_open
 
           ./$0 l s
           ;;
         g | genome)
-          rad_signal 'Genomes:'
-          rad_signal '\taarch64'
-          rad_signal '\tarmv6zk'
-          rad_signal '\ti686'
-          rad_signal '\tpowerpc'
-          rad_signal '\tpowerpc64'
-          rad_signal '\tpowerpc64le'
-          rad_signal '\triscv64'
-          rad_signal '\tx86-64 (default)'
+          rad_open 'Genomes:'
+          rad_open '\taarch64'
+          rad_open '\tarmv6zk'
+          rad_open '\ti686'
+          rad_open '\tpowerpc'
+          rad_open '\tpowerpc64'
+          rad_open '\tpowerpc64le'
+          rad_open '\triscv64'
+          rad_open '\tx86-64 (default)'
           ;;
         s | species)
-          rad_signal 'Species:'
-          rad_signal '\talbino'
-          rad_signal '\tatlanticus (default)'
-          rad_signal '\tbennettae'
-          rad_signal '\tmarginatus'
-          rad_signal '\tthompsoni'
+          rad_open 'Species:'
+          rad_open '\talbino'
+          rad_open '\tatlanticus (default)'
+          rad_open '\tbennettae'
+          rad_open '\tmarginatus'
+          rad_open '\tthompsoni'
           ;;
         *)
-          rad_die 'Valid list options are: g, genome, s and species'
+          rad_close 'Valid list options are: g, genome, s and species'
       esac
 
       exit 0
@@ -258,16 +322,16 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     s | -s | --species)
-      rad_signal $species
+      rad_open $species
       exit 0
       ;;
     v | -v | --version)
       rad_version
       exit 0
       ;;
-    '' | *)
-      rad_help
-      exit 1
+    *)
+      [ $sleep -eq 0 ] && $0 b e $@ || $0 q b e $@
+      exit 0
       ;;
   esac
 
