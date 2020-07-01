@@ -7,7 +7,6 @@ set -e
 umask 022
 
 # Define the default variables
-behavior=envenomate
 sleep=0
 
 # Define the default location for cerata (testing atm)
@@ -36,7 +35,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.3"
+  rad_open "$0 version 0.4"
 }
 
 # require will be moved to behave bootstrap options
@@ -57,7 +56,7 @@ rad_help() {
   rad_open '\tq, -q, --quiet  \tDo not prefix output with ~~'
   rad_open '\t       --sleep  \tSame as --quiet'
   rad_open
-  rad_open '\tr, -r, --require\tDisplay bootstrap requirements'
+  rad_open '\tr, -r, --require\tCheck if the host system has all required packages'
   rad_open '\ts, -s, --species\tDisplay current species'
   rad_open '\tv, -v, --version\tDisplay version number'
 }
@@ -70,8 +69,8 @@ rad_behave_help() {
   rad_open "\t$0 b (Options)"
   rad_open
   rad_open 'Options:'
-  rad_open "\tb, bootstrap \tPerform bootstrap behavior"
-  rad_open "\te, envenomate\tPerform envenomate behavior (default)"
+  rad_open '\tb, bootstrap \tPerform bootstrap behavior'
+  rad_open '\te, envenomate\tPerform envenomate behavior (default)'
 }
 
 rad_behave_bootstrap_help() {
@@ -82,9 +81,11 @@ rad_behave_bootstrap_help() {
   rad_open "\t$0 b b (Options)"
   rad_open
   rad_open 'Options:'
-  rad_open "\tc, chroot   \tBootstrap a chroot environment"
-  rad_open "\tt, toolchain\tBootstrap a cross-compiler toolchain"
-  rad_open "\tx, cross    \tBootstrap a cross-compiled glaucus system (default)"
+  rad_open '\tr, require  \tCheck if the host system has all required packages'
+  rad_open
+  rad_open '\tc, chroot   \tBootstrap a cross compiled chroot environment'
+  rad_open '\tt, toolchain\tBootstrap a cross compiler toolchain'
+  rad_open '\tx, cross    \tBootstrap a cross compiled glaucus system (default)'
 }
 
 rad_behave_envenomate_help() {
@@ -105,7 +106,9 @@ rad_behave_envenomate_help() {
 }
 
 # Action functions
-rad_require() {
+rad_behave_bootstrap_require() {
+  rad_open 'Checking if the host system has all required packages...'
+  rad_open
   rad_open "bash:     \t$(bash --version | sed 1q | cut -d' ' -f4)"
   rad_open "bc:       \t$(bc --version | sed 1q | cut -d' ' -f2)"
   rad_open "binutils: \t$(ld --version | sed 1q | cut -d' ' -f4)"
@@ -134,10 +137,6 @@ rad_require() {
   rad_open "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
   rad_open "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
   rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
-}
-
-rad_bootstrap() {
-  :
 }
 
 rad_behave_bootstrap_arch() {
@@ -286,6 +285,139 @@ rad_behave_bootstrap_arch() {
 
       export TGT=$MARCH-glaucus-linux-musl
       ;;
+    *)
+      $0 l g
+      exit 1
+      ;;
+  esac
+}
+
+rad_behave_bootstrap_flags() {
+  # Some common flags in all species
+  COMMON=-fcommon
+  DEBUG=-g0
+  FAT=-ffat-lto-objects
+  LTO=-flto
+  PIPE=-pipe
+  STRIP=-s
+
+  case $species in
+    albino | libre)
+      ;;
+    atlanticus | performance)
+      export SPCS=atlanticus
+
+      case $genome in
+        x86-64 | x86_64)
+          ALIGN=-malign-data=cacheline
+          FPMATH=-mfpmath=both
+          TLS=-mtls-dialect=gnu2
+          ;;
+      esac
+      DEVIRT=-fdevirtualize-at-ltrans
+      EXPAND=-fvariable-expansion-in-unroller
+      FINITE=-fno-finite-math-only
+      GCSE='-fgcse-sm -fgcse-las'
+      GRAPHITE='-fgraphite-identity -floop-nest-optimize'
+      IPA=-fipa-pta
+      IRA=-fira-loop-pressure
+      MERGE=-fmerge-all-constants
+      OFAST=-Ofast
+      OPENMP=-fopenmp
+      PGO='-ftracer -funroll-loops'
+      PLT=-fno-plt
+      SEMANTIC=-fno-semantic-interposition
+      SMS='-fmodulo-sched -fmodulo-sched-allow-regmoves'
+
+      export CFLAGS="$PIPE $OPENMP $DEBUG $OFAST $SMS $GCSE $IRA $IPA $GRAPHITE $MERGE $DEVIRT $SEMANTIC $EXPAND $LTO $PGO $STRIP $PLT $FARCH $TLS $FPMATH $ALIGN"
+
+      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
+      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
+
+      export CFLAGSFINITE="$(printf -- "$CFLAGS" | sed "s/$OFAST/& $FINITE/")"
+
+      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
+      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
+
+      export CFLAGSNOFPMATHNOLTO="$(printf -- "$CFLAGS" | sed -e "s/ $FPMATH//" -e "s/$LTO //")"
+
+      export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
+
+      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
+      export CFLAGSNOLTONOOPENMPNOPLT="$(printf -- "$CFLAGSNOLTO" | sed -e "s/$OPENMP //" -e "s/$PLT //")"
+
+      export CFLAGSNOOPENMP="$(printf -- "$CFLAGS" | sed "s/$OPENMP //")"
+
+      export CXXFLAGS="$CFLAGS"
+
+      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
+
+      export LDFLAGSNOOPENMP="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGSNOOPENMP"
+
+      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
+      ;;
+    bennettae | size)
+      export SPCS=bennettae
+
+      AUNWIND=-fno-asynchronous-unwind-tables
+      DSECTS=-fdata-sections
+      FSECTS=-ffunction-sections
+      OMIT=-fomit-frame-pointer
+      OS=-Os
+      UNWIND=-fno-unwind-tables
+
+      export CFLAGS="$PIPE $DEBUG $OS $OMIT $LTO $FSECTS $DSECTS $STRIP $UNWIND $AUNWIND $FARCH "
+
+      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
+      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
+      export CFLAGSFATNODSECTS="$(printf -- "$CFLAGSFAT" | sed "s/$DSECTS //")"
+
+      export CFLAGSNODSECTS="$(printf -- "$CFLAGS" | sed "s/$DSECTS //")"
+
+      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
+      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
+
+      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
+
+      export CXXFLAGS="$CFLAGS"
+
+      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed -Wl,--gc-sections $CFLAGS"
+
+      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
+      ;;
+    marginatus | sane)
+      export SPCS=marginatus
+
+      DEVIRT=-fdevirtualize-at-ltrans
+      GRAPHITE='-fgraphite-identity -floop-nest-optimize'
+      IPA=-fipa-pta
+      O3=-O3
+      SEMANTIC=-fno-semantic-interposition
+
+      export CFLAGS="$PIPE $DEBUG $O3 $IPA $GRAPHITE $DEVIRT $SEMANTIC $LTO $STRIP $FARCH"
+
+      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
+      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
+
+      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
+      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
+
+      export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
+
+      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
+
+      export CXXFLAGS="$CFLAGS"
+
+      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
+
+      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
+      ;;
+    thompsoni | radiology)
+      ;;
+    *)
+      $0 l s
+      exit 1
+      ;;
   esac
 }
 
@@ -316,19 +448,34 @@ while [ $# -ge 0 ]; do
       case $2 in
         b | bootstrap)
           case $3 in
+            r | require)
+              rad_behave_bootstrap_require
+              ;;
+            c | chroot)
+              $0 b b r
+
+              rad_open
+              rad_open "Bootstrapping an $genome cross-compiled chroot environment..."
+
+              rad_behave_bootstrap_arch
+              rad_behave_bootstrap_flags
+              ;;
             t | toolchain)
-              rad_open 'Setting default behavior to bootstrap...'
-              rad_open
-
-              behavior=bootstrap
-
-              rad_open 'Checking if host system has all required packages...'
-              rad_open
-
-              rad_require
+              $0 b b r
 
               rad_open
-              rad_open 'Bootstrapping an x86-64 cross-compiler toolchain targetting musl libc...'
+              rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
+
+              rad_behave_bootstrap_arch
+              ;;
+            x | cross)
+              $0 b b r
+
+              rad_open
+              rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
+
+              rad_behave_bootstrap_arch
+              rad_behave_bootstrap_flags
               ;;
             *)
               rad_behave_bootstrap_help
@@ -363,7 +510,7 @@ while [ $# -ge 0 ]; do
                 elif [ $cys_len -eq 1 ]; then
                   rad_open "Cyst:        \t$cys"
                 else
-                  rad_open "Cyst:        \t~~"
+                  rad_open 'Cyst:        \t~~'
                 fi
                 ;;
               c | cnt | concentrate | concentrates)
@@ -373,7 +520,7 @@ while [ $# -ge 0 ]; do
                 elif [ $cnt_len -eq 1 ]; then
                   rad_open "Concentrate: \t$cnt"
                 else
-                  rad_open "Concentrate: \t~~"
+                  rad_open 'Concentrate: \t~~'
                 fi
                 ;;
               l | lic | license | licenses)
@@ -383,7 +530,7 @@ while [ $# -ge 0 ]; do
                 elif [ $lic_len -eq 1 ]; then
                   rad_open "License:     \t$lic"
                 else
-                  rad_open "License:     \t~~"
+                  rad_open 'License:     \t~~'
                 fi
                 ;;
               '' | *)
@@ -439,7 +586,7 @@ while [ $# -ge 0 ]; do
           [ $sleep -eq 0 ] && $0 l s || $0 q l s
           ;;
         g | genome)
-          rad_open 'Genomes:'
+          rad_open 'Genomes (Archs):'
           rad_open '\taarch64,          armv8-a,    arm64'
           rad_open '\tarmv6zk,          arm,        bcm2835'
           rad_open '\ti686,             i386,       x86'
@@ -450,7 +597,7 @@ while [ $# -ge 0 ]; do
           rad_open '\tx86-64 (default), x86_64'
           ;;
         s | species)
-          rad_open 'Species:'
+          rad_open 'Species (Flags):'
           rad_open '\talbino,               libre'
           rad_open '\tatlanticus (default), performance'
           rad_open '\tbennettae,            size'
@@ -459,6 +606,7 @@ while [ $# -ge 0 ]; do
           ;;
         *)
           rad_close 'Valid list options are: g, genome, s and species'
+          ;;
       esac
 
       exit 0
@@ -467,7 +615,7 @@ while [ $# -ge 0 ]; do
       sleep=1
       ;;
     r | -r | --require)
-      rad_require
+      $0 b b r
       exit 0
       ;;
     s | -s | --species)
