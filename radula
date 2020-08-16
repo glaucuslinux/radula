@@ -9,8 +9,11 @@ umask 022
 # Define the default variables
 sleep=0
 
+# Define the default glaucus directory (which is normally the parent directory
+# for both the cerata and the radula).
+GLAD=$PWD/..
 # Define the default location for cerata (testing atm)
-CERD=$PWD/../cerata
+CERD=$GLAD/cerata
 
 # Standard output function
 # Opens the radula (mouth)
@@ -420,14 +423,108 @@ rad_behave_bootstrap_flags() {
   esac
 }
 
-rad_behave_bootstrap_stage_toolchain() {
-  :
+rad_behave_bootstrap_variables() {
+  # Originally GLAD and CERD belonged here but it appears that a better place
+  # for them would be in the radula script itself as "global" variables.
+  export BAKD=$GLAD/backup
+  export CRSD=$GLAD/cross
+  export LOGD=$GLAD/logs
+  export SCRD=$GLAD/scripts
+  export SRCD=$GLAD/sources
+  export TMPD=$GLAD/temporary
+  export TLCD=$GLAD/toolchain
+
+  export PATH=$TLCD/bin:/usr/bin
+
+  # pkgconf variables are only needed for the cross and chroot stages (the
+  # toolchain stage won't use any of the pkgconf environment variables below).
+  export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
+  export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
+  export PKG_CONFIG_SYSROOT_DIR=$CRSD
+  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
+  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
+
+  # All commands here lack the verbosity flag because we intend to have two
+  # modes of operation, and we're sticking with the silent one for now.
+  export AUTORECONF='autoreconf -fis'
+  export CHMOD='chmod -R'
+  export CHOWN='chown -R'
+  export LN='ln -fns'
+  export MAKE='make -j1'
+  # To prevent overlapping with the install() function in .ceras files, we add
+  # the full path to the install command.
+  export MKDIR='/usr/bin/install -d'
+  export MV=mv
+  export RM='rm -fr'
+  export RSYNC='rsync -aHAXSx'
+  export UMOUNT='umount -fqR'
 }
 
+# Bootstrap a cross-compiler toolchain targetting musl-libc
+rad_behave_bootstrap_stage_toolchain_variables() {
+  export TLOG=$LOGD/toolchain/$(ls -l $LOGD/toolchain | wc -l)
+  export TSCR=$SCRD/toolchain
+  export TTMP=$TMPD/toolchain
+
+  export TSRC=$TTMP/sources
+  export TBLD=$TTMP/builds
+
+  export BLD=$($CERD/binutils/config.guess)
+}
+
+rad_behave_bootstrap_stage_toolchain_check() {
+  $SCRD/check musl &&
+  $SCRD/check binutils &&
+  $SCRD/check gmp &&
+  $SCRD/check mpfr &&
+  $SCRD/check mpc &&
+  $SCRD/check isl &&
+  $SCRD/check gcc
+}
+
+rad_behave_bootstrap_stage_toolchain_prepare() {
+  $RM $CRSD &&
+  $MKDIR $CRSD &&
+
+  $RM $TBLD &&
+  $MKDIR $TBLD &&
+
+  $RM $TLCD &&
+  $MKDIR $TLCD
+}
+
+rad_behave_bootstrap_stage_toolchain_construct() {
+  $SCRD/construct toolchain musl-headers &&
+  $SCRD/construct toolchain binutils &&
+  $SCRD/construct toolchain gcc &&
+  $SCRD/construct toolchain musl &&
+  $SCRD/construct toolchain libgcc &&
+  $SCRD/construct toolchain libstdc++-v3 &&
+  $SCRD/construct toolchain libgomp
+}
+
+rad_behave_bootstrap_stage_toolchain_backup() {
+  $RSYNC $CRSD $BAKD --delete &&
+
+  $RSYNC $TLCD $BAKD --delete
+}
+
+rad_behave_bootstrap_stage_toolchain() {
+  rad_behave_bootstrap_stage_toolchain_variables &&
+  rad_behave_bootstrap_stage_toolchain_check &&
+  rad_behave_bootstrap_stage_toolchain_prepare &&
+
+  rad_behave_bootstrap_stage_toolchain_construct &&
+
+  rad_behave_bootstrap_stage_toolchain_backup
+}
+
+# Bootstrap a cross-compiled glaucus system
 rad_behave_bootstrap_stage_cross() {
   :
 }
 
+# Bootstrap a cross-compiled chroot environment
 rad_behave_bootstrap_stage_chroot() {
   :
 }
@@ -480,6 +577,8 @@ while [ $# -ge 0 ]; do
               rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
 
               rad_behave_bootstrap_arch
+
+              rad_behave_bootstrap_stage_toolchain
               ;;
             x | cross)
               [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
