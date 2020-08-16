@@ -539,7 +539,6 @@ while [ $# -ge 0 ]; do
                 ;;
             esac
 
-
           elif [ -d $CERD/$3 ]; then
             . $CERD/$3/ceras
 
