@@ -38,7 +38,6 @@ rad_version() {
   rad_open "$0 version 0.4"
 }
 
-# require will be moved to behave bootstrap options
 rad_help() {
   rad_version
 
@@ -421,11 +420,25 @@ rad_behave_bootstrap_flags() {
   esac
 }
 
+rad_behave_bootstrap_stage_toolchain() {
+  :
+}
+
+rad_behave_bootstrap_stage_cross() {
+  :
+}
+
+rad_behave_bootstrap_stage_chroot() {
+  :
+}
+
 # Source the configuration file in /etc/radula.conf
 # Will soon be replaced with /etc/radula.conf (No forward slash for testing atm)
 . etc/radula.conf
 
-# Catch the quiet signal wherever it was
+# Catch the quiet signal wherever it was.
+# Currently the flag "require" wrongly turns the quiet signal on since the word
+# "require" has a "q" in it. This needs to be fixed.
 case "$@" in
   *q* | *-q* | *--quiet* | *--sleep*)
     sleep=1
@@ -452,7 +465,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_require
               ;;
             c | chroot)
-              $0 b b r
+              [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
 
               rad_open
               rad_open "Bootstrapping an $genome cross-compiled chroot environment..."
@@ -461,7 +474,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_flags
               ;;
             t | toolchain)
-              $0 b b r
+              [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
 
               rad_open
               rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
@@ -469,7 +482,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch
               ;;
             x | cross)
-              $0 b b r
+              [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
 
               rad_open
               rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
@@ -614,7 +627,7 @@ while [ $# -ge 0 ]; do
       sleep=1
       ;;
     r | -r | --require)
-      $0 b b r
+      [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
       exit 0
       ;;
     s | -s | --species)
