@@ -423,6 +423,9 @@ rad_behave_bootstrap_flags() {
   esac
 }
 
+# Common bootstrap variables that are used in all stages (taken from the main
+# Makefile located over at the main glaucus repository (which will soon be
+# deprecated in favour of radula)).
 rad_behave_bootstrap_variables() {
   # Originally GLAD and CERD belonged here but it appears that a better place
   # for them would be in the radula script itself as "global" variables.
@@ -472,6 +475,8 @@ rad_behave_bootstrap_stage_toolchain_variables() {
   export BLD=$($CERD/binutils/config.guess)
 }
 
+# The check script in the behave directory will soon have its functionality
+# migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_check() {
   $SCRD/check musl &&
   $SCRD/check binutils &&
@@ -493,6 +498,8 @@ rad_behave_bootstrap_stage_toolchain_prepare() {
   $MKDIR $TLCD
 }
 
+# The construct script in the behave directory will soon have its functionality
+# migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_construct() {
   $SCRD/construct toolchain musl-headers &&
   $SCRD/construct toolchain binutils &&
@@ -509,7 +516,11 @@ rad_behave_bootstrap_stage_toolchain_backup() {
   $RSYNC $TLCD $BAKD --delete
 }
 
+# The '&&'s will be removed upon testing if the error/logging mechanisms are
+# working as intended without them.
 rad_behave_bootstrap_stage_toolchain() {
+  rad_behave_bootstrap_variables &&
+
   rad_behave_bootstrap_stage_toolchain_variables &&
   rad_behave_bootstrap_stage_toolchain_check &&
   rad_behave_bootstrap_stage_toolchain_prepare &&
