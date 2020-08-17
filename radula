@@ -38,7 +38,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.4"
+  rad_open "$0 version 0.5"
 }
 
 rad_help() {
@@ -489,40 +489,40 @@ rad_behave_bootstrap_stage_toolchain_variables() {
 # The check script in the behave directory will soon have its functionality
 # migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_check() {
-  $SCRD/check musl &&
-  $SCRD/check binutils &&
-  $SCRD/check gmp &&
-  $SCRD/check mpfr &&
-  $SCRD/check mpc &&
-  $SCRD/check isl &&
+  $SCRD/check musl
+  $SCRD/check binutils
+  $SCRD/check gmp
+  $SCRD/check mpfr
+  $SCRD/check mpc
+  $SCRD/check isl
   $SCRD/check gcc
 }
 
 rad_behave_bootstrap_stage_toolchain_prepare() {
-  $RM $CRSD &&
-  $MKDIR $CRSD &&
+  $RM $CRSD
+  $MKDIR $CRSD
 
-  $RM $TBLD &&
-  $MKDIR $TBLD &&
+  $RM $TBLD
+  $MKDIR $TBLD
 
-  $RM $TLCD &&
+  $RM $TLCD
   $MKDIR $TLCD
 }
 
 # The construct script in the behave directory will soon have its functionality
 # migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_construct() {
-  $SCRD/construct toolchain musl-headers &&
-  $SCRD/construct toolchain binutils &&
-  $SCRD/construct toolchain gcc &&
-  $SCRD/construct toolchain musl &&
-  $SCRD/construct toolchain libgcc &&
-  $SCRD/construct toolchain libstdc++-v3 &&
+  $SCRD/construct toolchain musl-headers
+  $SCRD/construct toolchain binutils
+  $SCRD/construct toolchain gcc
+  $SCRD/construct toolchain musl
+  $SCRD/construct toolchain libgcc
+  $SCRD/construct toolchain libstdc++-v3
   $SCRD/construct toolchain libgomp
 }
 
 rad_behave_bootstrap_stage_toolchain_backup() {
-  $RSYNC $CRSD $BAKD --delete &&
+  $RSYNC $CRSD $BAKD --delete
 
   $RSYNC $TLCD $BAKD --delete
 }
@@ -531,13 +531,13 @@ rad_behave_bootstrap_stage_toolchain_backup() {
 # working as intended without them. Remember that having '&&'s and '||'s
 # dangling at the end of the line with nothing after them is wrong!
 rad_behave_bootstrap_stage_toolchain() {
-  rad_behave_bootstrap_variables &&
+  rad_behave_bootstrap_variables
 
-  rad_behave_bootstrap_stage_toolchain_variables &&
-  rad_behave_bootstrap_stage_toolchain_check &&
-  rad_behave_bootstrap_stage_toolchain_prepare &&
+  rad_behave_bootstrap_stage_toolchain_variables
+  rad_behave_bootstrap_stage_toolchain_check
+  rad_behave_bootstrap_stage_toolchain_prepare
 
-  rad_behave_bootstrap_stage_toolchain_construct &&
+  rad_behave_bootstrap_stage_toolchain_construct
 
   rad_behave_bootstrap_stage_toolchain_backup
 }
@@ -589,22 +589,22 @@ rad_behave_gnu() {
 # before anything starts (since it has sources I doubt if clean will remove
 # those but we still have to find out...)
 rad_behave_initialize() {
-  $MKDIR $BAKD &&
-  $MKDIR $SRCD &&
-  $MKDIR $TLCD &&
+  $MKDIR $BAKD
+  $MKDIR $SRCD
+  $MKDIR $TLCD
 
-  $MKDIR $LOGD/chroot &&
-  $MKDIR $LOGD/cross &&
-  $MKDIR $LOGD/toolchain &&
+  $MKDIR $LOGD/chroot
+  $MKDIR $LOGD/cross
+  $MKDIR $LOGD/toolchain
 
-  $MKDIR $TMPD/chroot/builds &&
-  $MKDIR $TMPD/chroot/sources &&
+  $MKDIR $TMPD/chroot/builds
+  $MKDIR $TMPD/chroot/sources
 
-  $MKDIR $TMPD/cross/builds &&
-  $MKDIR $TMPD/cross/cerata &&
-  $MKDIR $TMPD/cross/sources &&
+  $MKDIR $TMPD/cross/builds
+  $MKDIR $TMPD/cross/cerata
+  $MKDIR $TMPD/cross/sources
 
-  $MKDIR $TMPD/toolchain/sources &&
+  $MKDIR $TMPD/toolchain/sources
   $MKDIR $TMPD/toolchain/builds
 }
 
