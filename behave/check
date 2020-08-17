@@ -5,9 +5,6 @@
 
 . $CERD/$1/ceras &&
 
-$SCRD/contact "$nom $ver" &&
-
-$SCRD/contact check &&
 if [ ! -d $SRCD/$nom ]; then
   $MKDIR $SRCD/$nom &&
 
@@ -15,6 +12,5 @@ if [ ! -d $SRCD/$nom ]; then
   $SCRD/die ceras $nom fetch $? ||
   exit
 else
-  . $SCRD/verify &&
-  $SCRD/contact
+  . $SCRD/verify
 fi
