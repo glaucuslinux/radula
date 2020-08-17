@@ -447,20 +447,31 @@ rad_behave_bootstrap_variables() {
   export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
   export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
 
-  # All commands here lack the verbosity flag because we intend to have two
-  # modes of operation, and we're sticking with the silent one for now.
-  export AUTORECONF='autoreconf -fis'
-  export CHMOD='chmod -R'
-  export CHOWN='chown -R'
-  export LN='ln -fns'
-  export MAKE='make -j1'
-  # To prevent overlapping with the install() function in .ceras files, we add
-  # the full path to the install command.
-  export MKDIR='/usr/bin/install -d'
-  export MV=mv
-  export RM='rm -fr'
-  export RSYNC='rsync -aHAXSx'
-  export UMOUNT='umount -fqR'
+  if [ $sleep -eq 0 ]; then
+    export AUTORECONF='autoreconf -fvis'
+    export CHMOD='chmod -Rv'
+    export CHOWN='chown -Rv'
+    export LN='ln -fnsv'
+    export MAKE='make -j1 V=1'
+    # To prevent overlapping with the install() function in .ceras files, we add
+    # the full path to the install command.
+    export MKDIR='/usr/bin/install -dv'
+    export MV='mv -v'
+    export RM='rm -frv'
+    export RSYNC='rsync -vaHAXSx'
+    export UMOUNT='umount -fqRv'
+  else
+    export AUTORECONF='autoreconf -fis'
+    export CHMOD='chmod -R'
+    export CHOWN='chown -R'
+    export LN='ln -fns'
+    export MAKE='make -j1'
+    export MKDIR='/usr/bin/install -d'
+    export MV=mv
+    export RM='rm -fr'
+    export RSYNC='rsync -aHAXSx'
+    export UMOUNT='umount -fqR'
+  fi
 }
 
 # Bootstrap a cross-compiler toolchain targetting musl-libc
@@ -517,7 +528,8 @@ rad_behave_bootstrap_stage_toolchain_backup() {
 }
 
 # The '&&'s will be removed upon testing if the error/logging mechanisms are
-# working as intended without them.
+# working as intended without them. Remember that having '&&'s and '||'s
+# dangling at the end of the line with nothing after them is wrong!
 rad_behave_bootstrap_stage_toolchain() {
   rad_behave_bootstrap_variables &&
 
@@ -537,6 +549,82 @@ rad_behave_bootstrap_stage_cross() {
 
 # Bootstrap a cross-compiled chroot environment
 rad_behave_bootstrap_stage_chroot() {
+  :
+}
+
+# More actions
+rad_behave_check() {
+  :
+}
+
+# This might be moved to bootstrap_clean
+rad_behave_clean() {
+  :
+}
+
+rad_behave_construct() {
+  :
+}
+
+rad_behave_die() {
+  :
+}
+
+rad_behave_envenomate() {
+  :
+}
+
+rad_behave_fetch() {
+  :
+}
+
+# The GNU function, which basically copies any of config.guess, config.sub or
+# config.rpath from a unified location where the binutils ceras is kept to the
+# requested destination.
+rad_behave_gnu() {
+  $RSYNC $CERD/binutils/config.$1 $2
+}
+
+# This might be moved to bootstrap_initialize since it must be run only once
+# before anything starts (since it has sources I doubt if clean will remove
+# those but we still have to find out...)
+rad_behave_initialize() {
+  $MKDIR $BAKD &&
+  $MKDIR $SRCD &&
+  $MKDIR $TLCD &&
+
+  $MKDIR $LOGD/chroot &&
+  $MKDIR $LOGD/cross &&
+  $MKDIR $LOGD/toolchain &&
+
+  $MKDIR $TMPD/chroot/builds &&
+  $MKDIR $TMPD/chroot/sources &&
+
+  $MKDIR $TMPD/cross/builds &&
+  $MKDIR $TMPD/cross/cerata &&
+  $MKDIR $TMPD/cross/sources &&
+
+  $MKDIR $TMPD/toolchain/sources &&
+  $MKDIR $TMPD/toolchain/builds
+}
+
+rad_behave_log() {
+  :
+}
+
+rad_behave_patch() {
+  if [ $sleep -eq 0 ]; then
+    patch -p$1 -i $CERD/$2/patches/$3/$4.patch
+  else
+    patch -p$1 -si $CERD/$2/patches/$3/$4.patch
+  fi
+}
+
+rad_behave_release() {
+  :
+}
+
+rad_behave_verify() {
   :
 }
 
