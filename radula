@@ -151,7 +151,7 @@ rad_behave_bootstrap_arch() {
       export FARCH='-mabi=lp64 -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -march=armv8-a -mtune=generic'
 
       export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
-      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -223,7 +223,7 @@ rad_behave_bootstrap_arch() {
       export FARCH="-mcpu=$ARCH -mabi=elfv2"
 
       export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -241,7 +241,7 @@ rad_behave_bootstrap_arch() {
       export FARCH="-mcpu=$ARCH -mabi=elfv2"
 
       export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-powerpc64"
+      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64"
 
       export MARCH=powerpc64
 
@@ -259,7 +259,7 @@ rad_behave_bootstrap_arch() {
       export FARCH='-mabi=lp64d -march=rv64imafdc -mtune=rocket'
 
       export GCARCH='--with-arch=rv64imafdc --with-tune=rocket --with-abi=lp64d'
-      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -277,7 +277,7 @@ rad_behave_bootstrap_arch() {
       export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
 
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
-      export GPARCH="$SCRD/patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=x86_64
 
@@ -474,42 +474,6 @@ rad_behave_bootstrap_variables() {
   fi
 }
 
-# the rad_close statement is directly used here, instead of adding it following
-# the call of the function. This is done because this function is used twice
-# (once in fetch and once in check), which is unlike fetch which is only used in
-# check so its rad_close comes after its call.
-rad_behave_bootstrap_verify() {
-  if [ $ver != git ]; then
-    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null || rad_close "ceras $nom verify exited with status $?"
-  else
-    return 0
-  fi
-}
-
-rad_behave_bootstrap_fetch() {
-  if [ $ver = git ]; then
-    git clone -q $url $SRCD/$nom
-  else
-    curl -Lso $SRCD/$nom/$(basename $url) $url
-
-    rad_behave_bootstrap_verify
-
-    tar xf $SRCD/$nom/$(basename $url) -C $SRCD/$nom
-  fi
-}
-
-rad_behave_bootstrap_check() {
-  . $CERD/$1/ceras
-
-  if [ ! -d $SRCD/$nom ]; then
-    $MKDIR $SRCD/$nom
-
-    rad_behave_bootstrap_fetch || rad_close "ceras $nom fetch exited with status $?"
-  else
-    rad_behave_bootstrap_verify
-  fi
-}
-
 # Bootstrap a cross-compiler toolchain targetting musl-libc
 rad_behave_bootstrap_stage_toolchain_variables() {
   export TLOG=$LOGD/toolchain/$(ls -l $LOGD/toolchain | wc -l)
@@ -525,13 +489,13 @@ rad_behave_bootstrap_stage_toolchain_variables() {
 # The check script in the behave directory will soon have its functionality
 # migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_check() {
-  $SCRD/check musl
-  $SCRD/check binutils
-  $SCRD/check gmp
-  $SCRD/check mpfr
-  $SCRD/check mpc
-  $SCRD/check isl
-  $SCRD/check gcc
+  rad_behave_check musl
+  rad_behave_check binutils
+  rad_behave_check gmp
+  rad_behave_check mpfr
+  rad_behave_check mpc
+  rad_behave_check isl
+  rad_behave_check gcc
 }
 
 rad_behave_bootstrap_stage_toolchain_prepare() {
@@ -593,6 +557,42 @@ rad_behave_clean() {
   :
 }
 
+# the rad_close statement is directly used here, instead of adding it following
+# the call of the function. This is done because this function is used twice
+# (once in fetch and once in check), which is unlike fetch which is only used in
+# check so its rad_close comes after its call.
+rad_behave_verify() {
+  if [ $ver != git ]; then
+    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null || rad_close "ceras $nom verify exited with status $?"
+  else
+    return 0
+  fi
+}
+
+rad_behave_fetch() {
+  if [ $ver = git ]; then
+    git clone -q $url $SRCD/$nom
+  else
+    curl -Lso $SRCD/$nom/$(basename $url) $url
+
+    rad_behave_verify
+
+    tar xf $SRCD/$nom/$(basename $url) -C $SRCD/$nom
+  fi
+}
+
+rad_behave_check() {
+  . $CERD/$1/ceras
+
+  if [ ! -d $SRCD/$nom ]; then
+    $MKDIR $SRCD/$nom
+
+    rad_behave_fetch || rad_close "ceras $nom fetch exited with status $?"
+  else
+    rad_behave_verify
+  fi
+}
+
 rad_behave_construct() {
   :
 }
@@ -602,10 +602,6 @@ rad_behave_die() {
 }
 
 rad_behave_envenomate() {
-  :
-}
-
-rad_behave_fetch() {
   :
 }
 
@@ -652,10 +648,6 @@ rad_behave_patch() {
 }
 
 rad_behave_release() {
-  :
-}
-
-rad_behave_verify() {
   :
 }
 
