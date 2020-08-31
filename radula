@@ -38,7 +38,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.5"
+  rad_open "$0 version 0.6"
 }
 
 rad_help() {
@@ -474,6 +474,42 @@ rad_behave_bootstrap_variables() {
   fi
 }
 
+# the rad_close statement is directly used here, instead of adding it following
+# the call of the function. This is done because this function is used twice
+# (once in fetch and once in check), which is unlike fetch which is only used in
+# check so its rad_close comes after its call.
+rad_behave_bootstrap_verify() {
+  if [ $ver != git ]; then
+    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null || rad_close "ceras $nom verify exited with status $?"
+  else
+    return 0
+  fi
+}
+
+rad_behave_bootstrap_fetch() {
+  if [ $ver = git ]; then
+    git clone -q $url $SRCD/$nom
+  else
+    curl -Lso $SRCD/$nom/$(basename $url) $url
+
+    rad_behave_bootstrap_verify
+
+    tar xf $SRCD/$nom/$(basename $url) -C $SRCD/$nom
+  fi
+}
+
+rad_behave_bootstrap_check() {
+  . $CERD/$1/ceras
+
+  if [ ! -d $SRCD/$nom ]; then
+    $MKDIR $SRCD/$nom
+
+    rad_behave_bootstrap_fetch || rad_close "ceras $nom fetch exited with status $?"
+  else
+    rad_behave_bootstrap_verify
+  fi
+}
+
 # Bootstrap a cross-compiler toolchain targetting musl-libc
 rad_behave_bootstrap_stage_toolchain_variables() {
   export TLOG=$LOGD/toolchain/$(ls -l $LOGD/toolchain | wc -l)
@@ -549,11 +585,6 @@ rad_behave_bootstrap_stage_cross() {
 
 # Bootstrap a cross-compiled chroot environment
 rad_behave_bootstrap_stage_chroot() {
-  :
-}
-
-# More actions
-rad_behave_check() {
   :
 }
 
