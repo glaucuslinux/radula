@@ -38,7 +38,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.7"
+  rad_open "$0 version 0.8"
 }
 
 rad_help() {
@@ -149,12 +149,36 @@ rad_behave_check() {
   fi
 }
 
+# The main function responsible for building cerata. Logging will be implemented
+# in the future in a way different from the previous logging mechanism.
 rad_behave_construct() {
-  :
+  . $CERD/$2/ceras
+  . $CERD/$nom/$1.ceras
+
+  prepare || rad_close "ceras $nom prepare exited with satus $?"
+  configure || rad_close "ceras $nom configure exited with satus $?"
+  build || rad_close "ceras $nom build exited with satus $?"
+  install || rad_close "ceras $nom install exited with satus $?"
 }
 
+# A special version of rad_behave_construct that's tailored for the
+# production/bootstrapping of the final cross compiled system. The only
+# difference between construct and envenomate is that the latter creates a sac
+# and a venom directory to store the installed files of a ceras that has arleady
+# been built (The sac is technically the DESTDIR while venom stores the packaged
+# tarball of sac with a sum file of sha512sums).
+#
+# This is done to keep track of the installed files.
+#
+# Envenomate also copies the contents of the sac to the target cross compiled
+# system directory.
 rad_behave_envenomate() {
-  :
+  $MKDIR $XCER/$1/sac
+  $MKDIR $XCER/$1/venom
+
+  rad_behave_construct cross $1
+
+  $RSYNC $XCER/$1/sac/ $CRSD
 }
 
 # The GNU function, which basically copies any of config.guess, config.sub or
@@ -185,10 +209,6 @@ rad_behave_initialize() {
 
   $MKDIR $TMPD/toolchain/sources
   $MKDIR $TMPD/toolchain/builds
-}
-
-rad_behave_log() {
-  :
 }
 
 rad_behave_patch() {
@@ -603,13 +623,13 @@ rad_behave_bootstrap_stage_toolchain_prepare() {
 # The construct script in the behave directory will soon have its functionality
 # migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_construct() {
-  $SCRD/construct toolchain musl-headers
-  $SCRD/construct toolchain binutils
-  $SCRD/construct toolchain gcc
-  $SCRD/construct toolchain musl
-  $SCRD/construct toolchain libgcc
-  $SCRD/construct toolchain libstdc++-v3
-  $SCRD/construct toolchain libgomp
+  rad_behave_construct toolchain musl-headers
+  rad_behave_construct toolchain binutils
+  rad_behave_construct toolchain gcc
+  rad_behave_construct toolchain musl
+  rad_behave_construct toolchain libgcc
+  rad_behave_construct toolchain libstdc++-v3
+  rad_behave_construct toolchain libgomp
 }
 
 rad_behave_bootstrap_stage_toolchain_backup() {
