@@ -596,6 +596,10 @@ rad_behave_bootstrap_stage_toolchain_variables() {
   export TSRC=$TTMP/sources
   export TBLD=$TTMP/builds
 
+  # Using the latest official GNU config.guess to obtain the correct build
+  # tuple:
+  #
+  # https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
   export BLD=$($CERD/binutils/config.guess)
 }
 
@@ -675,8 +679,246 @@ rad_behave_bootstrap_stage_toolchain_release() {
 }
 
 # Bootstrap a cross-compiled glaucus system
+
+rad_behave_bootstrap_stage_cross_variables() {
+  export XLOG=$LOGD/cross/$(ls -l $LOGD/cross | wc -l)
+  export XSCR=$SCRD/cross
+  export XTMP=$TMPD/cross
+
+  export XBLD=$XTMP/builds
+  export XCER=$XTMP/cerata
+  export XSRC=$XTMP/sources
+
+  # Don't use NATIVECC and NATIVECXX because they are ancient and were
+  # superceded by HOSTCC and HOSTCXX. They refer to the host's gcc and g++
+  # compilers respectively, which are different to the CC and CXX compilers we
+  # built in the toolchain stage (the ones that with the $TGT suffix that will
+  # actually cross compile our stuff).
+  #
+  # While HOSTCC and HOSTCXX aren't actually needed, it's better to specify them
+  # because some packages like netbsd-curses use them to build some tools. This
+  # means that some tools will be built with HOSTCC (nbperf, tic...) and the
+  # actual netbsd-curses component will be built with CC.
+  export HOSTCC=gcc
+  export HOSTCXX=g++
+
+  export AR=$TGT-gcc-ar
+  export AS=$TGT-as
+  export CC=$TGT-gcc
+  export CPP="$TGT-gcc -E"
+  export CXX=$TGT-g++
+  export LD=$TGT-ld
+  export NM=$TGT-gcc-nm
+  export OBJCOPY=$TGT-objcopy
+  export OBJDUMP=$TGT-objdump
+  export RANLIB=$TGT-gcc-ranlib
+  export READELF=$TGT-readelf
+  export SIZE=$TGT-size
+  export STRINGS=$TGT-strings
+  export STRIP=$TGT-strip
+
+  export BLD=$($CERD/binutils/config.guess)
+}
+
+rad_behave_bootstrap_stage_cross_prepare() {
+  $RSYNC $BAKD/cross $GLAD --delete
+
+  $RSYNC $BAKD/toolchain $GLAD --delete
+
+  $RM $XBLD
+  $MKDIR $XBLD
+
+  $RM $XCER
+  $MKDIR $XCER
+
+  $RM $CRSD/boot
+  $MKDIR $CRSD/boot
+
+  $RM $CRSD/etc
+  $MKDIR $CRSD/etc
+
+  # Basic groups, these are lacking a lot so ignore them for now unless
+  # something needs them (e.g. udev).
+  printf 'root:x:0:
+  tty:x:1:
+  disk:x:2:
+  audio:x:3:
+  video:x:4:
+  utmp:x:5:\n' > $CRSD/etc/group
+
+  printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
+
+  # Will probably be changed back to oksh once it can cross compile
+  printf 'root::0:0:root:/root:/usr/bin/mksh\n' > $CRSD/etc/passwd
+
+  $RM $CRSD/var
+  $MKDIR $CRSD/var/lib
+  $MKDIR $CRSD/var/lib/urandom
+  $MKDIR $CRSD/var/log
+}
+
+# The only instance were rad_behave_envenomate is used. As to why it is being
+# used, please refer to the comment above that particular function.
+rad_behave_bootstrap_stage_cross_envenomate() {
+  rad_behave_envenomate linux-headers
+  rad_behave_envenomate skalibs
+  rad_behave_envenomate execline
+  rad_behave_envenomate s6
+  rad_behave_envenomate utmps
+  rad_behave_envenomate shadow
+  rad_behave_envenomate libressl
+  rad_behave_envenomate toybox
+  rad_behave_envenomate netbsd-curses
+  rad_behave_envenomate procps-ng
+  rad_behave_envenomate mksh
+  rad_behave_envenomate dash
+  rad_behave_envenomate util-linux
+  rad_behave_envenomate e2fsprogs
+  rad_behave_envenomate s6-linux-init
+  rad_behave_envenomate s6-rc
+  rad_behave_envenomate eudev
+  rad_behave_envenomate s6-boot-scripts
+  rad_behave_envenomate linux
+}
+
+rad_behave_bootstrap_stage_cross_configure() {
+  # Might default to leaving the fstab empty or with comments indicating what to
+  # put as values, or just multiple commented entries and the user uncomments
+  # what he/she wants. One shouldn't forget that the image function
+  # rad_behave_bootstrap_stage_cross_img generates an ext4 img, so ext4 should
+  # stay the default.
+  printf '/dev/sda1 / ext4 defaults 0 1\n' > $CRSD/etc/fstab
+
+  # glaucus's iconic blue coloured shell prompt
+  printf 'export PS1="[\033[0;44m\u@\h\033[0m:\033[1m\w\033[0m]$ "
+  export HISTFILE=$HOME/.ksh_history\n' > $CRSD/etc/profile
+
+  # 'fifo's can be copied, rsynced and tarred, but they can't be checksummed and
+  # they can't be used with fakeroot because they'll become regular files;
+  # hence, why we are creating them manually upon completion.
+  mkfifo -m 0600 $CRSD/etc/s6/run-image/service/s6-linux-init-shutdownd/fifo
+  mkfifo -m 0600 $CRSD/etc/s6/run-image/service/s6-svscan-log/fifo
+
+  # Alphabetically ordered list of available shells. mksh will be replaced by
+  # oksh in the future. rksh is just a symlink to ksh (ksh -r, or restricted ksh
+  # which I think is obsolete now but useful to have).
+  printf '/usr/bin/dash
+  /usr/bin/ksh
+  /usr/bin/mksh
+  /usr/bin/rksh
+  /usr/bin/sh\n' > $CRSD/etc/shells
+}
+
+rad_behave_bootstrap_stage_cross_strip() {
+  # Delete empty directories in etc that we have no use of
+  find $CRSD/etc -type d -empty -delete
+
+  # Clean the tmp directory in case it got populated during cross-compilation
+  # (it'll probably be empty since we're cross compiling, but in the case of
+  # compilation inside a chroot, it might get full).
+  $RM $CRSD/tmp/*
+
+  # Stripping
+  find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
+  find $CRSD/usr \( -name *.so* -a ! -name *dbg \) -type f -exec strip \
+    --strip-unneeded -v {} \;
+  find $CRSD/usr -type f -exec strip -sv {} \;
+  # Delete unneeded libarchive .la files
+  find $CRSD/usr -name *.la -delete
+
+  # Remove charset.alias for musl
+  $RM $CRSD/usr/lib/charset.alias
+}
+
 rad_behave_bootstrap_stage_cross() {
-  :
+  rad_behave_bootstrap_variables
+
+  rad_behave_bootstrap_stage_cross_variables
+  rad_behave_bootstrap_stage_cross_prepare
+
+  rad_behave_bootstrap_stage_cross_envenomate
+
+  rad_behave_bootstrap_stage_cross_configure
+  rad_behave_bootstrap_stage_cross_strip
+
+  # Perhaps add a flag to allow the creation of an img after building the cross
+  # stage?
+  # rad_behave_bootstrap_stage_cross_img
+}
+
+# This function needs fixing. Perhaps add an additional flag to allow the
+# creation of an img after building cross is done?
+rad_behave_bootstrap_stage_cross_img() {
+  NAME=glaucus.img
+  SIZE=256M
+  LOOP=$(losetup -f)
+
+  $RM $NAME
+  # We're creating a raw image
+  qemu-img create -f raw $NAME $SIZE
+  # We're using the mbr.bin provided by SYSLINUX, and is written to the first
+  # 440 bytes of our image above (don't change the bs/count).
+  dd if=other/mbr.bin of=$NAME conv=notrunc bs=440 count=1
+
+  # Using parted without prompting for user interaction.
+  parted -s $NAME mklabel msdos
+  # Defaulting to ext4 (see rad_behave_bootstrap_stage_cross_configure for the
+  # comment regarding fstab).
+  parted -s -a none $NAME mkpart primary ext4 0 $SIZE
+  parted -s -a none $NAME set 1 boot on
+
+  # Detach all loop devices if any (We can either rely on $LOOP providing an
+  # empty loop device for use, or detach all loop devices and start from loop0,
+  # and I think the former is better since the user might have loop devices
+  # already attached).
+  losetup -D
+  losetup $LOOP $NAME
+
+  # Needed for the partitioning of the image (notifies the kernel).
+  partx -a $LOOP
+  mkfs.ext4 $(printf $LOOP)p1
+
+  mount $(printf $LOOP)p1 /mnt/loop
+
+  # Remove this empty directory
+  $RM /mnt/loop/lost+found
+
+  # Create the essential vkfs directories
+  $MKDIR /mnt/loop/dev
+  $MKDIR /mnt/loop/proc
+  $MKDIR /mnt/loop/run
+  $MKDIR /mnt/loop/sys
+
+  # Special permissions directories
+  $MKDIR -m 0750 /mnt/loop/root
+  $MKDIR -m 1777 /mnt/loop/tmp
+
+  # Copy the cross compiled system we just built
+  $RSYNC cross/boot /mnt/loop
+  $RSYNC cross/etc /mnt/loop
+  $RSYNC cross/usr /mnt/loop
+  $RSYNC cross/var /mnt/loop
+
+  # Essential symlinks that can't be removed since many software depend on their
+  # existence (make, perl, python, )
+  $LN usr/bin /mnt/loop/bin
+  $LN usr/lib /mnt/loop/lib
+
+  # We're using EXTLINUX which is part of The Syslinux Project since we have an
+  # img file (ISOLINUX is for the iso which isn't ready yet).
+  $MKDIR /mnt/loop/boot/extlinux
+  # Copy our extlinux.conf file which defaults to sda1 and ext4 with the init
+  # set to '/etc/s6/bin/init'.
+  $RSYNC scripts/other/extlinux.conf /mnt/loop/boot/extlinux
+
+  $CHOWN -R 0:0 /mnt/loop
+
+  extlinux --install /mnt/loop/boot/extlinux
+
+  # Clean up
+  $UMOUNT /mnt/loop
+  partx -d $LOOP
+  losetup -d $LOOP
 }
 
 # This function is used in both the cross and chroot stages. It was brought over
@@ -739,7 +981,9 @@ rad_behave_bootstrap_stage_chroot_variables() {
   export STRIP=$TGT-strip
 
   # Using the latest official GNU config.guess to obtain the correct build
-  # tuple.
+  # tuple:
+  #
+  # https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
   export BLD=$($CERD/binutils/config.guess)
 }
 
