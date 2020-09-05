@@ -5,6 +5,8 @@
 
 set -e
 umask 022
+# Examine `unalias -a`, is it POSIX compliant, and does it fully work under
+# DASH, only further testing will tell.
 unalias -a
 
 # Define the default variables
@@ -40,7 +42,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 0.9.3"
+  rad_open "$0 version 0.9.4"
 }
 
 rad_help() {
@@ -222,7 +224,10 @@ rad_behave_gnu() {
 # those but we still have to find out...)
 rad_behave_initialize() {
   $MKDIR $BAKD
-  $MKDIR $SRCD
+  # This directory will be preserved, still we'll add a check to create it if it
+  # doesn't exist just to prevent mkdir from complaining if it exists (remember
+  # `set -e`).
+  [ ! -d $SRCD ] && $MKDIR $SRCD
   $MKDIR $TLCD
 
   # Are these 3 log directories still relevant? A new logging mechanism will be
@@ -234,6 +239,8 @@ rad_behave_initialize() {
   $MKDIR $TMPD/chroot/builds
   $MKDIR $TMPD/chroot/sources
 
+  # An extra cerata directory is created in cross to store tarballs and
+  # checksums for the packages we'll be building from source.
   $MKDIR $TMPD/cross/builds
   $MKDIR $TMPD/cross/cerata
   $MKDIR $TMPD/cross/sources
@@ -243,11 +250,7 @@ rad_behave_initialize() {
 }
 
 rad_behave_patch() {
-  if [ $sleep -eq 0 ]; then
-    patch -p$1 -i $CERD/$2/patches/$3/$4.patch
-  else
-    patch -p$1 -si $CERD/$2/patches/$3/$4.patch
-  fi
+  [ $sleep -eq 0 ] && patch -p$1 -i $CERD/$2/patches/$3/$4.patch || patch -p$1 -si $CERD/$2/patches/$3/$4.patch
 }
 
 rad_behave_bootstrap_require() {
@@ -283,6 +286,37 @@ rad_behave_bootstrap_require() {
   rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
 }
 
+# Architecture related variables explained (for rad_behave_bootstrap_arch):
+#
+# ARCH stands for the technically correct architecture (except for ones with a
+# dash in them '-', then they get turned to underscores '_').
+#
+# CARCH stands for Cerata ARCH, which means options/flags that are related to a
+# certain architecture and are passed in that ceras's configure function mostly
+# (this includes all cerata with the exception of `gcc` as that has its own
+# variable GCARCH).
+#
+# FARCH stands for Flags ARCH, which means options/flags that are related to a
+# certain architecture and are passed in rad_behave_bootstrap_flags.
+#
+# GCARCH stands for Gcc Configuration ARCH, which means options/flags that are
+# related to a certain architecture and are passed the `gcc` ceras configure
+# function (In this regard, CARCH stands for cerata other than `gcc`).
+#
+# GPARCH stands for Gcc Patch ARCH, which refers to the architecture of the
+# pure64 patch by glaucus applied to the `gcc` sources in the prepare function.
+#
+# MARCH stands for Musl ARCH, which refers to the closest architecture
+# recognized by `musl`.
+#
+# LARCH stands for Linux ARCH, which refers to the closest architecture
+# recognized by `linux`.
+#
+# LCARCH stands for Linux Configuration ARCH, which refers to the closest device
+# with a similar architecture that's used to configure the kernel sources.
+#
+# LIARCH stands for Linux Image ARCH, which refers to the directory where
+# `linux` stores its image file after it has been built.
 rad_behave_bootstrap_arch() {
   case $genome in
     aarch64 | armv8-a | arm64)
@@ -437,7 +471,8 @@ rad_behave_bootstrap_arch() {
 }
 
 rad_behave_bootstrap_flags() {
-  # Some common flags in all species
+  # Some common flags in all species (LTO and stripping are enabled for all
+  # species!)
   COMMON=-fcommon
   DEBUG=-g0
   FAT=-ffat-lto-objects
@@ -448,6 +483,11 @@ rad_behave_bootstrap_flags() {
   case $species in
     # Currently both atlanticus (performance) and albino (libre) share the same
     # flags since albino is intended to be a libre version of atlanticus.
+    #
+    # The performance flags are deemed "dangerous" by many (if you didn't know
+    # what you're doing), which is why we decided to embrace them and come up
+    # with something useful with them that we know works perfectly fine and
+    # without errors (in both compilation time and runtime).
     atlanticus | performance | albino | libre)
       export SPCS=atlanticus
 
@@ -500,6 +540,11 @@ rad_behave_bootstrap_flags() {
 
       export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
       ;;
+    # Some additional flags might be added after testing for further size
+    # reduction. Flags that require further testing:
+    #   1- '-fno-exception' (not used)
+    #   2- '-fno-unwind-tables' (used)
+    #   3- '-fno-asynchronous-unwind-tables' (used)
     bennettae | size)
       export SPCS=bennettae
 
@@ -565,6 +610,15 @@ rad_behave_bootstrap_flags() {
   esac
 }
 
+# Anatomy of the glaucus directory:
+#
+# BAKD = BAcKup Directory
+# CRSD = CRoSs Directory
+# LOGD = LOG Directory
+# SRCD = SouRCes Directory
+# TMPD = TeMPorary Directory
+# TLCD = TooLChain Directory
+#
 # Common bootstrap variables that are used in all stages (taken from the main
 # Makefile located over at the main glaucus repository (which will soon be
 # deprecated in favour of radula)).
@@ -574,7 +628,6 @@ rad_behave_bootstrap_variables() {
   export BAKD=$GLAD/backup
   export CRSD=$GLAD/cross
   export LOGD=$GLAD/logs
-  export SCRD=$GLAD/scripts
   export SRCD=$GLAD/sources
   export TMPD=$GLAD/temporary
   export TLCD=$GLAD/toolchain
@@ -616,10 +669,16 @@ rad_behave_bootstrap_variables() {
   fi
 }
 
+# Toolchain Variables:
+#
+# TLOG = Toolchain LOG directory (old logging mechanism)
+# TTMP = Toolchain TeMPorary Directory
+# TSRC = Toolchain temporary SouRCes Directory
+# TBLD = Toolchain temporary BuiLDs Directory
+#
 # Bootstrap a cross-compiler toolchain targetting musl-libc
 rad_behave_bootstrap_stage_toolchain_variables() {
   export TLOG=$LOGD/toolchain/$(ls -l $LOGD/toolchain | wc -l)
-  export TSCR=$SCRD/toolchain
   export TTMP=$TMPD/toolchain
 
   export TSRC=$TTMP/sources
@@ -635,8 +694,13 @@ rad_behave_bootstrap_stage_toolchain_variables() {
 # The check script in the behave directory will soon have its functionality
 # migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_check() {
+  # We don't check for musl-headers, we check for musl instead since that's what
+  # eventually provides musl-headers.
   rad_behave_check musl
   rad_behave_check binutils
+  # Same goes for libgcc, libstdc++-v3 and libgomp (even though we are building
+  # them separately in toolchain construct, we only have to check for gcc here
+  # as it provides all of them).
   rad_behave_check gmp
   rad_behave_check mpfr
   rad_behave_check mpc
@@ -664,6 +728,8 @@ rad_behave_bootstrap_stage_toolchain_construct() {
   rad_behave_construct toolchain musl
   rad_behave_construct toolchain libgcc
   rad_behave_construct toolchain libstdc++-v3
+  # Yup, we also have OpenMP also enabled. This probably will only be built when
+  # using atlanticus (performance) and albino (libre).
   rad_behave_construct toolchain libgomp
 }
 
@@ -685,9 +751,12 @@ rad_behave_bootstrap_stage_toolchain() {
 
   rad_behave_bootstrap_stage_toolchain_construct
 
+  # Perhaps making backup optional? or per user request?
   rad_behave_bootstrap_stage_toolchain_backup
 }
 
+# Relase a tarball of the toolchain in case the user wanted to archive it (for
+# future builds) or use it for something else.
 rad_behave_bootstrap_stage_toolchain_release() {
   $RSYNC $TLCD /tmp --delete
 
@@ -709,9 +778,15 @@ rad_behave_bootstrap_stage_toolchain_release() {
 
 # Bootstrap a cross-compiled glaucus system
 
+# Cross Variables:
+#
+# XLOG = cross LOG directory (x is for cross, as c is for chroot)
+# XTMP = cross TeMPorary directory (x is for cross, as c is for chroot)
+# XBLD = cross temporary BuiLD directory (x is for cross, as c is for chroot)
+# XCER = cross temporary CERata directory (x is for cross, as c is for chroot)
+# XSRC = cross temporary SouRCes directory(x is for cross, as c is for chroot)
 rad_behave_bootstrap_stage_cross_variables() {
   export XLOG=$LOGD/cross/$(ls -l $LOGD/cross | wc -l)
-  export XSCR=$SCRD/cross
   export XTMP=$TMPD/cross
 
   export XBLD=$XTMP/builds
@@ -802,6 +877,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate toybox
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate procps-ng
+  # Swithing to oksh soon
   rad_behave_envenomate mksh
   rad_behave_envenomate dash
   rad_behave_envenomate util-linux
@@ -988,9 +1064,14 @@ rad_behave_bootstrap_stage_cross_check() {
 # with an identical/similar architecture as well or if the user knows what
 # he/she is doing.
 
+# Chroot Variables:
+#
+# CLOG = Chroot LOG directory
+# CTMP = Chroot TeMPorary directory
+# CBLD = Chroot BuiLD directory
+# CSRC = Chroot SouRCes directory
 rad_behave_bootstrap_stage_chroot_variables() {
   export CLOG=$LOGD/chroot/$(ls -l $LOGD/chroot | wc -l)
-  export CSCR=$SCRD/chroot
   export CTMP=$TMPD/chroot
 
   export CBLD=$CTMP/builds
