@@ -5,8 +5,7 @@
 
 set -e
 umask 022
-# Do we really need this? Does it work outside of DASH? Is it POSIX compliant?
-#unalias -a
+unalias -a
 
 # Define the default variables
 sleep=0
@@ -33,16 +32,13 @@ rad_close() {
   exit 1
 }
 
-# Information and Helper functions (Notice how all flags are ordered
-# alphabetically for ease of use)
-rad_license() {
-  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
-  rad_open 'Distributed under the terms of the ISC License'
-}
+# Information and Helper functions
+#
+# Notice how all flags are ordered alphabetically for ease of use.
 
 rad_version() {
-  rad_license
-
+  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
+  rad_open 'Distributed under the terms of the ISC License'
   rad_open
   rad_open "$0 version 0.9.3"
 }
@@ -99,6 +95,8 @@ rad_behave_bootstrap_help() {
   rad_open '\tx, cross    \tBootstrap a cross compiled glaucus system (default)'
 }
 
+# Double quotes around the strings below since we're using a single quote '
+# inside of them.
 rad_behave_envenomate_help() {
   rad_version
 
