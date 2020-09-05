@@ -58,7 +58,6 @@ rad_help() {
   rad_open '\tq, -q, --quiet  \tDo not prefix output with ~~'
   rad_open '\t       --sleep  \tSame as --quiet'
   rad_open
-  rad_open '\tr, -r, --require\tCheck if the host system has all required packages'
   rad_open '\ts, -s, --species\tDisplay current species'
   rad_open '\tv, -v, --version\tDisplay version number'
 }
@@ -1241,6 +1240,8 @@ while [ $# -ge 0 ]; do
 
               rad_behave_bootstrap_arch
               rad_behave_bootstrap_flags
+
+              rad_behave_bootstrap_stage_cross
               ;;
             *)
               rad_behave_bootstrap_help
@@ -1377,10 +1378,6 @@ while [ $# -ge 0 ]; do
       ;;
     q | -q | --quiet | --sleep)
       sleep=1
-      ;;
-    r | -r | --require)
-      [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
-      exit 0
       ;;
     s | -s | --species)
       rad_open $species
