@@ -74,7 +74,6 @@ rad_behave_help() {
   rad_open 'Options:'
   rad_open '\tb, bootstrap \tPerform bootstrap behavior'
   rad_open '\te, envenomate\tPerform envenomate behavior (default)'
-  rad_open
   rad_open '\th, help      \tDisplay this help message'
 }
 
@@ -87,9 +86,7 @@ rad_behave_bootstrap_help() {
   rad_open
   rad_open 'Options:'
   rad_open '\tc, chroot   \tBootstrap a cross compiled chroot environment'
-  rad_open
   rad_open '\th, help     \tDisplay this help message'
-  rad_open
   rad_open '\tr, require  \tCheck if the host system has all required packages'
   rad_open '\tt, toolchain\tBootstrap a cross compiler toolchain'
   rad_open '\tx, cross    \tBootstrap a cross compiled glaucus system (default)'
@@ -106,9 +103,7 @@ rad_behave_envenomate_help() {
   rad_open
   rad_open 'Options:'
   rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
-  rad_open
   rad_open "\th, help                          \tDisplay this help message"
-  rad_open
   rad_open "\tl, lic, license, licenses        \tDisplay ceras's license(s)"
   rad_open "\tn, nom, name                     \tDisplay ceras's name"
   rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras's sha512sum"
@@ -131,37 +126,53 @@ rad_behave_envenomate_help() {
 # a $SHA512SUM variable with verbosity on and off based on the $sleep variable's
 # value).
 rad_behave_verify() {
-  if [ $ver != git ]; then
-    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null || rad_close "ceras $nom verify exited with status $?"
-  else
-    return 0
-  fi
+  printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null
 }
 
-# Needs sleep mode be implemented (either add an if below for both the git and
-# curl commands, or move them above as $GIT and $CURL variables with verbosity
-# on and off based on the sleep variable's value).
+# The implementation of the sleep mode here is rather ugly, which makes me think
+# that it might me a better idea to rely on previously defined variables for
+# $GIT, $CURL and $TAR above based on the value of $sleep.
+#
+# Also, the use of $(basename $url) is ugly and excessive (a global variable
+# might be a better idea for this particular use case?).
 rad_behave_fetch() {
+  # In case of a git repository then simply clone it into $SRCD with the name of
+  # $nom and not the original repo name (and they both are similar in most cases
+  # but this is mainly for repos that have different names than the original
+  # ceras we're using).
   if [ $ver = git ]; then
-    git clone -q $url $SRCD/$nom
+    [ $sleep -eq 0 ] && git clone $url $SRCD/$nom || git clone -q $url $SRCD/$nom
   else
-    curl -Lso $SRCD/$nom/$(basename $url) $url
+    # git creates the directory by default so there's no need to use it above.
+    $MKDIR $SRCD/$nom
 
-    rad_behave_verify
+    [ $sleep -eq 0 ] && curl -Lo $SRCD/$nom/$(basename $url) $url || curl -Lso $SRCD/$nom/$(basename $url) $url
 
-    tar xf $SRCD/$nom/$(basename $url) -C $SRCD/$nom
+    rad_behave_verify || rad_close "ceras $nom verify exited with status $?"
+
+    [ $sleep -eq 0 ] && tar xvf $SRCD/$nom/$(basename $url) -C $SRCD/$nom || tar xf $SRCD/$nom/$(basename $url) -C $SRCD/$nom
   fi
 }
 
 rad_behave_check() {
   . $CERD/$1/ceras
 
+  # Check if there is no directory with the ceras's name in $SRCD, if so proceed
+  # to fetch the ceras whether it was a clonable git repository or a
+  # downloadable tarball.
   if [ ! -d $SRCD/$nom ]; then
-    $MKDIR $SRCD/$nom
-
     rad_behave_fetch || rad_close "ceras $nom fetch exited with status $?"
-  else
-    rad_behave_verify
+  # Otherwise, and in the case of such a directory existing in $SRCD, and only
+  # if it's not a git repository, then verify the tarball inside (if the tarball
+  # was previously extracted, then verifying it won't matter much because the
+  # extracted contents could've been tampered with (which is extremely unlikely)
+  # without knowing, and this would require a reextraction in all cases which
+  # would slow down build times by a bit (and not by a whole much because we're
+  # using zstd). The only benefit that might come from reverifying an extracted
+  # tarball is this would be if the tarball was already broken, but then again
+  # it was verified before so how could that happen?
+  elif [ $ver != git ]; then
+    rad_behave_verify || rad_close "ceras $nom verify exited with status $?"
   fi
 }
 
