@@ -203,6 +203,8 @@ rad_behave_envenomate() {
   $MKDIR $XCER/$1/sac
   $MKDIR $XCER/$1/venom
 
+  # This is what prevents us from passing 'cross' to rad_behave_envenomate as
+  # it's already passed here, and it's only used in cross.
   rad_behave_construct cross $1
 
   $RSYNC $XCER/$1/sac/ $CRSD
