@@ -43,7 +43,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.9"
+  rad_open "$0 version 0.9.1"
 }
 
 rad_help() {
@@ -1193,9 +1193,14 @@ rad_behave_bootstrap_clean() {
   $RM $GLAD/var
 }
 
-# Source the configuration file in /etc/radula.conf
+# The script starts executing from here.
+
+# Source the configuration file in /etc/radula.conf if it exists, if not default
+# to using 'x86-64' as the base genome (architecture) and atlanticus
+# (performance) as the base species (flags).
+#
 # Will soon be replaced with /etc/radula.conf (No forward slash for testing atm)
-. etc/radula.conf
+[ -f etc/radula.conf ] && . etc/radula.conf || export genome=x86-64 species=atlanticus
 
 # Catch the quiet signal wherever it was.
 # Currently the flag "require" wrongly turns the quiet signal on since the word
