@@ -5,6 +5,8 @@
 
 set -e
 umask 022
+# Do we really need this? Does it work outside of BASH? Is it POSIX compliant?
+#unalias -a
 
 # Define the default variables
 sleep=0
@@ -23,6 +25,9 @@ rad_open() {
 
 # Standard error function
 # Closes the radula (mouth)
+#
+# When we want to end the script without printing anything don't use rad_close,
+# instead use `exit 1`.
 rad_close() {
   [ $sleep = 0 ] && printf "\033[0;31m~~\033[0m $1\n" || printf "$1\n"
   exit 1
@@ -115,7 +120,10 @@ rad_behave_envenomate_help() {
 # The rad_close statement is directly used here, instead of adding it following
 # the call of the function. This is done because this function is used twice
 # (once in fetch and once in check), which is unlike fetch which is only used in
-# check so its rad_close comes after its call.
+# check so its rad_close comes after its call. It also needs the sleep mode be
+# implemented (either add an if for the sha512sum command or move it above as
+# a $SHA512SUM variable with verbosity on and off based on the $sleep variable's
+# value).
 rad_behave_verify() {
   if [ $ver != git ]; then
     printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null || rad_close "ceras $nom verify exited with status $?"
@@ -124,6 +132,9 @@ rad_behave_verify() {
   fi
 }
 
+# Needs sleep mode be implemented (either add an if below for both the git and
+# curl commands, or move them above as $GIT and $CURL variables with verbosity
+# on and off based on the sleep variable's value).
 rad_behave_fetch() {
   if [ $ver = git ]; then
     git clone -q $url $SRCD/$nom
@@ -416,9 +427,9 @@ rad_behave_bootstrap_flags() {
   STRIP=-s
 
   case $species in
-    albino | libre)
-      ;;
-    atlanticus | performance)
+    # Currently both atlanticus (performance) and albino (libre) share the same
+    # flags since albino is intended to be a libre version of atlanticus.
+    albino | atlanticus | libre | performance)
       export SPCS=atlanticus
 
       case $genome in
@@ -499,7 +510,9 @@ rad_behave_bootstrap_flags() {
 
       export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
       ;;
-    marginatus | sane)
+    # Also, both the marginatus (sane) and the thompsoni (radiology) species
+    # share the same sane flags.
+    marginatus | radiology | thompsoni | sane)
       export SPCS=marginatus
 
       DEVIRT=-fdevirtualize-at-ltrans
@@ -525,8 +538,6 @@ rad_behave_bootstrap_flags() {
       export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
 
       export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
-      ;;
-    thompsoni | radiology)
       ;;
     *)
       $0 l s
@@ -757,7 +768,10 @@ rad_behave_bootstrap_stage_cross_prepare() {
 }
 
 # The only instance were rad_behave_envenomate is used. As to why it is being
-# used, please refer to the comment above that particular function.
+# used, please refer to the comment above that particular function. Also, notice
+# how we're not specifying the stage as a first argument after using the
+# envenomate function (which is what we used to do in construct) since the
+# envenomate keyword only refers to the cross stage.
 rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate linux-headers
   rad_behave_envenomate skalibs
