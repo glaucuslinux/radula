@@ -429,7 +429,7 @@ rad_behave_bootstrap_flags() {
   case $species in
     # Currently both atlanticus (performance) and albino (libre) share the same
     # flags since albino is intended to be a libre version of atlanticus.
-    albino | atlanticus | libre | performance)
+    atlanticus | performance | albino | libre)
       export SPCS=atlanticus
 
       case $genome in
@@ -512,7 +512,7 @@ rad_behave_bootstrap_flags() {
       ;;
     # Also, both the marginatus (sane) and the thompsoni (radiology) species
     # share the same sane flags.
-    marginatus | radiology | thompsoni | sane)
+    marginatus | sane | thompsoni | radiology)
       export SPCS=marginatus
 
       DEVIRT=-fdevirtualize-at-ltrans
