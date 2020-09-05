@@ -43,7 +43,7 @@ rad_version() {
   rad_license
 
   rad_open
-  rad_open "$0 version 0.9.2"
+  rad_open "$0 version 0.9.3"
 }
 
 rad_help() {
@@ -75,6 +75,8 @@ rad_behave_help() {
   rad_open "\t$0 b (Options)"
   rad_open
   rad_open 'Options:'
+  rad_open '\th, help      \tDisplay this help message'
+  rad_open
   rad_open '\tb, bootstrap \tPerform bootstrap behavior'
   rad_open '\te, envenomate\tPerform envenomate behavior (default)'
 }
@@ -87,6 +89,7 @@ rad_behave_bootstrap_help() {
   rad_open "\t$0 b b (Options)"
   rad_open
   rad_open 'Options:'
+  rad_open '\th, help     \tDisplay this help message'
   rad_open '\tr, require  \tCheck if the host system has all required packages'
   rad_open
   rad_open '\tc, chroot   \tBootstrap a cross compiled chroot environment'
@@ -99,9 +102,11 @@ rad_behave_envenomate_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 b e (Options) [Cerata]"
+  rad_open "\t$0 b e (Options) (Cerata)"
   rad_open
   rad_open 'Options:'
+  rad_open "\th, help                          \tDisplay this help message"
+  rad_open
   rad_open "\tn, nom, name                     \tDisplay ceras's name"
   rad_open "\tv, ver, version                  \tDisplay ceras's version"
   rad_open "\tu, url, source                   \tDisplay ceras's source"
@@ -1264,6 +1269,10 @@ while [ $# -ge 0 ]; do
 
               rad_behave_bootstrap_stage_cross
               ;;
+            h | help)
+              rad_behave_bootstrap_help
+              exit 0
+              ;;
             *)
               rad_behave_bootstrap_help
               exit 1
@@ -1332,16 +1341,23 @@ while [ $# -ge 0 ]; do
           # The check is faulty as it'll allow '$3' to work when it's empty, so
           # we have to check that '$3' is not NULL, and proceed to check that it
           # actually exists in $CERD.
-          elif [ ! -z "$3" ] && [ -d $CERD/$3 ]; then
+          elif [ ! -z $3 ] && [ ! $3 = h ] && [ -d $CERD/$3 ]; then
             . $CERD/$3/ceras
 
             for i in n v u s y c l; do
               [ $sleep -eq 0 ] && $0 b e $i $3 || $0 q b e $i $3
             done
+          elif [ $3 = h ]; then
+            rad_behave_envenomate_help
+            exit 0
           else
             rad_behave_envenomate_help
             exit 1
           fi
+          ;;
+        h | help)
+          rad_behave_help
+          exit 0
           ;;
         *)
           rad_behave_help
@@ -1426,8 +1442,12 @@ while [ $# -ge 0 ]; do
     # one with) when we pass 2 or more cerata (only works with one currently
     # ceras value currently). Example, `./rad gcc` will work, but 
     # `./rad gcc linux` won't as it'll print 2 help messages as explained above.
+    #
+    # The above problem was solved by making radula only accept a single
+    # ceras regardless of how many cerata were passed (by using $1 instead of
+    # $@).
     *)
-      [ $sleep -eq 0 ] && $0 b e $@ || $0 q b e $@
+      [ $sleep -eq 0 ] && $0 b e $1 || $0 q b e $1
       exit 0
       ;;
   esac
