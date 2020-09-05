@@ -5,7 +5,7 @@
 
 set -e
 umask 022
-# Do we really need this? Does it work outside of BASH? Is it POSIX compliant?
+# Do we really need this? Does it work outside of DASH? Is it POSIX compliant?
 #unalias -a
 
 # Define the default variables
