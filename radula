@@ -1147,7 +1147,7 @@ rad_behave_bootstrap_stage_chroot_prepare() {
 rad_behave_bootstrap_stage_chroot_construct() {
   rad_behave_construct chroot m4
   rad_behave_construct chroot netbsd-curses
-  rad_behave_construct chroot pkgconf &&
+  rad_behave_construct chroot pkgconf
   rad_behave_construct chroot libedit
   rad_behave_construct chroot mksh
   rad_behave_construct chroot dash
