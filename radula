@@ -42,7 +42,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 0.9.4"
+  rad_open "$0 version 0.9.5"
 }
 
 rad_help() {
@@ -105,7 +105,7 @@ rad_behave_envenomate_help() {
   rad_open
   rad_open 'Options:'
   rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
-  rad_open "\th, help                          \tDisplay this help message"
+  rad_open '\th, help                          \tDisplay this help message'
   rad_open "\tl, lic, license, licenses        \tDisplay ceras's license(s)"
   rad_open "\tn, nom, name                     \tDisplay ceras's name"
   rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras's sha512sum"
@@ -128,7 +128,11 @@ rad_behave_envenomate_help() {
 # a $SHA512SUM variable with verbosity on and off based on the $sleep variable's
 # value).
 rad_behave_verify() {
-  printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null
+  if [ $sleep -eq 0 ]; then
+    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c
+  else
+    printf "$sum $SRCD/$nom/$(basename $url)" | sha512sum -c > /dev/null
+  fi
 }
 
 # The implementation of the sleep mode here is rather ugly, which makes me think
@@ -281,6 +285,8 @@ rad_behave_bootstrap_require() {
   rad_open "rsync:    \t$(rsync --version | sed 1q | cut -d' ' -f4)"
   rad_open "sed:      \t$(sed --version | sed 1q | cut -d' ' -f4)"
   rad_open "tar:      \t$(tar --version | sed 1q | cut -d' ' -f4)"
+  # texinfo is required for binutils not to throw stupid warnings, it can be
+  # omitted though, and the warnings can be ignored.
   rad_open "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
   rad_open "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
   rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
@@ -646,14 +652,6 @@ rad_behave_bootstrap_variables() {
 
   export PATH=$TLCD/bin:/usr/bin
 
-  # pkgconf variables are only needed for the cross and chroot stages (the
-  # toolchain stage won't use any of the pkgconf environment variables below).
-  export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
-  export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
-  export PKG_CONFIG_SYSROOT_DIR=$CRSD
-  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
-  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
-
   if [ $sleep -eq 0 ]; then
     export AUTORECONF='autoreconf -fvis'
     export CHMOD='chmod -Rv'
@@ -679,6 +677,16 @@ rad_behave_bootstrap_variables() {
     export RSYNC='rsync -aHAXSx'
     export UMOUNT='umount -fqR'
   fi
+}
+
+# pkgconf variables are only needed for the cross and chroot stages (the
+# toolchain stage won't use any of the pkgconf environment variables below).
+rad_behave_bootstrap_pkg_config_variables() {
+  export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
+  export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
+  export PKG_CONFIG_SYSROOT_DIR=$CRSD
+  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
+  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
 }
 
 # Toolchain Variables:
@@ -770,7 +778,7 @@ rad_behave_bootstrap_stage_toolchain() {
 # Relase a tarball of the toolchain in case the user wanted to archive it (for
 # future builds) or use it for something else.
 rad_behave_bootstrap_stage_toolchain_release() {
-  $RSYNC $TLCD /tmp --delete
+  $RSYNC $BAKD/toolchain /tmp --delete
 
   rad_behave_bootstrap_stage_toolchain_variables
 
@@ -834,6 +842,32 @@ rad_behave_bootstrap_stage_cross_variables() {
   export STRIP=$TGT-strip
 
   export BLD=$($CERD/binutils/config.guess)
+}
+
+# This function is used in both the cross and chroot stages. It was brought over
+# from the older design of glaucus and it's still unsure whether it'll still be
+# used in chroot.
+#
+# Also, notice how small and glorious our base system is!
+rad_behave_bootstrap_stage_cross_check() {
+  rad_behave_check linux
+  rad_behave_check skalibs
+  rad_behave_check execline
+  rad_behave_check s6
+  rad_behave_check utmps
+  rad_behave_check shadow
+  rad_behave_check libressl
+  rad_behave_check toybox
+  rad_behave_check netbsd-curses
+  rad_behave_check procps-ng
+  rad_behave_check mksh
+  rad_behave_check dash
+  rad_behave_check util-linux
+  rad_behave_check e2fsprogs
+  rad_behave_check s6-linux-init
+  rad_behave_check s6-rc
+  rad_behave_check eudev
+  rad_behave_check s6-boot-scripts
 }
 
 rad_behave_bootstrap_stage_cross_prepare() {
@@ -952,8 +986,10 @@ rad_behave_bootstrap_stage_cross_strip() {
 
 rad_behave_bootstrap_stage_cross() {
   rad_behave_bootstrap_variables
+  rad_behave_bootstrap_pkg_config_variables
 
   rad_behave_bootstrap_stage_cross_variables
+  rad_behave_bootstrap_stage_cross_check
   rad_behave_bootstrap_stage_cross_prepare
 
   rad_behave_bootstrap_stage_cross_envenomate
@@ -1039,29 +1075,6 @@ rad_behave_bootstrap_stage_cross_img() {
   $UMOUNT /mnt/loop
   partx -d $LOOP
   losetup -d $LOOP
-}
-
-# This function is used in both the cross and chroot stages. It was brought over
-# from the older design of glaucus and it's still unsure whether it'll still be
-# used in chroot.
-#
-# Also, notice how small and glorious our base system is!
-rad_behave_bootstrap_stage_cross_check() {
-  rad_behave_check skalibs
-  rad_behave_check execline
-  rad_behave_check s6
-  rad_behave_check utmps
-  rad_behave_check libressl
-  rad_behave_check toybox
-  rad_behave_check netbsd-curses
-  rad_behave_check procps
-  rad_behave_check mksh
-  rad_behave_check dash
-  rad_behave_check e2fsprogs
-  rad_behave_check linux
-  rad_behave_check s6-linux-init
-  rad_behave_check s6-rc
-  rad_behave_check s6-boot-scripts
 }
 
 # Bootstrap a cross-compiled chroot environment
@@ -1251,6 +1264,7 @@ rad_behave_bootstrap_stage_chroot_enter() {
 
 rad_behave_bootstrap_stage_chroot() {
   rad_behave_bootstrap_variables
+  rad_behave_bootstrap_pkg_config_variables
 
   rad_behave_bootstrap_stage_chroot_variables
   rad_behave_bootstrap_stage_chroot_check
@@ -1351,6 +1365,9 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_flags
 
               rad_behave_bootstrap_stage_chroot
+              
+              rad_open
+              rad_open "Successfully bootstrapped an $genome cross-compiled chroot environment!"
               ;;
             t | toolchain)
               [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
@@ -1364,6 +1381,9 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch
 
               rad_behave_bootstrap_stage_toolchain
+              
+              rad_open
+              rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
             x | cross)
               [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
@@ -1375,6 +1395,9 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_flags
 
               rad_behave_bootstrap_stage_cross
+              
+              rad_open
+              rad_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
               ;;
             h | help)
               rad_behave_bootstrap_help
