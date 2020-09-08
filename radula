@@ -42,7 +42,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 0.9.5"
+  rad_open "$0 version 0.9.6"
 }
 
 rad_help() {
@@ -682,6 +682,10 @@ rad_behave_bootstrap_variables() {
 # pkgconf variables are only needed for the cross and chroot stages (the
 # toolchain stage won't use any of the pkgconf environment variables below).
 rad_behave_bootstrap_pkg_config_variables() {
+  # Notice how we're adding '$CRSD/' which is the sysroot, to both _PATH and
+  # _LIBDIR, this is done because both pkgconf and pkg-config don't respect the
+  # provided sysroot (meaning sysroot doesn't get automatically prefixed to PATH
+  # and LIBDIR, so we have to add it manually...).
   export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
   export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
   export PKG_CONFIG_SYSROOT_DIR=$CRSD
@@ -965,7 +969,9 @@ rad_behave_bootstrap_stage_cross_configure() {
 
 rad_behave_bootstrap_stage_cross_strip() {
   # Delete empty directories in etc that we have no use of
-  find $CRSD/etc -type d -empty -delete
+  # This wrongly deletes /etc/s6/run-image/utmps which is definitely wrong
+  # behaviour so it'll be disabled for now!
+  #find $CRSD/etc -type d -empty -delete
 
   # Clean the tmp directory in case it got populated during cross-compilation
   # (it'll probably be empty since we're cross compiling, but in the case of
@@ -1002,14 +1008,20 @@ rad_behave_bootstrap_stage_cross() {
   # rad_behave_bootstrap_stage_cross_img
 }
 
+# The below image function is a complete mess, and needs a rework so ignore it
+# for now.
+#
 # This function needs fixing. Perhaps add an additional flag to allow the
 # creation of an img after building cross is done?
 rad_behave_bootstrap_stage_cross_img() {
-  NAME=glaucus.img
-  SIZE=256M
+  NAME=$PWD/../glaucus.img
+  SIZE=128M
+  # Apparently it won't find losetup without this, and I'm too lazy to debug
+  # this, so we'll leave it for now...
+  export PATH=/usr/sbin:/usr/bin
   LOOP=$(losetup -f)
 
-  $RM $NAME
+  #$RM $NAME
   # We're creating a raw image
   qemu-img create -f raw $NAME $SIZE
   # We're using the mbr.bin provided by SYSLINUX, and is written to the first
@@ -1050,10 +1062,10 @@ rad_behave_bootstrap_stage_cross_img() {
   $MKDIR -m 1777 /mnt/loop/tmp
 
   # Copy the cross compiled system we just built
-  $RSYNC cross/boot /mnt/loop
-  $RSYNC cross/etc /mnt/loop
-  $RSYNC cross/usr /mnt/loop
-  $RSYNC cross/var /mnt/loop
+  $RSYNC ../cross/boot /mnt/loop
+  $RSYNC ../cross/etc /mnt/loop
+  $RSYNC ../cross/usr /mnt/loop
+  $RSYNC ../cross/var /mnt/loop
 
   # Essential symlinks that can't be removed since many software depend on their
   # existence (make, perl, python, )
@@ -1065,7 +1077,7 @@ rad_behave_bootstrap_stage_cross_img() {
   $MKDIR /mnt/loop/boot/extlinux
   # Copy our extlinux.conf file which defaults to sda1 and ext4 with the init
   # set to '/etc/s6/bin/init'.
-  $RSYNC scripts/other/extlinux.conf /mnt/loop/boot/extlinux
+  $RSYNC other/extlinux.conf /mnt/loop/boot/extlinux
 
   $CHOWN -R 0:0 /mnt/loop
 
@@ -1402,6 +1414,10 @@ while [ $# -ge 0 ]; do
             h | help)
               rad_behave_bootstrap_help
               exit 0
+              ;;
+            i | img | image)
+              rad_behave_bootstrap_variables
+              rad_behave_bootstrap_stage_cross_img
               ;;
             *)
               rad_behave_bootstrap_help
