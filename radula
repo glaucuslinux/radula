@@ -858,7 +858,6 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check skalibs
   rad_behave_check execline
   rad_behave_check s6
-  rad_behave_check utmps
   rad_behave_check shadow
   rad_behave_check libressl
   rad_behave_check toybox
@@ -897,8 +896,7 @@ rad_behave_bootstrap_stage_cross_prepare() {
   tty:x:1:
   disk:x:2:
   audio:x:3:
-  video:x:4:
-  utmp:x:5:\n' > $CRSD/etc/group
+  video:x:4:\n' > $CRSD/etc/group
 
   printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
 
@@ -921,7 +919,6 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate skalibs
   rad_behave_envenomate execline
   rad_behave_envenomate s6
-  rad_behave_envenomate utmps
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
   rad_behave_envenomate toybox
@@ -968,10 +965,11 @@ rad_behave_bootstrap_stage_cross_configure() {
 }
 
 rad_behave_bootstrap_stage_cross_strip() {
-  # Delete empty directories in etc that we have no use of
-  # This wrongly deletes /etc/s6/run-image/utmps which is definitely wrong
-  # behaviour so it'll be disabled for now!
-  #find $CRSD/etc -type d -empty -delete
+  # Delete empty directories in etc that we have no use of Previously this
+  # wrongly deleted /etc/s6/run-image/utmps which was definitely a wrong
+  # behaviour, but now we've removed utmps (and will probably switch to finit)
+  # so we can remove empty directories.
+  find $CRSD/etc -type d -empty -delete
 
   # Clean the tmp directory in case it got populated during cross-compilation
   # (it'll probably be empty since we're cross compiling, but in the case of
