@@ -1059,7 +1059,6 @@ while [ $# -ge 0 ]; do
               ;;
             h | -h | --help)
               rad_behave_bootstrap_help
-              exit 0
               ;;
             i | img | image)
               rad_behave_bootstrap_variables
