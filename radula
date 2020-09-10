@@ -1160,13 +1160,13 @@ while [ $# -ge 0 ]; do
                 ;;
             esac
 
-          elif [ ! -z $3 ] && [ ! $3 = h ] && [ -d $CERD/$3 ]; then
+          elif [ ! -z $3 ] && [ "$3" != h ] && [ -d $CERD/$3 ]; then
             . $CERD/$3/ceras
 
             for i in n v u s y c l; do
               [ $sleep -eq 0 ] && $0 b e $i $3 || $0 q b e $i $3
             done
-          elif [ ! -z $3 ] && [ $3 = h ]; then
+          elif [ "$3" = h ]; then
             rad_behave_envenomate_help
             exit 0
           else
