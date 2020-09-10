@@ -7,7 +7,15 @@ set -e
 umask 022
 unalias -a
 
+#
 # Default variables
+#
+
+bootstrap=0
+
+genome=x86-64
+species=atlanticus
+
 sleep=0
 
 # Default glaucus directory (GLAucus Directory aka GLAD)
@@ -31,7 +39,7 @@ rad_open() {
 # When we want to end the script without printing anything don't use rad_close,
 # instead use `exit 1`.
 rad_close() {
-  [ $sleep = 0 ] && printf "\033[0;31m~~\033[0m $1\n" || printf "$1\n"
+  [ $sleep = 0 ] && printf "\033[0;31m--\033[0m $1\n" || printf "$1\n"
   exit 1
 }
 
@@ -43,7 +51,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 0.9.7"
+  rad_open "$0 version 0.9.8 ($genome $species)"
 }
 
 rad_help() {
@@ -59,7 +67,7 @@ rad_help() {
   rad_open
   rad_open '\tg, -g, --genome \tDisplay current genome'
   rad_open '\th, -h, --help   \tDisplay this help message'
-  rad_open '\tl, -l, --list   \tList available genomes and species'
+  rad_open '\tl, -l, --list   \tList supported genomes and species'
   rad_open "\tq, -q, --quiet  \tDecrease the verbosity level and don't prefix"
   rad_open '\t                \tthe output with ~~'
   rad_open
@@ -78,7 +86,8 @@ rad_behave_help() {
   rad_open 'Options:'
   rad_open '\tb, bootstrap \tPerform bootstrap behavior'
   rad_open '\te, envenomate\tPerform envenomate behavior (default)'
-  rad_open '\th, help      \tDisplay this help message'
+  rad_open
+  rad_open '\th, -h, --help\tDisplay this help message'
 }
 
 rad_behave_bootstrap_help() {
@@ -89,15 +98,16 @@ rad_behave_bootstrap_help() {
   rad_open "\t$0 [ b | -b | --behave ] [ b | bootstrap ] [ Options ]"
   rad_open
   rad_open 'Options:'
-  rad_open '\tc, clean    \tClean up while preserving sources'
-  rad_open '\th, help     \tDisplay this help message'
-  rad_open '\tr, require  \tCheck if host has all required packages'
-  rad_open '\tt, toolchain\tBootstrap a cross compiler toolchain'
-  rad_open '\tx, cross    \tBootstrap a cross compiled glaucus system (default)'
+  rad_open '\tc, clean     \tClean up while preserving sources and backups'
+  rad_open '\td, distclean \tClean up everything'
+  rad_open
+  rad_open '\th, -h, --help\tDisplay this help message'
+  rad_open
+  rad_open '\tr, require   \tCheck if host has all required packages'
+  rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
+  rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system (default)'
 }
 
-# concentrate (plural concentrates): build time dependency(ies)
-# cyst (plural cysts): run time dependency(ies)
 rad_behave_envenomate_help() {
   rad_version
 
@@ -107,7 +117,9 @@ rad_behave_envenomate_help() {
   rad_open
   rad_open 'Options:'
   rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
-  rad_open '\th, help                          \tDisplay this help message'
+  rad_open
+  rad_open '\th, -h, --help                    \tDisplay this help message'
+  rad_open
   rad_open "\tl, lic, license, licenses        \tDisplay ceras's license(s)"
   rad_open "\tn, nom, name                     \tDisplay ceras's name"
   rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras's sha512sum"
@@ -229,17 +241,18 @@ rad_behave_bootstrap_require() {
 }
 
 rad_behave_bootstrap_initialize() {
-  $MKDIR $BAKD
+  [ ! -d $BAKD ] && $MKDIR $BAKD
   
   [ ! -d $SRCD ] && $MKDIR $SRCD
-  $MKDIR $TLCD
 
-  $MKDIR $TMPD/cross/builds
-  $MKDIR $TMPD/cross/cerata
-  $MKDIR $TMPD/cross/sources
+  if [ ! -d $TMPD ]; then
+    $MKDIR $TMPD/cross/builds
+    $MKDIR $TMPD/cross/cerata
+    $MKDIR $TMPD/cross/sources
 
-  $MKDIR $TMPD/toolchain/sources
-  $MKDIR $TMPD/toolchain/builds
+    $MKDIR $TMPD/toolchain/sources
+    $MKDIR $TMPD/toolchain/builds
+  fi
 }
 
 # Architecture related variables explained (for rad_behave_bootstrap_arch):
@@ -986,49 +999,34 @@ rad_behave_bootstrap_stage_cross_img() {
   losetup -d $LOOP
 }
 
-# Should run when bootstrapping fails or is aborted (and if requested). The list
-# of directories below needs to be updated to fit the new location of the
-# system.
 rad_behave_bootstrap_clean() {
-  $UMOUNT $GLAD/dev
-  $UMOUNT $GLAD/proc
-  $UMOUNT $GLAD/sys
-  $UMOUNT $GLAD/run
+  $RM $CRSD
 
-  $RM $GLAD/bin
-  $RM $GLAD/boot
-  $RM $GLAD/dev
-  $RM $GLAD/etc
-  $RM $GLAD/proc
-  $RM $GLAD/root
-  $RM $GLAD/run
-  $RM $GLAD/sys
-
-  $RM $GLAD/cross
-
-  $RM $GLAD/tmp
-
-  $RM $GLAD/toolchain
-
-  $RM $GLAD/usr
-  $RM $GLAD/var
+  $RM $TLCD
 }
 
-# The script starts executing from here.
+rad_behave_bootstrap_distclean() {
+  $RM $BAKD
 
-# Source the configuration file in /etc/radula.conf if it exists, if not default
-# to using 'x86-64' as the base genome (architecture) and atlanticus
-# (performance) as the base species (flags).
-#
-# Will soon be replaced with /etc/radula.conf (No forward slash for testing atm)
-[ -f etc/radula.conf ] && . etc/radula.conf || export genome=x86-64 species=atlanticus
+  $RM $SRCD
 
-# Catch the quiet signal wherever it was.
+  $RM $TMPD
+
+  rad_behave_bootstrap_clean
+}
+
 #
-# An easy usage advice for the user (especially when passing single letters only
-# like 'q') is to always pass the quiet/sleep flags before all arguments/flags
-# or after them, and not in between (to minimize errors, and it only makes sense
-# to use it that way).
+# Main
+#
+
+if [ -f /etc/radula.conf ]; then
+  . /etc/radula.conf
+elif [ -f /etc/rad.conf ]; then
+  . /etc/rad.conf
+fi
+
+# Tip: prefix or postfix your options with the letter `q` to correctly silence
+# radula.
 #
 # Currently the flag "require" wrongly turns the quiet signal on since the word
 # "require" has a "q" in it. This needs to be fixed.
@@ -1038,15 +1036,35 @@ case "$@" in
     ;;
 esac
 
-# Our basic and portable argument parser
-# Sets basic behavior variables, prints information and has some functionality
 # rad l q [g, s] doesn't work since list expects genome or species
 while [ $# -ge 0 ]; do
   case $1 in
+    '')
+      rad_help
+      exit 1
+      ;;
     b | -b | --behave)
       case $2 in
         b | bootstrap)
           case $3 in
+            c | clean)
+              rad_behave_bootstrap_variables
+
+              rad_behave_bootstrap_clean
+              ;;
+            d | distclean)
+              rad_behave_bootstrap_variables
+
+              rad_behave_bootstrap_distclean
+              ;;
+            h | -h | --help)
+              rad_behave_bootstrap_help
+              exit 0
+              ;;
+            i | img | image)
+              rad_behave_bootstrap_variables
+              rad_behave_bootstrap_stage_cross_img
+              ;;
             r | require)
               rad_behave_bootstrap_require
               ;;
@@ -1079,17 +1097,6 @@ while [ $# -ge 0 ]; do
               
               rad_open
               rad_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
-              ;;
-            i | img | image)
-              rad_behave_bootstrap_variables
-              rad_behave_bootstrap_stage_cross_img
-              ;;
-            c | clean)
-              rad_behave_bootstrap_clean
-              ;;
-            h | help)
-              rad_behave_bootstrap_help
-              exit 0
               ;;
             *)
               rad_behave_bootstrap_help
@@ -1173,7 +1180,7 @@ while [ $# -ge 0 ]; do
             exit 1
           fi
           ;;
-        h | help)
+        h | -h | --help)
           rad_behave_help
           exit 0
           ;;
@@ -1182,16 +1189,6 @@ while [ $# -ge 0 ]; do
           exit 1
           ;;
       esac
-      exit 0
-      ;;
-    bb | -bb)
-      shift
-      [ $sleep -eq 0 ] && $0 b b $@ || $0 q b b $@
-      exit 0
-      ;;
-    be | -be)
-      shift
-      [ $sleep -eq 0 ] && $0 b e $@ || $0 q b e $@
       exit 0
       ;;
     g | -g | --genome)
@@ -1203,42 +1200,26 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     l | -l | --list)
-      case $2 in
-        g | genome)
-          rad_open 'Genomes (Archs):'
-          rad_open '\taarch64,          armv8-a,    arm64'
-          rad_open '\tarmv6zk,          arm,        bcm2835'
-          rad_open '\ti686,             i386,       x86'
-          rad_open '\tpowerpc,          pmac32,     ppc'
-          rad_open '\tpowerpc64,        g5,         ppc64'
-          rad_open '\tpowerpc64le,      powernv,    ppc64le'
-          rad_open '\triscv64,          rv64imafdc, riscv'
-          rad_open '\tx86-64 (default), x86_64'
-          ;;
-        s | species)
-          rad_open 'Species (Flags):'
-          rad_open '\talbino,               libre'
-          rad_open '\tatlanticus (default), performance'
-          rad_open '\tbennettae,            size'
-          rad_open '\tmarginatus,           sane'
-          rad_open '\tthompsoni,            radiology'
-          ;;
-        '')
-          [ $sleep -eq 0 ] && $0 l g || $0 q l g
+      rad_version
 
-          rad_open
-
-          [ $sleep -eq 0 ] && $0 l s || $0 q l s
-          ;;
-        *)
-          rad_close 'Valid list options are: g, genome, s and species'
-          ;;
-      esac
-
+      rad_open
+      rad_open 'Genomes (Architectures):'
+      rad_open '\taarch64,     armv8-a,    arm64'
+      rad_open '\tarmv6zk,     arm,        bcm2835'
+      rad_open '\ti686,        i386,       x86'
+      rad_open '\tpowerpc,     pmac32,     ppc'
+      rad_open '\tpowerpc64,   g5,         ppc64'
+      rad_open '\tpowerpc64le, powernv,    ppc64le'
+      rad_open '\triscv64,     rv64imafdc, riscv'
+      rad_open '\tx86-64,      x86_64'
+      rad_open
+      rad_open 'Species (Flags):'
+      rad_open '\talbino,     libre'
+      rad_open '\tatlanticus, performance'
+      rad_open '\tbennettae,  size'
+      rad_open '\tmarginatus, sane'
+      rad_open '\tthompsoni,  radiology'
       exit 0
-      ;;
-    q | -q | --quiet | --sleep)
-      sleep=1
       ;;
     s | -s | --species)
       rad_open $species
@@ -1246,29 +1227,6 @@ while [ $# -ge 0 ]; do
       ;;
     v | -v | --version)
       rad_version
-      exit 0
-      ;;
-    # Don't call $0 b e just to exit with behave envenomate help message,
-    # instead output that help message directly and let the user think radula is
-    # operating in b e mode by default.
-    '')
-      rad_behave_envenomate_help
-      exit 1
-      ;;
-    # Call envenomate mode and pass the supposedly ceras value to it. There's a
-    # bug currently where it prints 2 help messages (one without sleep mode and
-    # one with) when we pass 2 or more cerata (only works with one currently
-    # ceras value currently). Example, `./rad gcc` will work, but 
-    # `./rad gcc linux` won't as it'll print 2 help messages as explained above.
-    #
-    # The above problem could be solved by making radula only accept a single
-    # ceras regardless of how many cerata were passed (by using $1 instead of
-    # $@), but then we can't operate normally in envenomate mode because we
-    # can't pass `c h l n s u v y` if the user requested them before passing the
-    # ceras (e.g. `./rad n gcc` won't work since n would be treated as a ceras
-    # here).
-    *)
-      [ $sleep -eq 0 ] && $0 b e $@ || $0 q b e $@
       exit 0
       ;;
   esac
