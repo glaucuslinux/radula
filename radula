@@ -523,9 +523,10 @@ rad_behave_bootstrap_flags() {
       FSECTS=-ffunction-sections
       OMIT=-fomit-frame-pointer
       OS=-Os
+      RTTI=-fno-rtti
       UNWIND=-fno-unwind-tables
 
-      export CFLAGS="$PIPE $DEBUG $OS $OMIT $LTO $FSECTS $DSECTS $STRIP $EXCEPT $UNWIND $AUNWIND $FARCH"
+      export CFLAGS="$PIPE $RTTI $DEBUG $OS $OMIT $LTO $FSECTS $DSECTS $STRIP $EXCEPT $UNWIND $AUNWIND $FARCH"
 
       export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
       export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
