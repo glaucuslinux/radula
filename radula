@@ -18,26 +18,22 @@ species=atlanticus
 
 sleep=0
 
-# Default glaucus directory (GLAucus Directory aka GLAD)
+# GLAucus Directory
 GLAD=$PWD/..
-# Define cerata directory (CERata Directory aka CERD)
+# CERata Directory
 CERD=$GLAD/cerata
 
 #
 # IO Functions
 #
 
-# Standard output function
 # Opens the radula (mouth)
 rad_open() {
   [ $sleep = 0 ] && printf "\033[0;34m~~\033[0m $1\n" || printf "$1\n"
 }
 
-# Standard error function
 # Closes the radula (mouth)
-#
-# When we want to end the script without printing anything don't use rad_close,
-# instead use `exit 1`.
+# Use `exit 1` instead of rad_close when you don't want to print anything
 rad_close() {
   [ $sleep = 0 ] && printf "\033[0;31m--\033[0m $1\n" || printf "$1\n"
   exit 1
@@ -233,8 +229,6 @@ rad_behave_bootstrap_require() {
   rad_open "rsync:    \t$(rsync --version | sed 1q | cut -d' ' -f4)"
   rad_open "sed:      \t$(sed --version | sed 1q | cut -d' ' -f4)"
   rad_open "tar:      \t$(tar --version | sed 1q | cut -d' ' -f4)"
-  # texinfo is required for binutils not to throw stupid warnings, it can be
-  # omitted though, and the warnings can be ignored.
   rad_open "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
   rad_open "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
   rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
@@ -244,15 +238,6 @@ rad_behave_bootstrap_initialize() {
   [ ! -d $BAKD ] && $MKDIR $BAKD
   
   [ ! -d $SRCD ] && $MKDIR $SRCD
-
-  if [ ! -d $TMPD ]; then
-    $MKDIR $TMPD/cross/builds
-    $MKDIR $TMPD/cross/cerata
-    $MKDIR $TMPD/cross/sources
-
-    $MKDIR $TMPD/toolchain/sources
-    $MKDIR $TMPD/toolchain/builds
-  fi
 }
 
 # Architecture related variables explained (for rad_behave_bootstrap_arch):
@@ -580,20 +565,12 @@ rad_behave_bootstrap_flags() {
   esac
 }
 
-# Anatomy of the glaucus directory:
-#
 # BAKD = BAcKup Directory
 # CRSD = CRoSs Directory
 # SRCD = SouRCes Directory
 # TMPD = TeMPorary Directory
 # TLCD = TooLChain Directory
-#
-# Common bootstrap variables that are used in all stages (taken from the main
-# Makefile located over at the main glaucus repository (which will soon be
-# deprecated in favour of radula)).
 rad_behave_bootstrap_variables() {
-  # Originally GLAD and CERD belonged here but it appears that a better place
-  # for them would be in the radula script itself as "global" variables.
   export BAKD=$GLAD/backup
   export CRSD=$GLAD/cross
   export SRCD=$GLAD/sources
@@ -608,8 +585,7 @@ rad_behave_bootstrap_variables() {
     export CHOWN='chown -Rv'
     export LN='ln -fnsv'
     export MAKE='make -j1 V=1'
-    # To prevent overlapping with the install() function in .ceras files, we add
-    # the full path to the install command.
+    # Full path to not overlap with the install() function in .ceras files
     export MKDIR='/usr/bin/install -dv'
     export MV='mv -v'
     export RM='rm -frv'
@@ -629,13 +605,10 @@ rad_behave_bootstrap_variables() {
   fi
 }
 
-# pkgconf variables are only needed for the cross and chroot stages (the
-# toolchain stage won't use any of the pkgconf environment variables below).
+# Only for use in cross
 rad_behave_bootstrap_pkg_config_variables() {
-  # Notice how we're adding '$CRSD/' which is the sysroot, to both _PATH and
-  # _LIBDIR, this is done because both pkgconf and pkg-config don't respect the
-  # provided sysroot (meaning sysroot doesn't get automatically prefixed to PATH
-  # and LIBDIR, so we have to add it manually...).
+  # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
+  # automatically prefixed to PATH and LIBDIR)
   export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
   export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
   export PKG_CONFIG_SYSROOT_DIR=$CRSD
@@ -643,36 +616,25 @@ rad_behave_bootstrap_pkg_config_variables() {
   export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
 }
 
-# Toolchain Variables:
 #
+# Toolchain Stage Functions
+#
+
 # TTMP = Toolchain TeMPorary Directory
-# TSRC = Toolchain temporary SouRCes Directory
 # TBLD = Toolchain temporary BuiLDs Directory
-#
-# Bootstrap a cross-compiler toolchain targetting musl-libc
+# TSRC = Toolchain temporary SouRCes Directory
 rad_behave_bootstrap_stage_toolchain_variables() {
   export TTMP=$TMPD/toolchain
 
   export TSRC=$TTMP/sources
   export TBLD=$TTMP/builds
 
-  # Using the latest official GNU config.guess to obtain the correct build
-  # tuple:
-  #
-  # https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
   export BLD=$($CERD/binutils/config.guess)
 }
 
-# The check script in the behave directory will soon have its functionality
-# migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_check() {
-  # We don't check for musl-headers, we check for musl instead since that's what
-  # eventually provides musl-headers.
   rad_behave_check musl
   rad_behave_check binutils
-  # Same goes for libgcc, libstdc++-v3 and libgomp (even though we are building
-  # them separately in toolchain construct, we only have to check for gcc here
-  # as it provides all of them).
   rad_behave_check gmp
   rad_behave_check mpfr
   rad_behave_check mpc
@@ -687,12 +649,12 @@ rad_behave_bootstrap_stage_toolchain_prepare() {
   $RM $TBLD
   $MKDIR $TBLD
 
+  [ ! -d $TSRC ] && $MKDIR $TSRC
+
   $RM $TLCD
   $MKDIR $TLCD
 }
 
-# The construct script in the behave directory will soon have its functionality
-# migrated to a function in radula.
 rad_behave_bootstrap_stage_toolchain_construct() {
   rad_behave_construct toolchain musl-headers
   rad_behave_construct toolchain binutils
@@ -700,32 +662,26 @@ rad_behave_bootstrap_stage_toolchain_construct() {
   rad_behave_construct toolchain musl
   rad_behave_construct toolchain libgcc
   rad_behave_construct toolchain libstdc++-v3
-  # Yup, we also have OpenMP also enabled. This probably will only be built when
-  # using atlanticus (performance) and albino (libre).
+  # Only for atlanticus (performance) and albino (libre)
   rad_behave_construct toolchain libgomp
 }
 
 rad_behave_bootstrap_stage_toolchain_backup() {
   $RSYNC $CRSD $BAKD --delete
-
   $RSYNC $TLCD $BAKD --delete
 }
 
 rad_behave_bootstrap_stage_toolchain() {
-  rad_behave_bootstrap_variables
-
   rad_behave_bootstrap_stage_toolchain_variables
   rad_behave_bootstrap_stage_toolchain_check
   rad_behave_bootstrap_stage_toolchain_prepare
 
   rad_behave_bootstrap_stage_toolchain_construct
 
-  # Perhaps making backup optional? or per user request?
   rad_behave_bootstrap_stage_toolchain_backup
 }
 
-# Relase a tarball of the toolchain in case the user wanted to archive it (for
-# future builds) or use it for something else.
+# Experimental release function
 rad_behave_bootstrap_stage_toolchain_release() {
   $RSYNC $BAKD/toolchain /tmp --delete
 
@@ -745,14 +701,14 @@ rad_behave_bootstrap_stage_toolchain_release() {
   /usr/bin/tar -I '/usr/bin/zstd -22 --ultra --long=31 -T0' -cvf toolchain-$(date +%d%m%Y).tar.zstd /tmp/toolchain
 }
 
-# Bootstrap a cross-compiled glaucus system
-
-# Cross Variables:
 #
-# XTMP = cross stage TeMPorary directory
-# XBLD = cross stage temporary BuiLD directory
-# XCER = cross stage temporary CERata directory
-# XSRC = cross stage temporary SouRCes directory
+# Cross Stage Functions
+#
+
+# XTMP = cross TeMPorary Directory
+# XBLD = Toolchain temporary BuiLDs Directory
+# XCER = Toolchain temporary BuiLDs Directory
+# XSRC = Toolchain temporary SouRCes Directory
 rad_behave_bootstrap_stage_cross_variables() {
   export XTMP=$TMPD/cross
 
@@ -760,16 +716,9 @@ rad_behave_bootstrap_stage_cross_variables() {
   export XCER=$XTMP/cerata
   export XSRC=$XTMP/sources
 
-  # Don't use NATIVECC and NATIVECXX because they are ancient and were
-  # superceded by HOSTCC and HOSTCXX. They refer to the host's gcc and g++
-  # compilers respectively, which are different to the CC and CXX compilers we
-  # built in the toolchain stage (the ones that with the $TGT suffix that will
-  # actually cross compile our stuff).
+  # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
   #
-  # While HOSTCC and HOSTCXX aren't actually needed, it's better to specify them
-  # because some packages like netbsd-curses use them to build some tools. This
-  # means that some tools will be built with HOSTCC (nbperf, tic...) and the
-  # actual netbsd-curses component will be built with CC.
+  # HOSTCC and HOSTCXX are optional (used in netbsd-curses for nbperf and tic).
   export HOSTCC=gcc
   export HOSTCXX=g++
 
@@ -807,23 +756,19 @@ rad_behave_bootstrap_stage_cross_check() {
 
 rad_behave_bootstrap_stage_cross_prepare() {
   $RSYNC $BAKD/cross $GLAD --delete
-
   $RSYNC $BAKD/toolchain $GLAD --delete
 
-  $RM $XBLD
-  $MKDIR $XBLD
+  [ -d $XBLD ] && $RM $XBLD
+  [ ! -d $XBLD ] && $MKDIR $XBLD
 
-  $RM $XCER
-  $MKDIR $XCER
+  [ -d $XCER ] && $RM $XCER
+  [ ! -d $XCER ] && $MKDIR $XCER
 
-  $RM $CRSD/boot
-  $MKDIR $CRSD/boot
+  [ ! -d $XSRC ] && $MKDIR $XSRC
 
-  $RM $CRSD/etc
   $MKDIR $CRSD/etc
 
-  # Basic groups, these are lacking a lot so ignore them for now unless
-  # something needs them (e.g. udev).
+  # Do we need more groups for eudev?
   printf 'root:x:0:
   tty:x:1:
   disk:x:2:
@@ -832,7 +777,7 @@ rad_behave_bootstrap_stage_cross_prepare() {
 
   printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
 
-  # Will probably be changed back to oksh once it can cross compile
+  # Will switch to oksh
   printf 'root::0:0:root:/root:/usr/bin/mksh\n' > $CRSD/etc/passwd
 
   $RM $CRSD/var
@@ -841,11 +786,6 @@ rad_behave_bootstrap_stage_cross_prepare() {
   $MKDIR $CRSD/var/log
 }
 
-# The only instance were rad_behave_envenomate is used. As to why it is being
-# used, please refer to the comment above that particular function. Also, notice
-# how we're not specifying the stage as a first argument after using the
-# envenomate function (which is what we used to do in construct) since the
-# envenomate keyword only refers to the cross stage.
 rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate linux-headers
   rad_behave_envenomate shadow
@@ -853,9 +793,8 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate toybox
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate procps-ng
-  # Swithing to oksh soon
-  #rad_behave_envenomate mksh
-  rad_behave_envenomate oksh
+  # Will switch to oksh
+  rad_behave_envenomate mksh
   rad_behave_envenomate dash
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
@@ -906,9 +845,6 @@ rad_behave_bootstrap_stage_cross_strip() {
 }
 
 rad_behave_bootstrap_stage_cross() {
-  rad_behave_bootstrap_variables
-  rad_behave_bootstrap_pkg_config_variables
-
   rad_behave_bootstrap_stage_cross_variables
   rad_behave_bootstrap_stage_cross_check
   rad_behave_bootstrap_stage_cross_prepare
@@ -1063,6 +999,7 @@ while [ $# -ge 0 ]; do
               ;;
             i | img | image)
               rad_behave_bootstrap_variables
+
               rad_behave_bootstrap_stage_cross_img
               ;;
             r | require)
@@ -1074,13 +1011,14 @@ while [ $# -ge 0 ]; do
               rad_open
               rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
 
-              # No need to pass rad_behave_bootstrap_flags here as the toolchain
-              # should be built with care without extreme flags and
-              # optimizations.
+              rad_behave_bootstrap_variables
+              rad_behave_bootstrap_initialize
+
+              # No rad_behave_bootstrap_flags optimizations for the toolchain.
               rad_behave_bootstrap_arch
 
               rad_behave_bootstrap_stage_toolchain
-              
+
               rad_open
               rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
@@ -1090,11 +1028,14 @@ while [ $# -ge 0 ]; do
               rad_open
               rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
 
+              rad_behave_bootstrap_variables
+              rad_behave_bootstrap_pkg_config_variables
+
               rad_behave_bootstrap_arch
               rad_behave_bootstrap_flags
 
               rad_behave_bootstrap_stage_cross
-              
+
               rad_open
               rad_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
               ;;
