@@ -1154,18 +1154,12 @@ while [ $# -ge 0 ]; do
                   rad_open 'License:     \t~~'
                 fi
                 ;;
-              # It's not right to check for '' (as * will suffice) here as that
-              # would've been resolved by $0 b e $@ and wouldn't reach this
-              # stage.
               *)
                 rad_behave_envenomate_help
                 exit 1
                 ;;
             esac
 
-          # The check is faulty as it'll allow '$3' to work when it's empty, so
-          # we have to check that '$3' is not NULL, and proceed to check that it
-          # actually exists in $CERD.
           elif [ ! -z $3 ] && [ ! $3 = h ] && [ -d $CERD/$3 ]; then
             . $CERD/$3/ceras
 
