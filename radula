@@ -803,20 +803,12 @@ rad_behave_bootstrap_stage_cross_envenomate() {
 }
 
 rad_behave_bootstrap_stage_cross_configure() {
-  # Might default to leaving the fstab empty or with comments indicating what to
-  # put as values, or just multiple commented entries and the user uncomments
-  # what he/she wants. One shouldn't forget that the image function
-  # rad_behave_bootstrap_stage_cross_img generates an ext4 img, so ext4 should
-  # stay the default.
   printf '/dev/sda1 / ext4 defaults 0 1\n' > $CRSD/etc/fstab
 
-  # glaucus's iconic blue coloured shell prompt
   printf 'export PS1="[\033[0;44m\u@\h\033[0m:\033[1m\w\033[0m]$ "
   export HISTFILE=$HOME/.ksh_history\n' > $CRSD/etc/profile
 
-  # Alphabetically ordered list of available shells. mksh will be replaced by
-  # oksh in the future. rksh is just a symlink to ksh (ksh -r, or restricted ksh
-  # which I think is obsolete now but useful to have).
+  # Will switch to oksh
   printf '/usr/bin/dash
   /usr/bin/ksh
   /usr/bin/mksh
@@ -827,20 +819,12 @@ rad_behave_bootstrap_stage_cross_configure() {
 rad_behave_bootstrap_stage_cross_strip() {
   find $CRSD/etc -type d -empty -delete
 
-  # Clean the tmp directory in case it got populated during cross-compilation
-  # (it'll probably be empty since we're cross compiling, but in the case of
-  # compilation inside a chroot, it might get full).
-  $RM $CRSD/tmp/*
-
-  # Stripping
   find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
   find $CRSD/usr \( -name *.so* -a ! -name *dbg \) -type f -exec strip \
     --strip-unneeded -v {} \;
   find $CRSD/usr -type f -exec strip -sv {} \;
-  # Delete unneeded libarchive .la files
   find $CRSD/usr -name *.la -delete
 
-  # Remove charset.alias for musl
   $RM $CRSD/usr/lib/charset.alias
 }
 
@@ -853,17 +837,8 @@ rad_behave_bootstrap_stage_cross() {
 
   rad_behave_bootstrap_stage_cross_configure
   rad_behave_bootstrap_stage_cross_strip
-
-  # Perhaps add a flag to allow the creation of an img after building the cross
-  # stage?
-  # rad_behave_bootstrap_stage_cross_img
 }
 
-# The below image function is a complete mess, and needs a rework so ignore it
-# for now.
-#
-# This function needs fixing. Perhaps add an additional flag to allow the
-# creation of an img after building cross is done?
 rad_behave_bootstrap_stage_cross_img() {
   NAME=$PWD/../glaucus.img
   SIZE=128M
@@ -937,17 +912,17 @@ rad_behave_bootstrap_stage_cross_img() {
 }
 
 rad_behave_bootstrap_clean() {
-  $RM $CRSD
+  [ -d $CRSD ] && $RM $CRSD
 
-  $RM $TLCD
+  [ -d $TLCD ] && $RM $TLCD
 }
 
 rad_behave_bootstrap_distclean() {
-  $RM $BAKD
+  [ -d $BAKD ] && $RM $BAKD
 
-  $RM $SRCD
+  [ -d $SRCD ] && $RM $SRCD
 
-  $RM $TMPD
+  [ -d $TMPD ] && $RM $TMPD
 
   rad_behave_bootstrap_clean
 }
