@@ -98,7 +98,9 @@ rad_behave_bootstrap_help() {
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
-  rad_open '\tr, require   \tCheck if host has all required packages'
+  rad_open '\ti, image     \tCreate a .img file of the glaucus system'
+  rad_open '\tq, require   \tCheck if host has all required packages'
+  rad_open '\tr, release   \tRelease a compressed tarball of the toolchain'
   rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
   rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system (default)'
 }
@@ -238,9 +240,9 @@ rad_behave_bootstrap_require() {
 }
 
 rad_behave_bootstrap_initialize() {
-  [ ! -d $BAKD ] && $MKDIR $BAKD
+  $MKDIR $BAKD
   
-  [ ! -d $SRCD ] && $MKDIR $SRCD
+  $MKDIR $SRCD
 }
 
 # Architecture related variables explained (for rad_behave_bootstrap_arch):
@@ -646,15 +648,12 @@ rad_behave_bootstrap_stage_toolchain_check() {
 }
 
 rad_behave_bootstrap_stage_toolchain_prepare() {
-  $RM $CRSD
   $MKDIR $CRSD
 
-  $RM $TBLD
   $MKDIR $TBLD
 
-  [ ! -d $TSRC ] && $MKDIR $TSRC
+  $MKDIR $TSRC
 
-  $RM $TLCD
   $MKDIR $TLCD
 }
 
@@ -686,22 +685,23 @@ rad_behave_bootstrap_stage_toolchain() {
 
 # Experimental release function
 rad_behave_bootstrap_stage_toolchain_release() {
-  $RSYNC $BAKD/toolchain /tmp --delete
+  $MKDIR $1
 
-  rad_behave_bootstrap_stage_toolchain_variables
+  $RSYNC $BAKD/cross $1 --delete
+  $RSYNC $BAKD/toolchain $1 --delete
 
-  $RM /tmp/toolchain/lib64
+  $RM $1/*/lib64
 
-  find /tmp/toolchain -name *.la -delete
+  find $1 -name *.la -delete
 
-  strip -gv /tmp/toolchain/lib/* || true
-  /usr/bin/strip --strip-unneeded -v /tmp/toolchain/bin/* || true
+  strip -gv $1/*/lib/* || true
+  strip --strip-unneeded -v $1/toolchain/bin/* || true
 
-  $RM /tmp/toolchain/share/doc
-  $RM /tmp/toolchain/share/info
-  $RM /tmp/toolchain/share/man
+  $RM $1/toolchain/share/doc
+  $RM $1/toolchain/share/info
+  $RM $1/toolchain/share/man
 
-  /usr/bin/tar -I '/usr/bin/zstd -22 --ultra --long=31 -T0' -cvf toolchain-$(date +%d%m%Y).tar.zstd /tmp/toolchain
+  tar -I 'zstd -22 --ultra --long=31 -T0' -cvf $GLAD/toolchain-$(date+%d%m%Y).tar.zstd $1
 }
 
 #
@@ -761,13 +761,13 @@ rad_behave_bootstrap_stage_cross_prepare() {
   $RSYNC $BAKD/cross $GLAD --delete
   $RSYNC $BAKD/toolchain $GLAD --delete
 
-  [ -d $XBLD ] && $RM $XBLD
-  [ ! -d $XBLD ] && $MKDIR $XBLD
+  $RM $XBLD
+  $MKDIR $XBLD
 
-  [ -d $XCER ] && $RM $XCER
-  [ ! -d $XCER ] && $MKDIR $XCER
+  $RM $XCER
+  $MKDIR $XCER
 
-  [ ! -d $XSRC ] && $MKDIR $XSRC
+  $MKDIR $XSRC
 
   $MKDIR $CRSD/etc
 
@@ -784,7 +784,6 @@ video:x:4:\n' > $CRSD/etc/group
   printf 'root::0:0:root:/root:/usr/bin/mksh\n' > $CRSD/etc/passwd
 
   $RM $CRSD/var
-  $MKDIR $CRSD/var/lib
   $MKDIR $CRSD/var/lib/urandom
   $MKDIR $CRSD/var/log
 }
@@ -844,7 +843,7 @@ rad_behave_bootstrap_stage_cross() {
 
 rad_behave_bootstrap_stage_cross_img() {
   if [ $(id -u) -eq 0 ]; then
-    [ -f $1 ] && $RM $1
+    $RM $1
     qemu-img create -f raw $1 $2
     # Write mbr.bin (from SYSLINUX) to the first 440 bytes of our image
     dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1
@@ -861,7 +860,7 @@ rad_behave_bootstrap_stage_cross_img() {
     partx -a $3
     mkfs.ext4 $(printf $3)p1
 
-    [ ! -d $4 ] && $MKDIR $4
+    $MKDIR $4
 
     mount $(printf $3)p1 $4
 
@@ -906,19 +905,25 @@ label glaucus
 }
 
 rad_behave_bootstrap_clean() {
-  [ -d $CRSD ] && $RM $CRSD
+  $RM $CRSD
 
-  [ -d $TLCD ] && $RM $TLCD
+  $RM $TBLD
+
+  $RM $TLCD
+  
+  $RM $XBLD
+  
+  $RM $XCER
 }
 
 rad_behave_bootstrap_distclean() {
-  [ -d $BAKD ] && $RM $BAKD
+  $RM $BAKD
 
-  [ -d $SRCD ] && $RM $SRCD
+  $RM $GLAD/glaucus.img
 
-  [ -d $TMPD ] && $RM $TMPD
+  $RM $SRCD
 
-  [ -f $GLAD/glaucus.img ] && $RM $GLAD/glaucus.img
+  $RM $TMPD
 
   rad_behave_bootstrap_clean
 }
@@ -973,8 +978,13 @@ while [ $# -ge 0 ]; do
 
               rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
               ;;
-            r | require)
+            q | require)
               rad_behave_bootstrap_require
+              ;;
+            r | release)
+              rad_behave_bootstrap_variables
+
+              rad_behave_bootstrap_stage_toolchain_release /tmp/toolchain
               ;;
             t | toolchain)
               [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
@@ -985,10 +995,14 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_variables
               rad_behave_bootstrap_initialize
 
-              # No rad_behave_bootstrap_flags optimizations for the toolchain.
+              rad_behave_bootstrap_clean
+
+              # No rad_behave_bootstrap_flags optimizations for the toolchain
               rad_behave_bootstrap_arch
 
-              rad_behave_bootstrap_stage_toolchain
+              rad_behave_bootstrap_stage_toolchain || {
+                rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
+              }
 
               rad_open
               rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
@@ -1005,7 +1019,9 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch
               rad_behave_bootstrap_flags
 
-              rad_behave_bootstrap_stage_cross
+              rad_behave_bootstrap_stage_cross || {
+                rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
+              }
 
               rad_open
               rad_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
