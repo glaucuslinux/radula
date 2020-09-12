@@ -99,8 +99,8 @@ rad_behave_bootstrap_help() {
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
   rad_open '\ti, image     \tCreate a .img file of the glaucus system'
-  rad_open '\tq, require   \tCheck if host has all required packages'
-  rad_open '\tr, release   \tRelease a compressed tarball of the toolchain'
+  rad_open '\tr, require   \tCheck if host has all required packages'
+  rad_open '\t   release   \tRelease a compressed tarball of the toolchain'
   rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
   rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system (default)'
 }
@@ -978,10 +978,10 @@ while [ $# -ge 0 ]; do
 
               rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
               ;;
-            q | require)
+            r | require)
               rad_behave_bootstrap_require
               ;;
-            r | release)
+            release)
               rad_behave_bootstrap_variables
 
               rad_behave_bootstrap_stage_toolchain_release /tmp/toolchain
