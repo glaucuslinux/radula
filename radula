@@ -752,9 +752,9 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check libressl
   rad_behave_check toybox
   rad_behave_check netbsd-curses
-  rad_behave_check procps-ng
   rad_behave_check mksh
   rad_behave_check dash
+  rad_behave_check procps-ng
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
   rad_behave_check eudev
@@ -797,14 +797,17 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate libressl
   rad_behave_envenomate toybox
   rad_behave_envenomate netbsd-curses
-  rad_behave_envenomate procps-ng
   # Will switch to oksh
   rad_behave_envenomate mksh
   rad_behave_envenomate dash
+  rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
   rad_behave_envenomate eudev
-  #rad_behave_envenomate linux
+  rad_behave_envenomate libuev
+  rad_behave_envenomate libite
+  rad_behave_envenomate finit
+  rad_behave_envenomate linux
 }
 
 rad_behave_bootstrap_stage_cross_configure() {
@@ -890,7 +893,7 @@ rad_behave_bootstrap_stage_cross_img() {
 default glaucus
 label glaucus
         kernel /boot/vmlinuz
-        append root=/dev/sda1 rootfstype=ext4 init=/etc/s6/bin/init ro quiet' > $4/boot/extlinux/extlinux.conf
+        append root=/dev/sda1 rootfstype=ext4 init=/usr/bin/finit ro quiet' > $4/boot/extlinux/extlinux.conf
 
     $CHOWN -R 0:0 $4
 
