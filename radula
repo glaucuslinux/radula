@@ -704,7 +704,7 @@ rad_behave_bootstrap_stage_toolchain_release() {
   $RM $1/toolchain/share/info
   $RM $1/toolchain/share/man
 
-  tar -I 'zstd -22 --ultra --long=31 -T0' -cvf $GLAD/toolchain-$(date+%d%m%Y).tar.zstd $1
+  tar -I 'zstd -22 --ultra --long=31 -T0' -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zstd $1
 }
 
 #
