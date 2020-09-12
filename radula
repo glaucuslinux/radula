@@ -67,6 +67,7 @@ rad_help() {
   rad_open '\t                \tthe output with ~~'
   rad_open
   rad_open '\t       --sleep  \tSame as --quiet'
+  rad_open
   rad_open '\ts, -s, --species\tDisplay current species'
   rad_open '\tv, -v, --version\tDisplay current version number'
 }
@@ -100,7 +101,9 @@ rad_behave_bootstrap_help() {
   rad_open
   rad_open '\ti, image     \tCreate a .img file of the glaucus system'
   rad_open '\tr, require   \tCheck if host has all required packages'
+  rad_open
   rad_open '\t   release   \tRelease a compressed tarball of the toolchain'
+  rad_open
   rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
   rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system (default)'
 }
