@@ -8,12 +8,13 @@ umask 022
 unalias -a
 
 #
-# Default variables
+# Default Variables
 #
 
 bootstrap=0
 ccache=0
 genome=x86-64
+kernel=1
 parallel=0
 sleep=0
 species=atlanticus
@@ -47,7 +48,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 0.9.9 ($genome $species)"
+  rad_open "$0 version 1.0.0 ($genome $species)"
 }
 
 rad_help() {
@@ -208,39 +209,41 @@ rad_behave_patch() {
 rad_behave_bootstrap_require() {
   rad_open 'Checking if host has all required packages...'
   rad_open
-  rad_open "bash:     \t$(bash --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bc:       \t$(bc --version | sed 1q | cut -d' ' -f2)"
-  rad_open "binutils: \t$(ld --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bison:    \t$(bison --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bzip2:    \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  rad_open "ccache:   \t$(ccache --version | sed 1q | cut -d' ' -f3)"
-  rad_open "coreutils:\t$(ls --version | sed 1q | cut -d' ' -f4)"
-  rad_open "curl:     \t$(curl --version | sed 1q | cut -d' ' -f2)"
-  rad_open "diffutils:\t$(diff --version | sed 1q | cut -d' ' -f4)"
-  rad_open "findutils:\t$(find --version | sed 1q | cut -d' ' -f4)"
-  rad_open "g++:      \t$(g++ --version | sed 1q | cut -d' ' -f3)"
-  rad_open "gawk:     \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
-  rad_open "gcc:      \t$(gcc --version | sed 1q | cut -d' ' -f3)"
-  rad_open "git:      \t$(git --version | cut -d' ' -f3)"
-  rad_open "glibc:    \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
-  rad_open "grep:     \t$(grep --version | sed 1q | cut -d' ' -f4)"
-  rad_open "gzip:     \t$(gzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "linux:    \t$(uname -r)"
-  rad_open "losetup:  \t$(losetup --version | cut -d' ' -f 4)"
-  rad_open "lzip:     \t$(lzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "m4:       \t$(m4 --version | sed 1q | cut -d' ' -f4)"
-  rad_open "make:     \t$(make --version | sed 1q | cut -d' ' -f3)"
-  rad_open "parted:   \t$(parted --version | sed 1q | cut -d' ' -f 4)"
-  rad_open "partx:    \t$(partx --version | cut -d' ' -f 4)"
-  rad_open "patch:    \t$(patch --version | sed 1q | cut -d' ' -f3)"
-  rad_open "perl:     \t$(perl -V:version | cut -d"'" -f2)"
-  rad_open "rsync:    \t$(rsync --version | sed 1q | cut -d' ' -f4)"
-  rad_open "sed:      \t$(sed --version | sed 1q | cut -d' ' -f4)"
-  rad_open "syslinux: \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
-  rad_open "tar:      \t$(tar --version | sed 1q | cut -d' ' -f4)"
-  rad_open "texinfo:  \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
-  rad_open "xz:       \t$(xz --version | sed 1q | cut -d' ' -f4)"
-  rad_open "zstd:     \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
+  rad_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
+  rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
+  rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+  rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
+  rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
+  rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
+  rad_open "extlinux:  \t$(extlinux --version 2>&1 | cut -d' ' -f2)"
+  rad_open "findutils: \t$(find --version | sed 1q | cut -d' ' -f4)"
+  rad_open "g++:       \t$(g++ --version | sed 1q | cut -d' ' -f3)"
+  rad_open "gawk:      \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
+  rad_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
+  rad_open "git:       \t$(git --version | cut -d' ' -f3)"
+  rad_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
+  rad_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
+  rad_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "linux:     \t$(uname -r)"
+  rad_open "losetup:   \t$(losetup --version | cut -d' ' -f 4)"
+  rad_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
+  rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
+  rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
+  rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
+  rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
+  rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
+  rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
+  rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
+  rad_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
+  rad_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
+  rad_open "texinfo:   \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
+  rad_open "util-linux:\t$(losetup --version | cut -d' ' -f 4)"
+  rad_open "xz:        \t$(xz --version | sed 1q | cut -d' ' -f4)"
+  rad_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
 }
 
 rad_behave_bootstrap_initialize() {
@@ -813,7 +816,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate libuev
   rad_behave_envenomate libite
   rad_behave_envenomate finit
-  rad_behave_envenomate linux
+  [ $kernel -eq 1 ] && rad_behave_envenomate linux
 }
 
 rad_behave_bootstrap_stage_cross_configure() {
