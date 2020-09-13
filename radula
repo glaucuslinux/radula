@@ -753,7 +753,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check libressl
   rad_behave_check toybox
   rad_behave_check netbsd-curses
-  rad_behave_check mksh
+  rad_behave_check oksh
   rad_behave_check dash
   rad_behave_check procps-ng
   rad_behave_check util-linux
@@ -791,8 +791,7 @@ kvm:x:11:\n' > $CRSD/etc/group
 
   printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
 
-  # Will switch to oksh
-  printf 'root::0:0:root:/root:/usr/bin/mksh\n' > $CRSD/etc/passwd
+  printf 'root::0:0:root:/root:/usr/bin/oksh\n' > $CRSD/etc/passwd
 
   $RM $CRSD/var
   $MKDIR $CRSD/var/lib/urandom
@@ -805,8 +804,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate libressl
   rad_behave_envenomate toybox
   rad_behave_envenomate netbsd-curses
-  # Will switch to oksh
-  rad_behave_envenomate mksh
+  rad_behave_envenomate oksh
   rad_behave_envenomate dash
   rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
@@ -826,10 +824,9 @@ rad_behave_bootstrap_stage_cross_configure() {
   printf 'export PS1="[\033[0;44m\u@\h\033[0m:\033[1m\w\033[0m]$ "
 export HISTFILE=$HOME/.ksh_history\n' > $CRSD/etc/profile
 
-  # Will switch to oksh
   printf '/usr/bin/dash
 /usr/bin/ksh
-/usr/bin/mksh
+/usr/bin/oksh
 /usr/bin/rksh
 /usr/bin/sh\n' > $CRSD/etc/shells
 }
