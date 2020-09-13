@@ -12,6 +12,7 @@ unalias -a
 #
 
 bootstrap=0
+ccache=0
 genome=x86-64
 parallel=0
 sleep=0
@@ -776,10 +777,17 @@ rad_behave_bootstrap_stage_cross_prepare() {
 
   # Do we need more groups for eudev?
   printf 'root:x:0:
-tty:x:1:
-disk:x:2:
-audio:x:3:
-video:x:4:\n' > $CRSD/etc/group
+kmem:x:1:
+tape:x:2:
+tty:x:3:
+disk:x:4:
+lp:x:5:
+dialout:x:6:
+audio:x:7:
+video:x:8:
+cdrom:x:9:
+input:x:10:
+kvm:x:11:\n' > $CRSD/etc/group
 
   printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
 
@@ -812,6 +820,8 @@ rad_behave_bootstrap_stage_cross_envenomate() {
 
 rad_behave_bootstrap_stage_cross_configure() {
   printf '/dev/sda1 / ext4 defaults 0 1\n' > $CRSD/etc/fstab
+
+  printf 'glaucus\n' > $CRSD/etc/hostname
 
   printf 'export PS1="[\033[0;44m\u@\h\033[0m:\033[1m\w\033[0m]$ "
 export HISTFILE=$HOME/.ksh_history\n' > $CRSD/etc/profile
@@ -848,6 +858,9 @@ rad_behave_bootstrap_stage_cross() {
 }
 
 rad_behave_bootstrap_stage_cross_img() {
+  # Remove `-S` from rsync (for sudo and IO error)
+  RSYNC='rsync -vaHAXx'
+
   if [ $(id -u) -eq 0 ]; then
     $RM $1
     qemu-img create -f raw $1 $2
@@ -969,10 +982,18 @@ while [ $# -ge 0 ]; do
             c | clean)
               rad_behave_bootstrap_variables
 
+              rad_behave_bootstrap_stage_toolchain_variables
+
+              rad_behave_bootstrap_stage_cross_variables
+
               rad_behave_bootstrap_clean
               ;;
             d | distclean)
               rad_behave_bootstrap_variables
+
+              rad_behave_bootstrap_stage_toolchain_variables
+
+              rad_behave_bootstrap_stage_cross_variables
 
               rad_behave_bootstrap_distclean
               ;;
