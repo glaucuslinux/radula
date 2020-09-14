@@ -755,6 +755,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check shadow
   rad_behave_check libressl
   rad_behave_check toybox
+  rad_behave_check grep
   rad_behave_check netbsd-curses
   rad_behave_check oksh
   rad_behave_check dash
@@ -762,6 +763,9 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
   rad_behave_check eudev
+  rad_behave_check libuev
+  rad_behave_check libite
+  rad_behave_check finit
 }
 
 rad_behave_bootstrap_stage_cross_prepare() {
@@ -806,6 +810,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
   rad_behave_envenomate toybox
+  rad_behave_envenomate grep
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
