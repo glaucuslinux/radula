@@ -48,7 +48,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.0.0 ($genome $species)"
+  rad_open "$0 version 1.1.0 ($genome $species)"
 }
 
 rad_help() {
