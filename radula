@@ -596,7 +596,7 @@ rad_behave_bootstrap_variables() {
     export CHMOD='chmod -Rv'
     export CHOWN='chown -Rv'
     export LN='ln -fnsv'
-    export MAKE='make -j1 V=1'
+    [ $parallel -eq 0 ] && export MAKE='make -j1 V=1' || export MAKE="make -j$parallel V=1"
     # Full path to not overlap with the install() function in .ceras files
     export MKDIR='/usr/bin/install -dv'
     export MV='mv -v'
@@ -608,7 +608,7 @@ rad_behave_bootstrap_variables() {
     export CHMOD='chmod -R'
     export CHOWN='chown -R'
     export LN='ln -fns'
-    export MAKE='make -j1'
+    [ $parallel -eq 0 ] && export MAKE='make -j1' || export MAKE="make -j$parallel"
     export MKDIR='/usr/bin/install -d'
     export MV=mv
     export RM='rm -fr'
