@@ -861,66 +861,62 @@ rad_behave_bootstrap_stage_cross_img() {
   # Remove `-S` from rsync (for sudo and IO error)
   RSYNC='rsync -vaHAXx'
 
-  if [ $(id -u) -eq 0 ]; then
-    $RM $1
-    qemu-img create -f raw $1 $2
-    # Write mbr.bin (from SYSLINUX) to the first 440 bytes of our image
-    dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1
+  $RM $1
+  qemu-img create -f raw $1 $2
+  # Write mbr.bin (from SYSLINUX) to the first 440 bytes of our image
+  dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1
 
-    parted -s $1 mklabel msdos
-    # Default to ext4 which complies with the generated fstab
-    parted -s -a none $1 mkpart primary ext4 0 $2
-    parted -s -a none $1 set 1 boot on
+  parted -s $1 mklabel msdos
+  # Default to ext4 which complies with the generated fstab
+  parted -s -a none $1 mkpart primary ext4 0 $2
+  parted -s -a none $1 set 1 boot on
 
-    losetup -D
-    losetup $3 $1
+  losetup -D
+  losetup $3 $1
 
-    # Notify the kernel about the new partition
-    partx -a $3
-    mkfs.ext4 $(printf $3)p1
+  # Notify the kernel about the new partition
+  partx -a $3
+  mkfs.ext4 $(printf $3)p1
 
-    $MKDIR $4
+  $MKDIR $4
 
-    mount $(printf $3)p1 $4
+  mount $(printf $3)p1 $4
 
-    $RM $4/lost+found
+  $RM $4/lost+found
 
-    $MKDIR $4/dev
-    $MKDIR $4/proc
-    $MKDIR $4/run
-    $MKDIR $4/sys
+  $MKDIR $4/dev
+  $MKDIR $4/proc
+  $MKDIR $4/run
+  $MKDIR $4/sys
 
-    $MKDIR -m 0750 $4/root
-    $MKDIR -m 1777 $4/tmp
+  $MKDIR -m 0750 $4/root
+  $MKDIR -m 1777 $4/tmp
 
-    $RSYNC $CRSD/boot $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-    $RSYNC $CRSD/etc $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-    $RSYNC $CRSD/usr $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-    $RSYNC $CRSD/var $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/boot $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/etc $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/usr $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/var $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
 
-    $LN usr/bin $4/bin
-    $LN usr/lib $4/lib
+  $LN usr/bin $4/bin
+  $LN usr/lib $4/lib
 
-    $MKDIR $4/boot/extlinux
-    printf 'prompt 0
+  $MKDIR $4/boot/extlinux
+  printf 'prompt 0
 default glaucus
 label glaucus
         kernel /boot/vmlinuz
         append root=/dev/sda1 rootfstype=ext4 init=/usr/bin/finit ro quiet' > $4/boot/extlinux/extlinux.conf
 
-    $CHOWN -R 0:0 $4
+  $CHOWN -R 0:0 $4
 
-    extlinux --install $4/boot/extlinux
+  extlinux --install $4/boot/extlinux
 
-    # Clean up
-    $UMOUNT $4
-    partx -d $3
-    losetup -d $3
+  # Clean up
+  $UMOUNT $4
+  partx -d $3
+  losetup -d $3
 
-    $RSYNC $1 $BAKD
-  else
-    rad_close 'Please run this script as root!'
-  fi
+  $RSYNC $1 $BAKD
 }
 
 rad_behave_bootstrap_clean() {
@@ -1003,7 +999,11 @@ while [ $# -ge 0 ]; do
             i | img | image)
               rad_behave_bootstrap_variables
 
-              rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+              if [ $(id -u) -eq 0 ]; then
+                rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+              else
+                rad_close 'Please run this script as root!'
+              fi
               ;;
             r | require)
               rad_behave_bootstrap_require
