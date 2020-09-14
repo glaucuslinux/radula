@@ -762,6 +762,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check procps-ng
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
+  rad_behave_check kmod
   rad_behave_check eudev
   rad_behave_check libuev
   rad_behave_check libite
@@ -817,6 +818,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
+  rad_behave_envenomate kmod
   rad_behave_envenomate eudev
   rad_behave_envenomate libuev
   rad_behave_envenomate libite
