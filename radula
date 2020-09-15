@@ -7,6 +7,10 @@ set -e
 umask 022
 unalias -a
 
+# Disable unicode
+LC_ALL=C
+LANG=C
+
 #
 # Default Variables
 #
@@ -14,6 +18,7 @@ unalias -a
 bootstrap=0
 ccache=0
 genome=x86-64
+init=finit
 kernel=1
 parallel=0
 sleep=0
@@ -48,7 +53,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.1.0 ($genome $species)"
+  rad_open "$0 version 1.2.0 ($genome $species)"
 }
 
 rad_help() {
@@ -751,6 +756,8 @@ rad_behave_bootstrap_stage_cross_variables() {
 }
 
 rad_behave_bootstrap_stage_cross_check() {
+  rad_behave_check iana-etc
+  rad_behave_check filesystem
   rad_behave_check linux
   rad_behave_check shadow
   rad_behave_check libressl
@@ -764,9 +771,19 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check e2fsprogs
   rad_behave_check kmod
   rad_behave_check eudev
-  rad_behave_check libuev
-  rad_behave_check libite
-  rad_behave_check finit
+
+  if [ $init = finit ]; then
+    rad_behave_check libuev
+    rad_behave_check libite
+    rad_behave_check finit
+  elif [ $init = s6 ]; then
+    rad_behave_check skalibs
+    rad_behave_check execline
+    rad_behave_check s6
+    rad_behave_check s6-linux-init
+    rad_behave_check s6-rc
+    rad_behave_check s6-boot-scripts
+  fi
 }
 
 rad_behave_bootstrap_stage_cross_prepare() {
@@ -780,33 +797,11 @@ rad_behave_bootstrap_stage_cross_prepare() {
   $MKDIR $XCER
 
   $MKDIR $XSRC
-
-  $MKDIR $CRSD/etc
-
-  # Do we need more groups for eudev?
-  printf 'root:x:0:
-kmem:x:1:
-tape:x:2:
-tty:x:3:
-disk:x:4:
-lp:x:5:
-dialout:x:6:
-audio:x:7:
-video:x:8:
-cdrom:x:9:
-input:x:10:
-kvm:x:11:\n' > $CRSD/etc/group
-
-  printf '127.0.0.1 localhost glaucus\n' > $CRSD/etc/hosts
-
-  printf 'root::0:0:root:/root:/usr/bin/oksh\n' > $CRSD/etc/passwd
-
-  $RM $CRSD/var
-  $MKDIR $CRSD/var/lib/urandom
-  $MKDIR $CRSD/var/log
 }
 
 rad_behave_bootstrap_stage_cross_envenomate() {
+  rad_behave_envenomate iana-etc
+  rad_behave_envenomate filesystem
   rad_behave_envenomate linux-headers
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
@@ -820,25 +815,21 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate e2fsprogs
   rad_behave_envenomate kmod
   rad_behave_envenomate eudev
-  rad_behave_envenomate libuev
-  rad_behave_envenomate libite
-  rad_behave_envenomate finit
+
+  if [ $init = finit ]; then
+    rad_behave_envenomate libuev
+    rad_behave_envenomate libite
+    rad_behave_envenomate finit
+  elif [ $init = s6 ]; then
+    rad_behave_envenomate skalibs
+    rad_behave_envenomate execline
+    rad_behave_envenomate s6
+    rad_behave_envenomate s6-linux-init
+    rad_behave_envenomate s6-rc
+    rad_behave_envenomate s6-boot-scripts
+  fi
+
   [ $kernel -eq 1 ] && rad_behave_envenomate linux
-}
-
-rad_behave_bootstrap_stage_cross_configure() {
-  printf '/dev/sda1 / ext4 defaults 0 1\n' > $CRSD/etc/fstab
-
-  printf 'glaucus\n' > $CRSD/etc/hostname
-
-  printf 'export PS1="[\033[0;44m\u@\h\033[0m:\033[1m\w\033[0m]$ "
-export HISTFILE=$HOME/.ksh_history\n' > $CRSD/etc/profile
-
-  printf '/usr/bin/dash
-/usr/bin/ksh
-/usr/bin/oksh
-/usr/bin/rksh
-/usr/bin/sh\n' > $CRSD/etc/shells
 }
 
 rad_behave_bootstrap_stage_cross_strip() {
@@ -860,7 +851,6 @@ rad_behave_bootstrap_stage_cross() {
 
   rad_behave_bootstrap_stage_cross_envenomate
 
-  rad_behave_bootstrap_stage_cross_configure
   rad_behave_bootstrap_stage_cross_strip
 }
 
@@ -891,28 +881,10 @@ rad_behave_bootstrap_stage_cross_img() {
 
   $RM $4/lost+found
 
-  $MKDIR $4/dev
-  $MKDIR $4/proc
-  $MKDIR $4/run
-  $MKDIR $4/sys
-
-  $MKDIR -m 0750 $4/root
-  $MKDIR -m 1777 $4/tmp
-
-  $RSYNC $CRSD/boot $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-  $RSYNC $CRSD/etc $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-  $RSYNC $CRSD/usr $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-  $RSYNC $CRSD/var $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
-
-  $LN usr/bin $4/bin
-  $LN usr/lib $4/lib
+  $RSYNC $CRSD/ $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
 
   $MKDIR $4/boot/extlinux
-  printf 'prompt 0
-default glaucus
-label glaucus
-        kernel /boot/vmlinuz
-        append root=/dev/sda1 rootfstype=ext4 init=/usr/bin/finit ro quiet' > $4/boot/extlinux/extlinux.conf
+  $RSYNC other/extlinux.conf.$init $4/boot/extlinux/extlinux.conf
 
   $CHOWN -R 0:0 $4
 
