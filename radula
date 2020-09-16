@@ -20,7 +20,7 @@ bootstrap=0
 ccache=0
 genome=x86-64
 init=finit
-kernel=1
+kernel=0
 parallel=0
 sleep=0
 species=atlanticus
@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.1 ($genome $species)"
+  rad_open "$0 version 1.2.2 ($genome $species)"
 }
 
 rad_help() {
@@ -677,8 +677,12 @@ rad_behave_bootstrap_stage_toolchain_construct() {
   rad_behave_construct toolchain musl
   rad_behave_construct toolchain libgcc
   rad_behave_construct toolchain libstdc++-v3
-  # Only for atlanticus (performance) and albino (libre)
-  rad_behave_construct toolchain libgomp
+
+  case $species in
+    atlanticus | performance | albino | libre)
+      rad_behave_construct toolchain libgomp
+      ;;
+  esac
 }
 
 rad_behave_bootstrap_stage_toolchain_backup() {
@@ -758,7 +762,6 @@ rad_behave_bootstrap_stage_cross_variables() {
 
 rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check iana-etc
-  rad_behave_check filesystem
   rad_behave_check radula
   rad_behave_check linux
   rad_behave_check shadow
