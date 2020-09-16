@@ -20,7 +20,7 @@ bootstrap=0
 ccache=0
 genome=x86-64
 init=finit
-kernel=0
+kernel=1
 parallel=0
 sleep=0
 species=atlanticus
@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.2 ($genome $species)"
+  rad_open "$0 version 1.2.3 ($genome $species)"
 }
 
 rad_help() {
@@ -700,21 +700,24 @@ rad_behave_bootstrap_stage_toolchain() {
   rad_behave_bootstrap_stage_toolchain_backup
 }
 
-# Experimental release function
 rad_behave_bootstrap_stage_toolchain_release() {
   $MKDIR $1
 
   $RSYNC $BAKD/cross $1 --delete
   $RSYNC $BAKD/toolchain $1 --delete
 
-  $RM $1/*/lib64
+  $RM $1/cross/lib64
+  $RM $1/cross/usr/lib64
+  $RM $1/toolchain/lib64
 
-  find $1 -name *.la -delete
+  find $1 -name "*.la" -delete
 
-  strip -gv $1/*/lib/* || true
+  strip -gv $1/cross/usr/lib/* || true
+  strip -gv $1/toolchain/lib/* || true
+
+  strip --strip-unneeded -v $1/cross/usr/bin/* || true
   strip --strip-unneeded -v $1/toolchain/bin/* || true
 
-  $RM $1/toolchain/share/doc
   $RM $1/toolchain/share/info
   $RM $1/toolchain/share/man
 
