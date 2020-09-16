@@ -253,7 +253,7 @@ rad_behave_bootstrap_require() {
 
 rad_behave_bootstrap_initialize() {
   $MKDIR $BAKD
-  
+
   $MKDIR $SRCD
 }
 
