@@ -15,6 +15,7 @@ LANG=C
 # Default Variables
 #
 
+binary=0
 bootstrap=0
 ccache=0
 genome=x86-64
@@ -53,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.0 ($genome $species)"
+  rad_open "$0 version 1.2.1 ($genome $species)"
 }
 
 rad_help() {
@@ -758,6 +759,7 @@ rad_behave_bootstrap_stage_cross_variables() {
 rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check iana-etc
   rad_behave_check filesystem
+  rad_behave_check radula
   rad_behave_check linux
   rad_behave_check shadow
   rad_behave_check libressl
@@ -802,6 +804,7 @@ rad_behave_bootstrap_stage_cross_prepare() {
 rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate iana-etc
   rad_behave_envenomate filesystem
+  rad_behave_envenomate radula
   rad_behave_envenomate linux-headers
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
