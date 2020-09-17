@@ -783,6 +783,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check netbsd-curses
   rad_behave_check oksh
   rad_behave_check dash
+  rad_behave_check psmisc
   rad_behave_check procps-ng
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
@@ -838,6 +839,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
+  rad_behave_envenomate psmisc
   rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
