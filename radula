@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.4 ($genome $species)"
+  rad_open "$0 version 1.2.5 ($genome $species)"
 }
 
 rad_help() {
@@ -783,6 +783,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check procps-ng
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
+  rad_behave_check hwids
   rad_behave_check kmod
   rad_behave_check pciutils
   rad_behave_check eudev
@@ -834,6 +835,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
+  rad_behave_envenomate hwids
   rad_behave_envenomate kmod
   rad_behave_envenomate pciutils
   rad_behave_envenomate eudev
