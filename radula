@@ -21,7 +21,7 @@ ccache=0
 genome=x86-64
 init=finit
 kernel=1
-parallel=0
+parallel=1
 sleep=0
 species=atlanticus
 
@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.3 ($genome $species)"
+  rad_open "$0 version 1.2.4 ($genome $species)"
 }
 
 rad_help() {
@@ -771,7 +771,12 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check shadow
   rad_behave_check libressl
   rad_behave_check toybox
+  rad_behave_check diffutils
+  rad_behave_check file
+  rad_behave_check findutils
   rad_behave_check grep
+  rad_behave_check sed
+  rad_behave_check which
   rad_behave_check netbsd-curses
   rad_behave_check oksh
   rad_behave_check dash
@@ -779,6 +784,7 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
   rad_behave_check kmod
+  rad_behave_check pciutils
   rad_behave_check eudev
 
   if [ $init = finit ]; then
@@ -816,7 +822,12 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
   rad_behave_envenomate toybox
+  rad_behave_envenomate diffutils
+  rad_behave_envenomate file
+  rad_behave_envenomate findutils
   rad_behave_envenomate grep
+  rad_behave_envenomate sed
+  rad_behave_envenomate which
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
@@ -824,6 +835,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate util-linux
   rad_behave_envenomate e2fsprogs
   rad_behave_envenomate kmod
+  rad_behave_envenomate pciutils
   rad_behave_envenomate eudev
 
   if [ $init = finit ]; then
