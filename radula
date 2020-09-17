@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.2.5 ($genome $species)"
+  rad_open "$0 version 1.3.0 ($genome $species)"
 }
 
 rad_help() {
@@ -777,6 +777,9 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check grep
   rad_behave_check sed
   rad_behave_check which
+  rad_behave_check attr
+  rad_behave_check acl
+  rad_behave_check libarchive
   rad_behave_check netbsd-curses
   rad_behave_check oksh
   rad_behave_check dash
@@ -829,6 +832,9 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate grep
   rad_behave_envenomate sed
   rad_behave_envenomate which
+  rad_behave_envenomate attr
+  rad_behave_envenomate acl
+  rad_behave_envenomate libarchive
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
@@ -1003,7 +1009,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_variables
 
               if [ $(id -u) -eq 0 ]; then
-                rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+                rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 256M $(losetup -f) /mnt/glaucus
               else
                 rad_close 'Please run this script as root!'
               fi
