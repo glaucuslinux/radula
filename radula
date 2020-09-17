@@ -767,9 +767,11 @@ rad_behave_bootstrap_stage_cross_variables() {
 rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check iana-etc
   rad_behave_check radula
+
   rad_behave_check linux
   rad_behave_check shadow
   rad_behave_check libressl
+
   rad_behave_check toybox
   rad_behave_check diffutils
   rad_behave_check file
@@ -777,10 +779,24 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check grep
   rad_behave_check sed
   rad_behave_check which
+
+  rad_behave_check lbzip2
+  rad_behave_check lbzip2-utils
+  rad_behave_check lz4
+  rad_behave_check lzlib
+  rad_behave_check pigz
+  rad_behave_check plzip
+  rad_behave_check xz
+  rad_behave_check zlib-ng
+  rad_behave_check zstd
   rad_behave_check libarchive
+
   rad_behave_check netbsd-curses
   rad_behave_check oksh
   rad_behave_check dash
+
+  rad_behave_check iproute2
+
   rad_behave_check psmisc
   rad_behave_check procps-ng
   rad_behave_check util-linux
@@ -821,9 +837,11 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate iana-etc
   rad_behave_envenomate filesystem
   rad_behave_envenomate radula
+
   rad_behave_envenomate linux-headers
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
+
   rad_behave_envenomate toybox
   rad_behave_envenomate diffutils
   rad_behave_envenomate file
@@ -831,10 +849,24 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate grep
   rad_behave_envenomate sed
   rad_behave_envenomate which
+
+  rad_behave_envenomate lbzip2
+  rad_behave_envenomate lbzip2-utils
+  rad_behave_envenomate lz4
+  rad_behave_envenomate lzlib
+  rad_behave_envenomate pigz
+  rad_behave_envenomate plzip
+  rad_behave_envenomate xz
+  rad_behave_envenomate zlib-ng
+  rad_behave_envenomate zstd
   rad_behave_envenomate libarchive
+
   rad_behave_envenomate netbsd-curses
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
+
+  rad_behave_envenomate iproute2
+
   rad_behave_envenomate psmisc
   rad_behave_envenomate procps-ng
   rad_behave_envenomate util-linux
