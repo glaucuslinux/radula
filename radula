@@ -8,8 +8,8 @@ umask 022
 unalias -a
 
 # Disable unicode
-LC_ALL=C
 LANG=C
+LC_ALL=C
 
 #
 # Default Variables
@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.3.0 ($genome $species)"
+  rad_open "$0 version 1.4.0 ($genome $species)"
 }
 
 rad_help() {
