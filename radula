@@ -220,7 +220,7 @@ rad_behave_bootstrap_require() {
   rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f4)"
   rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
   rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+  [ $ccache = 1 ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
   rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
   rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
   rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
