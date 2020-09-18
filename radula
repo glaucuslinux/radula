@@ -838,7 +838,9 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate filesystem
   rad_behave_envenomate radula
 
+  rad_behave_envenomate musl-utils
   rad_behave_envenomate linux-headers
+
   rad_behave_envenomate shadow
   rad_behave_envenomate libressl
 
