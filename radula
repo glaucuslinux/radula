@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.4.0 ($genome $species)"
+  rad_open "$0 version 1.5.0 ($genome $species)"
 }
 
 rad_help() {
@@ -238,6 +238,8 @@ rad_behave_bootstrap_require() {
   rad_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
   rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
   rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
+  rad_open "meson:     \t$(meson --version)"
+  rad_open "ninja:     \t$(ninja --version)"
   rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
   rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
   rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
@@ -795,7 +797,9 @@ rad_behave_bootstrap_stage_cross_check() {
   rad_behave_check oksh
   rad_behave_check dash
 
+  rad_behave_check libcap
   rad_behave_check iproute2
+  rad_behave_check iputils
 
   rad_behave_check psmisc
   rad_behave_check procps-ng
@@ -867,7 +871,9 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   rad_behave_envenomate oksh
   rad_behave_envenomate dash
 
+  rad_behave_envenomate libcap
   rad_behave_envenomate iproute2
+  rad_behave_envenomate iputils
 
   rad_behave_envenomate psmisc
   rad_behave_envenomate procps-ng
