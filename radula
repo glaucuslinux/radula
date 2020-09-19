@@ -54,7 +54,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.5.0 ($genome $species)"
+  rad_open "$0 version 1.5.1 ($genome $species)"
 }
 
 rad_help() {
@@ -747,6 +747,9 @@ rad_behave_bootstrap_stage_cross_variables() {
   # HOSTCC and HOSTCXX are optional (used in netbsd-curses for nbperf and tic).
   export HOSTCC=gcc
   export HOSTCXX=g++
+
+  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
+  export CROSS_COMPILE=$TGT-
 
   export AR=$TGT-gcc-ar
   export AS=$TGT-as
