@@ -16,7 +16,6 @@ LC_ALL=C
 #
 
 binary=0
-bootstrap=0
 ccache=0
 genome=x86-64
 init=finit
@@ -26,7 +25,7 @@ sleep=0
 species=atlanticus
 
 # GLAucus Directory
-[ $bootstrap -eq 0 ] && GLAD=/usr || GLAD=$PWD/..
+[ -d /usr/cerata ] && GLAD=/usr || GLAD=$PWD/..
 # CERata Directory
 CERD=$GLAD/cerata
 
@@ -36,13 +35,13 @@ CERD=$GLAD/cerata
 
 # Opens the radula (mouth)
 rad_open() {
-  [ $sleep = 0 ] && printf "\033[0;34m~~\033[0m $1\n" || printf "$1\n"
+  [ $sleep -eq 0 ] && printf "\033[0;34m~~\033[0m $1\n" || printf "$1\n"
 }
 
 # Closes the radula (mouth)
 # Use `exit 1` instead of rad_close when you don't want to print anything
 rad_close() {
-  [ $sleep = 0 ] && printf "\033[0;31m--\033[0m $1\n" || printf "$1\n"
+  [ $sleep -eq 0 ] && printf "\033[0;31m--\033[0m $1\n" || printf "$1\n"
   exit 1
 }
 
@@ -54,7 +53,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.5.2 ($genome $species)"
+  rad_open "$0 version 1.6.0 ($genome $species)"
 }
 
 rad_help() {
@@ -137,7 +136,58 @@ rad_behave_envenomate_help() {
 }
 
 #
-# Common Behavior Functions
+# Common Behavior Variable Functions
+#
+
+# For custom ccache directories (or if host was neither Fedora nor Arch, the
+# user has to specify them in /etc/radula.conf using the `CCCH` variable (along
+# with ccache=0 beforehand).
+rad_behave_ccache_variables() {
+  CCCH=${1:-/usr/lib64/ccache:/usr/lib/ccache/bin}
+  export PATH=$CCCH:$PATH
+}
+
+rad_behave_pkg_config_variables() {
+  # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
+  # automatically prefixed to PATH and LIBDIR)
+  export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig:$1/usr/share/pkgconfig
+  export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig:$1/usr/share/pkgconfig
+  # The trailing forward slash is important (envenomate on a glaucus system)
+  export PKG_CONFIG_SYSROOT_DIR=$1/
+  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$1/usr/include
+  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$1/usr/lib
+}
+
+# teeth are radula's tools
+rad_behave_teeth_variables() {
+  if [ $sleep -eq 0 ]; then
+    export AUTORECONF='autoreconf -fvis'
+    export CHMOD='chmod -Rv'
+    export CHOWN='chown -Rv'
+    export LN='ln -fnsv'
+    [ $parallel -eq 0 ] && export MAKE='make -j1 V=1' || export MAKE="make -j$parallel V=1"
+    # Full path to not overlap with the install() function in .ceras files
+    export MKDIR='/usr/bin/install -dv'
+    export MV='mv -v'
+    export RM='rm -frv'
+    export RSYNC='rsync -vaHAXSx'
+    export UMOUNT='umount -fqRv'
+  else
+    export AUTORECONF='autoreconf -fis'
+    export CHMOD='chmod -R'
+    export CHOWN='chown -R'
+    export LN='ln -fns'
+    [ $parallel -eq 0 ] && export MAKE='make -j1' || export MAKE="make -j$parallel"
+    export MKDIR='/usr/bin/install -d'
+    export MV=mv
+    export RM='rm -fr'
+    export RSYNC='rsync -aHAXSx'
+    export UMOUNT='umount -fqR'
+  fi
+}
+
+#
+# Common Behavior Action Functions
 #
 
 rad_behave_verify() {
@@ -220,7 +270,7 @@ rad_behave_bootstrap_require() {
   rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f4)"
   rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
   rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  [ $ccache = 1 ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+  [ $ccache -eq 1 ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
   rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
   rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
   rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
@@ -291,7 +341,7 @@ rad_behave_bootstrap_initialize() {
 #
 # LIARCH stands for Linux Image ARCH, which refers to the directory where
 # `linux` stores its image file after it has been built.
-rad_behave_bootstrap_arch() {
+rad_behave_bootstrap_arch_variables() {
   case $genome in
     aarch64 | armv8-a | arm64)
       export ARCH=aarch64
@@ -456,7 +506,7 @@ rad_behave_bootstrap_arch() {
   esac
 }
 
-rad_behave_bootstrap_flags() {
+rad_behave_bootstrap_flags_variables() {
   # Common flags enabled in all species
   COMMON=-fcommon
   DEBUG=-g0
@@ -599,41 +649,7 @@ rad_behave_bootstrap_variables() {
 
   export PATH=$TLCD/bin:$PATH
 
-  if [ $sleep -eq 0 ]; then
-    export AUTORECONF='autoreconf -fvis'
-    export CHMOD='chmod -Rv'
-    export CHOWN='chown -Rv'
-    export LN='ln -fnsv'
-    [ $parallel -eq 0 ] && export MAKE='make -j1 V=1' || export MAKE="make -j$parallel V=1"
-    # Full path to not overlap with the install() function in .ceras files
-    export MKDIR='/usr/bin/install -dv'
-    export MV='mv -v'
-    export RM='rm -frv'
-    export RSYNC='rsync -vaHAXSx'
-    export UMOUNT='umount -fqRv'
-  else
-    export AUTORECONF='autoreconf -fis'
-    export CHMOD='chmod -R'
-    export CHOWN='chown -R'
-    export LN='ln -fns'
-    [ $parallel -eq 0 ] && export MAKE='make -j1' || export MAKE="make -j$parallel"
-    export MKDIR='/usr/bin/install -d'
-    export MV=mv
-    export RM='rm -fr'
-    export RSYNC='rsync -aHAXSx'
-    export UMOUNT='umount -fqR'
-  fi
-}
-
-# Only for use in cross
-rad_behave_bootstrap_pkg_config_variables() {
-  # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
-  # automatically prefixed to PATH and LIBDIR)
-  export PKG_CONFIG_PATH=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
-  export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig:$CRSD/usr/share/pkgconfig
-  export PKG_CONFIG_SYSROOT_DIR=$CRSD
-  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
-  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
+  rad_behave_teeth_variables
 }
 
 #
@@ -643,7 +659,7 @@ rad_behave_bootstrap_pkg_config_variables() {
 # TTMP = Toolchain TeMPorary Directory
 # TBLD = Toolchain temporary BuiLDs Directory
 # TSRC = Toolchain temporary SouRCes Directory
-rad_behave_bootstrap_stage_toolchain_variables() {
+rad_behave_bootstrap_toolchain_variables() {
   export TTMP=$TMPD/toolchain
 
   export TSRC=$TTMP/sources
@@ -652,7 +668,7 @@ rad_behave_bootstrap_stage_toolchain_variables() {
   export BLD=$($CERD/binutils/config.guess)
 }
 
-rad_behave_bootstrap_stage_toolchain_check() {
+rad_behave_bootstrap_toolchain_check() {
   rad_behave_check musl
   rad_behave_check binutils
   rad_behave_check gmp
@@ -662,7 +678,7 @@ rad_behave_bootstrap_stage_toolchain_check() {
   rad_behave_check gcc
 }
 
-rad_behave_bootstrap_stage_toolchain_prepare() {
+rad_behave_bootstrap_toolchain_prepare() {
   $MKDIR $CRSD
 
   $MKDIR $TBLD
@@ -672,7 +688,7 @@ rad_behave_bootstrap_stage_toolchain_prepare() {
   $MKDIR $TLCD
 }
 
-rad_behave_bootstrap_stage_toolchain_construct() {
+rad_behave_bootstrap_toolchain_construct() {
   rad_behave_construct toolchain musl-headers
   rad_behave_construct toolchain binutils
   rad_behave_construct toolchain gcc
@@ -687,22 +703,22 @@ rad_behave_bootstrap_stage_toolchain_construct() {
   esac
 }
 
-rad_behave_bootstrap_stage_toolchain_backup() {
+rad_behave_bootstrap_toolchain_backup() {
   $RSYNC $CRSD $BAKD --delete
   $RSYNC $TLCD $BAKD --delete
 }
 
-rad_behave_bootstrap_stage_toolchain() {
-  rad_behave_bootstrap_stage_toolchain_variables
-  rad_behave_bootstrap_stage_toolchain_check
-  rad_behave_bootstrap_stage_toolchain_prepare
+rad_behave_bootstrap_toolchain() {
+  rad_behave_bootstrap_toolchain_variables
+  rad_behave_bootstrap_toolchain_check
+  rad_behave_bootstrap_toolchain_prepare
 
-  rad_behave_bootstrap_stage_toolchain_construct
+  rad_behave_bootstrap_toolchain_construct
 
-  rad_behave_bootstrap_stage_toolchain_backup
+  rad_behave_bootstrap_toolchain_backup
 }
 
-rad_behave_bootstrap_stage_toolchain_release() {
+rad_behave_bootstrap_toolchain_release() {
   $MKDIR $1
 
   $RSYNC $BAKD/cross $1 --delete
@@ -735,7 +751,7 @@ rad_behave_bootstrap_stage_toolchain_release() {
 # XBLD = Toolchain temporary BuiLDs Directory
 # XCER = Toolchain temporary BuiLDs Directory
 # XSRC = Toolchain temporary SouRCes Directory
-rad_behave_bootstrap_stage_cross_variables() {
+rad_behave_bootstrap_cross_variables() {
   export XTMP=$TMPD/cross
 
   export XBLD=$XTMP/builds
@@ -769,7 +785,7 @@ rad_behave_bootstrap_stage_cross_variables() {
   export BLD=$($CERD/binutils/config.guess)
 }
 
-rad_behave_bootstrap_stage_cross_check() {
+rad_behave_bootstrap_cross_check() {
   rad_behave_check iana-etc
   rad_behave_check radula
 
@@ -828,7 +844,7 @@ rad_behave_bootstrap_stage_cross_check() {
   fi
 }
 
-rad_behave_bootstrap_stage_cross_prepare() {
+rad_behave_bootstrap_cross_prepare() {
   $RSYNC $BAKD/cross $GLAD --delete
   $RSYNC $BAKD/toolchain $GLAD --delete
 
@@ -841,7 +857,7 @@ rad_behave_bootstrap_stage_cross_prepare() {
   $MKDIR $XSRC
 }
 
-rad_behave_bootstrap_stage_cross_envenomate() {
+rad_behave_bootstrap_cross_envenomate() {
   rad_behave_envenomate iana-etc
   rad_behave_envenomate filesystem
   rad_behave_envenomate radula
@@ -905,7 +921,7 @@ rad_behave_bootstrap_stage_cross_envenomate() {
   [ $kernel -eq 1 ] && rad_behave_envenomate linux
 }
 
-rad_behave_bootstrap_stage_cross_strip() {
+rad_behave_bootstrap_cross_strip() {
   find $CRSD/etc -type d -empty -delete
 
   find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
@@ -917,17 +933,17 @@ rad_behave_bootstrap_stage_cross_strip() {
   $RM $CRSD/usr/lib/charset.alias
 }
 
-rad_behave_bootstrap_stage_cross() {
-  rad_behave_bootstrap_stage_cross_variables
-  rad_behave_bootstrap_stage_cross_check
-  rad_behave_bootstrap_stage_cross_prepare
+rad_behave_bootstrap_cross() {
+  rad_behave_bootstrap_cross_variables
+  rad_behave_bootstrap_cross_check
+  rad_behave_bootstrap_cross_prepare
 
-  rad_behave_bootstrap_stage_cross_envenomate
+  rad_behave_bootstrap_cross_envenomate
 
-  rad_behave_bootstrap_stage_cross_strip
+  rad_behave_bootstrap_cross_strip
 }
 
-rad_behave_bootstrap_stage_cross_img() {
+rad_behave_bootstrap_cross_img() {
   # Remove `-S` from rsync (for sudo and IO error)
   RSYNC='rsync -vaHAXx'
 
@@ -977,9 +993,9 @@ rad_behave_bootstrap_clean() {
   $RM $TBLD
 
   $RM $TLCD
-  
+
   $RM $XBLD
-  
+
   $RM $XCER
 }
 
@@ -1030,18 +1046,18 @@ while [ $# -ge 0 ]; do
             c | clean)
               rad_behave_bootstrap_variables
 
-              rad_behave_bootstrap_stage_toolchain_variables
+              rad_behave_bootstrap_toolchain_variables
 
-              rad_behave_bootstrap_stage_cross_variables
+              rad_behave_bootstrap_cross_variables
 
               rad_behave_bootstrap_clean
               ;;
             d | distclean)
               rad_behave_bootstrap_variables
 
-              rad_behave_bootstrap_stage_toolchain_variables
+              rad_behave_bootstrap_toolchain_variables
 
-              rad_behave_bootstrap_stage_cross_variables
+              rad_behave_bootstrap_cross_variables
 
               rad_behave_bootstrap_distclean
               ;;
@@ -1052,7 +1068,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_variables
 
               if [ $(id -u) -eq 0 ]; then
-                rad_behave_bootstrap_stage_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+                rad_behave_bootstrap_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
               else
                 rad_close 'Please run this script as root!'
               fi
@@ -1063,7 +1079,7 @@ while [ $# -ge 0 ]; do
             s | release)
               rad_behave_bootstrap_variables
 
-              rad_behave_bootstrap_stage_toolchain_release /tmp/toolchain
+              rad_behave_bootstrap_toolchain_release /tmp/toolchain
               ;;
             t | toolchain)
               [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
@@ -1072,14 +1088,18 @@ while [ $# -ge 0 ]; do
               rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
 
               rad_behave_bootstrap_variables
+
+              # Only for the toolchain as we're relying on the host's ccache
+              [ $ccache -eq 1 ] && rad_behave_ccache_variables $CCCH
+
               rad_behave_bootstrap_initialize
 
               rad_behave_bootstrap_clean
 
               # No rad_behave_bootstrap_flags optimizations for the toolchain
-              rad_behave_bootstrap_arch
+              rad_behave_bootstrap_arch_variables
 
-              rad_behave_bootstrap_stage_toolchain || {
+              rad_behave_bootstrap_toolchain || {
                 rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
@@ -1093,12 +1113,13 @@ while [ $# -ge 0 ]; do
               rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
 
               rad_behave_bootstrap_variables
-              rad_behave_bootstrap_pkg_config_variables
 
-              rad_behave_bootstrap_arch
-              rad_behave_bootstrap_flags
+              rad_behave_pkg_config_variables $CRSD
 
-              rad_behave_bootstrap_stage_cross || {
+              rad_behave_bootstrap_arch_variables
+              rad_behave_bootstrap_flags_variables
+
+              rad_behave_bootstrap_cross || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
