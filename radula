@@ -26,7 +26,7 @@ sleep=0
 species=atlanticus
 
 # GLAucus Directory
-GLAD=$PWD/..
+[ $bootstrap -eq 0 ] && GLAD=/usr || GLAD=$PWD/..
 # CERata Directory
 CERD=$GLAD/cerata
 
@@ -66,7 +66,7 @@ rad_help() {
   rad_open
   rad_open 'Options:'
   rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
-  rad_open '\t                \tbootstrap, envenomate (default)'
+  rad_open '\t                \tbootstrap, envenomate'
   rad_open
   rad_open '\tg, -g, --genome \tDisplay current genome'
   rad_open '\th, -h, --help   \tDisplay this help message'
@@ -89,7 +89,7 @@ rad_behave_help() {
   rad_open
   rad_open 'Options:'
   rad_open '\tb, bootstrap \tPerform bootstrap behavior'
-  rad_open '\te, envenomate\tPerform envenomate behavior (default)'
+  rad_open '\te, envenomate\tPerform envenomate behavior'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
 }
@@ -113,7 +113,7 @@ rad_behave_bootstrap_help() {
   rad_open '\ts, release   \tRelease a compressed tarball of the toolchain'
   rad_open
   rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
-  rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system (default)'
+  rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system'
 }
 
 rad_behave_envenomate_help() {
@@ -121,7 +121,7 @@ rad_behave_envenomate_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ e | -e | --envenomate ] [ Options ] [ Cerata ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
   rad_open
   rad_open 'Options:'
   rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
