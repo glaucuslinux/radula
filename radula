@@ -12,17 +12,12 @@ LANG=C
 LC_ALL=C
 
 #
-# Default Variables
+# Default Behavior Variables
 #
 
-binary=0
 ccache=0
-genome=x86-64
-init=finit
-kernel=1
 parallel=1
 sleep=0
-species=atlanticus
 
 # GLAucus Directory (check if running on a glaucus system or if bootstrapping)
 [ -d /usr/cerata ] && GLAD=/usr || GLAD=$PWD/..
@@ -53,7 +48,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.7.0 ($genome $species)"
+  rad_open "$0 version 1.7.1 ($genome $species)"
 }
 
 rad_help() {
@@ -676,8 +671,8 @@ rad_behave_bootstrap_flags_variables() {
 rad_behave_bootstrap_variables() {
   export BAKD=$GLAD/backup
   export CRSD=$GLAD/cross
-  export SRCD=$GLAD/sources
-  export TMPD=$GLAD/temporary
+  export SRCD=$GLAD/src
+  export TMPD=$GLAD/tmp
   export TLCD=$GLAD/toolchain
 
   export PATH=$TLCD/bin:$PATH
@@ -704,7 +699,7 @@ rad_behave_bootstrap() {
 rad_behave_bootstrap_toolchain_variables() {
   export TTMP=$TMPD/toolchain
 
-  export TSRC=$TTMP/sources
+  export TSRC=$TTMP/src
   export TBLD=$TTMP/builds
 
   export BLD=$($CERD/binutils/config.guess)
@@ -786,7 +781,7 @@ rad_behave_bootstrap_cross_variables() {
   export XTMP=$TMPD/cross
 
   export XBLD=$XTMP/builds
-  export XSRC=$XTMP/sources
+  export XSRC=$XTMP/src
 
   # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
   #
@@ -1064,6 +1059,12 @@ while [ $# -ge 0 ]; do
     b | -b | --behave)
       case $2 in
         b | bootstrap | r | reproduce)
+          # Default Bootstrap Variables
+          genome=x86-64
+          init=finit
+          kernel=1
+          species=atlanticus
+
           case $3 in
             c | clean)
               rad_behave_bootstrap_variables
