@@ -24,7 +24,7 @@ parallel=1
 sleep=0
 species=atlanticus
 
-# GLAucus Directory
+# GLAucus Directory (check if running on a glaucus system or if bootstrapping)
 [ -d /usr/cerata ] && GLAD=/usr || GLAD=$PWD/..
 # CERata Directory
 CERD=$GLAD/cerata
@@ -53,7 +53,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.6.0 ($genome $species)"
+  rad_open "$0 version 1.7.0 ($genome $species)"
 }
 
 rad_help() {
@@ -65,8 +65,9 @@ rad_help() {
   rad_open
   rad_open 'Options:'
   rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
-  rad_open '\t                \tbootstrap, envenomate'
+  rad_open '\t                \tbinary, bootstrap | reproduce, envenomate'
   rad_open
+  rad_open '\tc, -c, --ceras  \tDisplay ceras information'
   rad_open '\tg, -g, --genome \tDisplay current genome'
   rad_open '\th, -h, --help   \tDisplay this help message'
   rad_open '\tl, -l, --list   \tList supported genomes and species'
@@ -91,6 +92,9 @@ rad_behave_help() {
   rad_open '\te, envenomate\tPerform envenomate behavior'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
+  rad_open
+  rad_open '\ti, binary    \tPerform binary behavior'
+  rad_open '\tr, reproduce \tSame as bootstrap'
 }
 
 rad_behave_bootstrap_help() {
@@ -98,7 +102,7 @@ rad_behave_bootstrap_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ b | bootstrap ] [ Options ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ b | bootstrap | r | reproduce ] [ Options ]"
   rad_open
   rad_open 'Options:'
   rad_open '\tc, clean     \tClean up while preserving sources and backups'
@@ -120,19 +124,57 @@ rad_behave_envenomate_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Ceras | Cerata ]"
   rad_open
   rad_open 'Options:'
-  rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras's concentrate(s)"
+  rad_open '\td, decyst    \tRemove ceras or cerata without preserving their cyst(s)'
+  rad_open '\t   delete    \tSame as decyst'
+  rad_open
+  rad_open '\th, -h, --help\tDisplay this help message'
+  rad_open
+  rad_open '\ti, install   \tInstall ceras or cerata from source (default)'
+  rad_open '\tr, remove    \tRemove ceras or cerata while preserving their cyst(s)'
+  rad_open '\ts, search    \tSearch for ceras or cerata within the cerata directory'
+  rad_open '\tu, upgrade   \tUpgrade ceras or cerata'
+}
+
+rad_behave_binary_help() {
+  rad_version
+
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Ceras | Cerata ]"
+  rad_open
+  rad_open 'Options:'
+  rad_open '\td, decyst    \tRemove binary ceras or cerata without preserving their cysts'
+  rad_open '\t   delete    \tSame as decyst'
+  rad_open
+  rad_open '\th, -h, --help\tDisplay this help message'
+  rad_open
+  rad_open '\ti, install   \tInstall binary ceras or cerata (default)'
+  rad_open '\tr, remove    \tRemove binary ceras or cerata while preserving their cyst(s)'
+  rad_open '\ts, search    \tSearch for binary ceras or cerata within the remote repositories'
+  rad_open '\tu, upgrade   \tUpgrade binary ceras or cerata'
+}
+
+rad_ceras_help() {
+  rad_version
+
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Ceras | Cerata ]"
+  rad_open
+  rad_open 'Options:'
+  rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras or cerata concentrate(s)"
   rad_open
   rad_open '\th, -h, --help                    \tDisplay this help message'
   rad_open
-  rad_open "\tl, lic, license, licenses        \tDisplay ceras's license(s)"
-  rad_open "\tn, nom, name                     \tDisplay ceras's name"
-  rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras's sha512sum"
-  rad_open "\tu, url, source                   \tDisplay ceras's source"
-  rad_open "\tv, ver, version                  \tDisplay ceras's version"
-  rad_open "\ty, cys, cyst, cysts              \tDisplay ceras's cyst(s)"
+  rad_open "\tl, lic, license, licenses        \tDisplay ceras or cerata license(s)"
+  rad_open "\tn, nom, name                     \tDisplay ceras or cerata name(s)"
+  rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras or cerata sha512sum(s)"
+  rad_open "\tu, url, source                   \tDisplay ceras or cerata source(s)"
+  rad_open "\tv, ver, version                  \tDisplay ceras or cerata version(s)"
+  rad_open "\ty, cys, cyst, cysts              \tDisplay ceras or cerata cyst(s)"
 }
 
 #
@@ -239,15 +281,6 @@ rad_behave_construct() {
   configure || rad_close "ceras $nom: configure exited with status $?"
   build || rad_close "ceras $nom: build exited with status $?"
   install || rad_close "ceras $nom: install exited with status $?"
-}
-
-rad_behave_envenomate() {
-  $MKDIR $XCER/$1/sac
-  $MKDIR $XCER/$1/venom
-
-  rad_behave_construct cross $1
-
-  $RSYNC $XCER/$1/sac/ $CRSD
 }
 
 rad_behave_gnu() {
@@ -656,6 +689,15 @@ rad_behave_bootstrap_variables() {
 # Toolchain Stage Functions
 #
 
+rad_behave_bootstrap() {
+  rad_behave_bootstrap_${1}_variables
+  rad_behave_bootstrap_${1}_check
+  rad_behave_bootstrap_${1}_prepare
+
+  rad_behave_bootstrap_${1}_construct
+
+  rad_behave_bootstrap_${1}_backup
+}
 # TTMP = Toolchain TeMPorary Directory
 # TBLD = Toolchain temporary BuiLDs Directory
 # TSRC = Toolchain temporary SouRCes Directory
@@ -708,16 +750,6 @@ rad_behave_bootstrap_toolchain_backup() {
   $RSYNC $TLCD $BAKD --delete
 }
 
-rad_behave_bootstrap_toolchain() {
-  rad_behave_bootstrap_toolchain_variables
-  rad_behave_bootstrap_toolchain_check
-  rad_behave_bootstrap_toolchain_prepare
-
-  rad_behave_bootstrap_toolchain_construct
-
-  rad_behave_bootstrap_toolchain_backup
-}
-
 rad_behave_bootstrap_toolchain_release() {
   $MKDIR $1
 
@@ -749,13 +781,11 @@ rad_behave_bootstrap_toolchain_release() {
 
 # XTMP = cross TeMPorary Directory
 # XBLD = Toolchain temporary BuiLDs Directory
-# XCER = Toolchain temporary BuiLDs Directory
 # XSRC = Toolchain temporary SouRCes Directory
 rad_behave_bootstrap_cross_variables() {
   export XTMP=$TMPD/cross
 
   export XBLD=$XTMP/builds
-  export XCER=$XTMP/cerata
   export XSRC=$XTMP/sources
 
   # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
@@ -798,6 +828,8 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check file
   rad_behave_check findutils
   rad_behave_check grep
+  rad_behave_check hostname
+  rad_behave_check rsync
   rad_behave_check sed
   rad_behave_check which
 
@@ -825,9 +857,10 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check procps-ng
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
-  rad_behave_check hwids
   rad_behave_check kmod
+  # hwids comes after pciutils since we're the final hwdata is provided by hwids
   rad_behave_check pciutils
+  rad_behave_check hwids
   rad_behave_check eudev
 
   if [ $init = finit ]; then
@@ -851,74 +884,75 @@ rad_behave_bootstrap_cross_prepare() {
   $RM $XBLD
   $MKDIR $XBLD
 
-  $RM $XCER
-  $MKDIR $XCER
-
   $MKDIR $XSRC
 }
 
-rad_behave_bootstrap_cross_envenomate() {
-  rad_behave_envenomate iana-etc
-  rad_behave_envenomate filesystem
-  rad_behave_envenomate radula
+rad_behave_bootstrap_cross_construct() {
+  rad_behave_construct cross iana-etc
+  rad_behave_construct cross hydroskeleton
+  rad_behave_construct cross cerata
+  rad_behave_construct cross radula
 
-  rad_behave_envenomate musl-utils
-  rad_behave_envenomate linux-headers
+  rad_behave_construct cross musl-utils
+  rad_behave_construct cross linux-headers
 
-  rad_behave_envenomate shadow
-  rad_behave_envenomate libressl
+  rad_behave_construct cross shadow
+  rad_behave_construct cross libressl
 
-  rad_behave_envenomate toybox
-  rad_behave_envenomate diffutils
-  rad_behave_envenomate file
-  rad_behave_envenomate findutils
-  rad_behave_envenomate grep
-  rad_behave_envenomate sed
-  rad_behave_envenomate which
+  rad_behave_construct cross toybox
+  rad_behave_construct cross diffutils
+  rad_behave_construct cross file
+  rad_behave_construct cross findutils
+  rad_behave_construct cross grep
+  rad_behave_construct cross hostname
+  rad_behave_construct cross rsync
+  rad_behave_construct cross sed
+  rad_behave_construct cross which
 
-  rad_behave_envenomate lbzip2
-  rad_behave_envenomate lbzip2-utils
-  rad_behave_envenomate lz4
-  rad_behave_envenomate lzlib
-  rad_behave_envenomate plzip
-  rad_behave_envenomate xz
+  rad_behave_construct cross lbzip2
+  rad_behave_construct cross lbzip2-utils
+  rad_behave_construct cross lz4
+  rad_behave_construct cross lzlib
+  rad_behave_construct cross plzip
+  rad_behave_construct cross xz
   # zlib-ng should be built before pigz as pigz requires zlib.h
-  rad_behave_envenomate zlib-ng
-  rad_behave_envenomate pigz
-  rad_behave_envenomate zstd
-  rad_behave_envenomate libarchive
+  rad_behave_construct cross zlib-ng
+  rad_behave_construct cross pigz
+  rad_behave_construct cross zstd
+  rad_behave_construct cross libarchive
 
-  rad_behave_envenomate netbsd-curses
-  rad_behave_envenomate oksh
-  rad_behave_envenomate dash
+  rad_behave_construct cross netbsd-curses
+  rad_behave_construct cross oksh
+  rad_behave_construct cross dash
 
-  rad_behave_envenomate libcap
-  rad_behave_envenomate iproute2
-  #rad_behave_envenomate iputils
+  rad_behave_construct cross libcap
+  rad_behave_construct cross iproute2
+  #rad_behave_construct cross iputils
 
-  rad_behave_envenomate psmisc
-  rad_behave_envenomate procps-ng
-  rad_behave_envenomate util-linux
-  rad_behave_envenomate e2fsprogs
-  rad_behave_envenomate hwids
-  rad_behave_envenomate kmod
-  rad_behave_envenomate pciutils
-  rad_behave_envenomate eudev
+  rad_behave_construct cross psmisc
+  rad_behave_construct cross procps-ng
+  rad_behave_construct cross util-linux
+  rad_behave_construct cross e2fsprogs
+  rad_behave_construct cross kmod
+  # hwids comes after pciutils since we're the final hwdata is provided by hwids
+  rad_behave_construct cross pciutils
+  rad_behave_construct cross hwids
+  rad_behave_construct cross eudev
 
   if [ $init = finit ]; then
-    rad_behave_envenomate libuev
-    rad_behave_envenomate libite
-    rad_behave_envenomate finit
+    rad_behave_construct cross libuev
+    rad_behave_construct cross libite
+    rad_behave_construct cross finit
   elif [ $init = s6 ]; then
-    rad_behave_envenomate skalibs
-    rad_behave_envenomate execline
-    rad_behave_envenomate s6
-    rad_behave_envenomate s6-linux-init
-    rad_behave_envenomate s6-rc
-    rad_behave_envenomate s6-boot-scripts
+    rad_behave_construct cross skalibs
+    rad_behave_construct cross execline
+    rad_behave_construct cross s6
+    rad_behave_construct cross s6-linux-init
+    rad_behave_construct cross s6-rc
+    rad_behave_construct cross s6-boot-scripts
   fi
 
-  [ $kernel -eq 1 ] && rad_behave_envenomate linux
+  [ $kernel -eq 1 ] && rad_behave_construct cross linux
 }
 
 rad_behave_bootstrap_cross_strip() {
@@ -931,16 +965,6 @@ rad_behave_bootstrap_cross_strip() {
   find $CRSD/usr -name *.la -delete
 
   $RM $CRSD/usr/lib/charset.alias
-}
-
-rad_behave_bootstrap_cross() {
-  rad_behave_bootstrap_cross_variables
-  rad_behave_bootstrap_cross_check
-  rad_behave_bootstrap_cross_prepare
-
-  rad_behave_bootstrap_cross_envenomate
-
-  rad_behave_bootstrap_cross_strip
 }
 
 rad_behave_bootstrap_cross_img() {
@@ -995,8 +1019,6 @@ rad_behave_bootstrap_clean() {
   $RM $TLCD
 
   $RM $XBLD
-
-  $RM $XCER
 }
 
 rad_behave_bootstrap_distclean() {
@@ -1041,7 +1063,7 @@ while [ $# -ge 0 ]; do
       ;;
     b | -b | --behave)
       case $2 in
-        b | bootstrap)
+        b | bootstrap | r | reproduce)
           case $3 in
             c | clean)
               rad_behave_bootstrap_variables
@@ -1099,7 +1121,7 @@ while [ $# -ge 0 ]; do
               # No rad_behave_bootstrap_flags optimizations for the toolchain
               rad_behave_bootstrap_arch_variables
 
-              rad_behave_bootstrap_toolchain || {
+              rad_behave_bootstrap toolchain || {
                 rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
@@ -1119,7 +1141,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch_variables
               rad_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap_cross || {
+              rad_behave_bootstrap cross || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
@@ -1133,76 +1155,14 @@ while [ $# -ge 0 ]; do
           esac
           ;;
         e | envenomate)
-          # Don't check for the directory $CERD/$4 alone because when $4 is
-          # empty it'll resolve to $CERD which does exist and will cause radula
-          # to fail.
-          if [ -f $CERD/$4/ceras ]; then
-            . $CERD/$4/ceras
-
-            case $3 in
-              n | nom | name)
-                rad_open "Name:        \t$nom"
-                ;;
-              v | ver | version)
-                rad_open "Version:     \t$ver"
-                ;;
-              u | url | source)
-                rad_open "Source:      \t$url"
-                ;;
-              s | sum | checksum | sha512sum)
-                rad_open "sha512sum:   \t$sum"
-                ;;
-              y | cys | cyst | cysts)
-                cys_len=$(printf "$cys" | wc -w)
-                if [ $cys_len -gt 1 ]; then
-                  rad_open "Cysts:       \t$(printf "$cys" | sed 's/ /, /g')"
-                elif [ $cys_len -eq 1 ]; then
-                  rad_open "Cyst:        \t$cys"
-                else
-                  rad_open 'Cyst:        \t~~'
-                fi
-                ;;
-              c | cnt | concentrate | concentrates)
-                cnt_len=$(printf "$cnt" | wc -w)
-                if [ $cnt_len -gt 1 ]; then
-                  rad_open "Concentrates:\t$(printf "$cnt" | sed 's/ /, /g')"
-                elif [ $cnt_len -eq 1 ]; then
-                  rad_open "Concentrate: \t$cnt"
-                else
-                  rad_open 'Concentrate: \t~~'
-                fi
-                ;;
-              l | lic | license | licenses)
-                lic_len=$(printf "$lic" | wc -w)
-                if [ $lic_len -gt 1 ]; then
-                  rad_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
-                elif [ $lic_len -eq 1 ]; then
-                  rad_open "License:     \t$lic"
-                else
-                  rad_open 'License:     \t~~'
-                fi
-                ;;
-              *)
-                rad_behave_envenomate_help
-                exit 1
-                ;;
-            esac
-
-          elif [ ! -z $3 ] && [ "$3" != h ] && [ -d $CERD/$3 ]; then
-            . $CERD/$3/ceras
-
-            for i in n v u s y c l; do
-              [ $sleep -eq 0 ] && $0 b e $i $3 || $0 q b e $i $3
-            done
-          elif [ "$3" = h ]; then
-            rad_behave_envenomate_help
-            exit 0
-          else
-            rad_behave_envenomate_help
-            exit 1
-          fi
+          rad_behave_envenomate_help
+          exit 0
           ;;
         h | -h | --help)
+          rad_behave_help
+          exit 0
+          ;;
+        i | binary)
           rad_behave_help
           exit 0
           ;;
@@ -1211,6 +1171,77 @@ while [ $# -ge 0 ]; do
           exit 1
           ;;
       esac
+      exit 0
+      ;;
+    c | -c | --ceras)
+      # Don't check for the directory $CERD/$4 alone because when $4 is
+      # empty it'll resolve to $CERD which does exist and will cause radula
+      # to fail.
+      if [ -f $CERD/$3/ceras ]; then
+        . $CERD/$3/ceras
+
+        case $2 in
+          n | nom | name)
+            rad_open "Name:        \t$nom"
+            ;;
+          v | ver | version)
+            rad_open "Version:     \t$ver"
+            ;;
+          u | url | source)
+            rad_open "Source:      \t$url"
+            ;;
+          s | sum | checksum | sha512sum)
+            rad_open "sha512sum:   \t$sum"
+            ;;
+          y | cys | cyst | cysts)
+            cys_len=$(printf "$cys" | wc -w)
+            if [ $cys_len -gt 1 ]; then
+              rad_open "Cysts:       \t$(printf "$cys" | sed 's/ /, /g')"
+            elif [ $cys_len -eq 1 ]; then
+              rad_open "Cyst:        \t$cys"
+            else
+              rad_open 'Cyst:        \t~~'
+            fi
+            ;;
+          c | cnt | concentrate | concentrates)
+            cnt_len=$(printf "$cnt" | wc -w)
+            if [ $cnt_len -gt 1 ]; then
+              rad_open "Concentrates:\t$(printf "$cnt" | sed 's/ /, /g')"
+            elif [ $cnt_len -eq 1 ]; then
+              rad_open "Concentrate: \t$cnt"
+            else
+              rad_open 'Concentrate: \t~~'
+            fi
+            ;;
+          l | lic | license | licenses)
+            lic_len=$(printf "$lic" | wc -w)
+            if [ $lic_len -gt 1 ]; then
+              rad_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
+            elif [ $lic_len -eq 1 ]; then
+              rad_open "License:     \t$lic"
+            else
+              rad_open 'License:     \t~~'
+            fi
+            ;;
+          *)
+            rad_ceras_help
+            exit 1
+            ;;
+        esac
+
+      elif [ ! -z $2 ] && [ -d $CERD/$2 ]; then
+        . $CERD/$2/ceras
+
+        for i in n v u s y c l; do
+          [ $sleep -eq 0 ] && $0 c $i $2 || $0 q c $i $2
+        done
+      elif [ "$2" = h ] || [ "$2" = -h ] || [ "$2" = --help ]; then
+        rad_ceras_help
+        exit 0
+      else
+        rad_ceras_help
+        exit 1
+      fi
       exit 0
       ;;
     g | -g | --genome)
