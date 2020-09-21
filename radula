@@ -70,7 +70,6 @@ rad_help() {
   rad_open '\tc, -c, --ceras  \tDisplay ceras information'
   rad_open '\tg, -g, --genome \tDisplay current genome'
   rad_open '\th, -h, --help   \tDisplay this help message'
-  rad_open '\tl, -l, --list   \tList supported genomes and species'
   rad_open "\tq, -q, --quiet  \tDecrease the verbosity level and don't prefix"
   rad_open '\t                \tthe output with ~~'
   rad_open
@@ -111,6 +110,7 @@ rad_behave_bootstrap_help() {
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
   rad_open '\ti, image     \tCreate a .img file of the glaucus system'
+  rad_open '\tl, list      \tList supported genomes and species'
   rad_open '\tr, require   \tCheck if host has all required packages'
   rad_open
   rad_open '\ts, release   \tRelease a compressed tarball of the toolchain'
@@ -124,18 +124,18 @@ rad_behave_envenomate_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Ceras | Cerata ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
   rad_open
   rad_open 'Options:'
-  rad_open '\td, decyst    \tRemove ceras or cerata without preserving their cyst(s)'
+  rad_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
   rad_open '\t   delete    \tSame as decyst'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
-  rad_open '\ti, install   \tInstall ceras or cerata from source (default)'
-  rad_open '\tr, remove    \tRemove ceras or cerata while preserving their cyst(s)'
-  rad_open '\ts, search    \tSearch for ceras or cerata within the cerata directory'
-  rad_open '\tu, upgrade   \tUpgrade ceras or cerata'
+  rad_open '\ti, install   \tInstall cerata from source (default)'
+  rad_open '\tr, remove    \tRemove cerata while preserving their cyst(s)'
+  rad_open '\ts, search    \tSearch for cerata within the cerata directory'
+  rad_open '\tu, upgrade   \tUpgrade cerata'
 }
 
 rad_behave_binary_help() {
@@ -143,18 +143,18 @@ rad_behave_binary_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Ceras | Cerata ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
   rad_open
   rad_open 'Options:'
-  rad_open '\td, decyst    \tRemove binary ceras or cerata without preserving their cysts'
+  rad_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
   rad_open '\t   delete    \tSame as decyst'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
-  rad_open '\ti, install   \tInstall binary ceras or cerata (default)'
-  rad_open '\tr, remove    \tRemove binary ceras or cerata while preserving their cyst(s)'
-  rad_open '\ts, search    \tSearch for binary ceras or cerata within the remote repositories'
-  rad_open '\tu, upgrade   \tUpgrade binary ceras or cerata'
+  rad_open '\ti, install   \tInstall binary cerata (default)'
+  rad_open '\tr, remove    \tRemove binary cerata while preserving their cyst(s)'
+  rad_open '\ts, search    \tSearch for binary cerata within the remote repositories'
+  rad_open '\tu, upgrade   \tUpgrade binary cerata'
 }
 
 rad_ceras_help() {
@@ -162,19 +162,19 @@ rad_ceras_help() {
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Ceras | Cerata ]"
+  rad_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Cerata ]"
   rad_open
   rad_open 'Options:'
-  rad_open "\tc, cnt, concentrate, concentrates\tDisplay ceras or cerata concentrate(s)"
+  rad_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
   rad_open
   rad_open '\th, -h, --help                    \tDisplay this help message'
   rad_open
-  rad_open "\tl, lic, license, licenses        \tDisplay ceras or cerata license(s)"
-  rad_open "\tn, nom, name                     \tDisplay ceras or cerata name(s)"
-  rad_open "\ts, sum, checksum, sha512sum      \tDisplay ceras or cerata sha512sum(s)"
-  rad_open "\tu, url, source                   \tDisplay ceras or cerata source(s)"
-  rad_open "\tv, ver, version                  \tDisplay ceras or cerata version(s)"
-  rad_open "\ty, cys, cyst, cysts              \tDisplay ceras or cerata cyst(s)"
+  rad_open "\tl, lic, license, licenses        \tDisplay cerata license(s)"
+  rad_open "\tn, nom, name                     \tDisplay cerata name(s)"
+  rad_open "\ts, sum, checksum, sha512sum      \tDisplay cerata sha512sum(s)"
+  rad_open "\tu, url, source                   \tDisplay cerata source(s)"
+  rad_open "\tv, ver, version                  \tDisplay cerata version(s)"
+  rad_open "\ty, cys, cyst, cysts              \tDisplay cerata cyst(s)"
 }
 
 #
@@ -1095,6 +1095,28 @@ while [ $# -ge 0 ]; do
                 rad_close 'Please run this script as root!'
               fi
               ;;
+            l | list)
+              rad_version
+
+              rad_open
+              rad_open 'Genomes (Architectures):'
+              rad_open '\taarch64,     armv8-a,    arm64'
+              rad_open '\tarmv6zk,     arm,        bcm2835'
+              rad_open '\ti686,        i386,       x86'
+              rad_open '\tpowerpc,     pmac32,     ppc'
+              rad_open '\tpowerpc64,   g5,         ppc64'
+              rad_open '\tpowerpc64le, powernv,    ppc64le'
+              rad_open '\triscv64,     rv64imafdc, riscv'
+              rad_open '\tx86-64,      x86_64'
+              rad_open
+              rad_open 'Species (Flags):'
+              rad_open '\talbino,     libre'
+              rad_open '\tatlanticus, performance'
+              rad_open '\tbennettae,  size'
+              rad_open '\tmarginatus, sane'
+              rad_open '\tthompsoni,  radiology'
+              exit 0
+              ;;
             r | require)
               rad_behave_bootstrap_require
               ;;
@@ -1250,28 +1272,6 @@ while [ $# -ge 0 ]; do
       ;;
     h | -h | --help)
       rad_help
-      exit 0
-      ;;
-    l | -l | --list)
-      rad_version
-
-      rad_open
-      rad_open 'Genomes (Architectures):'
-      rad_open '\taarch64,     armv8-a,    arm64'
-      rad_open '\tarmv6zk,     arm,        bcm2835'
-      rad_open '\ti686,        i386,       x86'
-      rad_open '\tpowerpc,     pmac32,     ppc'
-      rad_open '\tpowerpc64,   g5,         ppc64'
-      rad_open '\tpowerpc64le, powernv,    ppc64le'
-      rad_open '\triscv64,     rv64imafdc, riscv'
-      rad_open '\tx86-64,      x86_64'
-      rad_open
-      rad_open 'Species (Flags):'
-      rad_open '\talbino,     libre'
-      rad_open '\tatlanticus, performance'
-      rad_open '\tbennettae,  size'
-      rad_open '\tmarginatus, sane'
-      rad_open '\tthompsoni,  radiology'
       exit 0
       ;;
     s | -s | --species)
