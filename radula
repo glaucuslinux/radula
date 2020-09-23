@@ -20,7 +20,11 @@ parallel=1
 sleep=0
 
 # GLAucus Directory (check if running on a glaucus system or if bootstrapping)
-[ -d /usr/cerata ] && GLAD=/usr || GLAD=$PWD/..
+if [ -d /usr/cerata ]; then
+  GLAD=/usr
+else
+  GLAD=$PWD/..
+fi
 # CERata Directory
 CERD=$GLAD/cerata
 
@@ -56,7 +60,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.7.1 ($genome $species)"
+  rad_open "$0 version 1.7.2 ($genome $species)"
 }
 
 rad_help() {
@@ -186,7 +190,7 @@ rad_ceras_help() {
 
 # For custom ccache directories (or if host was neither Fedora nor Arch, the
 # user has to specify them in /etc/radula.conf using the `CCCH` variable (along
-# with ccache=0 beforehand).
+# with ccache=1 beforehand).
 rad_behave_ccache_variables() {
   CCCH=${1:-/usr/lib64/ccache:/usr/lib/ccache/bin}
   export PATH=$CCCH:$PATH
@@ -210,7 +214,13 @@ rad_behave_teeth_variables() {
     export CHMOD='chmod -Rv'
     export CHOWN='chown -Rv'
     export LN='ln -fnsv'
-    [ $parallel -eq 0 ] && export MAKE='make -j1 V=1' || export MAKE="make -j$parallel V=1"
+
+    if [ $parallel -eq 0 ]; then
+      export MAKE='make -j1 V=1'
+    else
+      export MAKE="make -j$parallel V=1"
+    fi
+
     # Full path to not overlap with the install() function in .ceras files
     export MKDIR='/usr/bin/install -dv'
     export MV='mv -v'
@@ -222,7 +232,13 @@ rad_behave_teeth_variables() {
     export CHMOD='chmod -R'
     export CHOWN='chown -R'
     export LN='ln -fns'
-    [ $parallel -eq 0 ] && export MAKE='make -j1' || export MAKE="make -j$parallel"
+
+    if [ $parallel -eq 0 ]; then
+      export MAKE='make -j1'
+    else
+      export MAKE="make -j$parallel"
+    fi
+
     export MKDIR='/usr/bin/install -d'
     export MV=mv
     export RM='rm -fr'
@@ -245,15 +261,27 @@ rad_behave_verify() {
 
 rad_behave_fetch() {
   if [ $ver = git ]; then
-    [ $sleep -eq 0 ] && git clone $url $SRCD/$nom || git clone -q $url $SRCD/$nom
+    if [ $sleep eq 0 ]; then
+      git clone $url $SRCD/$nom
+    else
+      git clone -q $url $SRCD/$nom
+    fi
   else
     $MKDIR $SRCD/$nom
 
-    [ $sleep -eq 0 ] && curl -Lo $SRCD/$nom/$1 $url || curl -Lso $SRCD/$nom/$1 $url
+    if [ $sleep -eq 0 ]; then
+      curl -Lo $SRCD/$nom/$1 $url
+    else
+      curl -Lso $SRCD/$nom/$1 $url
+    fi
 
     rad_behave_verify $1 || rad_close "ceras $nom: verify exited with status $?"
 
-    [ $sleep -eq 0 ] && tar xvf $SRCD/$nom/$1 -C $SRCD/$nom || tar xf $SRCD/$nom/$l -C $SRCD/$nom
+    if [ $sleep -eq 0 ]; then
+      tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
+    else
+      tar xf $SRCD/$nom/$1 -C $SRCD/$nom
+    fi
   fi
 }
 
@@ -291,7 +319,11 @@ rad_behave_gnu() {
 }
 
 rad_behave_patch() {
-  [ $sleep -eq 0 ] && patch -p$1 -i $CERD/$2/patches/$3/$4.patch || patch -p$1 -si $CERD/$2/patches/$3/$4.patch
+  if [ $sleep -eq 0 ]; then
+    patch -p$1 -i $CERD/$2/patches/$3/$4.patch
+  else
+    patch -p$1 -si $CERD/$2/patches/$3/$4.patch
+  fi
 }
 
 #
@@ -554,8 +586,6 @@ rad_behave_bootstrap_flags_variables() {
   case $species in
     # albino (libre) is the libre version of atlanticus (performance)
     atlanticus | performance | albino | libre)
-      export SPCS=atlanticus
-
       case $genome in
         x86-64 | x86_64)
           ALIGN=-malign-data=cacheline
@@ -606,8 +636,6 @@ rad_behave_bootstrap_flags_variables() {
       export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
       ;;
     bennettae | size)
-      export SPCS=bennettae
-
       AUNWIND=-fno-asynchronous-unwind-tables
       DSECTS=-fdata-sections
       EXCEPT=-fno-exceptions
@@ -638,8 +666,6 @@ rad_behave_bootstrap_flags_variables() {
       ;;
     # thompsoni (radiology) is based on marginatus (sane)
     marginatus | sane | thompsoni | radiology)
-      export SPCS=marginatus
-
       DEVIRT=-fdevirtualize-at-ltrans
       GRAPHITE='-fgraphite-identity -floop-nest-optimize'
       IPA=-fipa-pta
@@ -688,10 +714,6 @@ rad_behave_bootstrap_variables() {
   rad_behave_teeth_variables
 }
 
-#
-# Toolchain Stage Functions
-#
-
 rad_behave_bootstrap() {
   rad_behave_bootstrap_${1}_variables
   rad_behave_bootstrap_${1}_check
@@ -701,6 +723,11 @@ rad_behave_bootstrap() {
 
   rad_behave_bootstrap_${1}_backup
 }
+
+#
+# Toolchain Stage Functions
+#
+
 # TTMP = Toolchain TeMPorary Directory
 # TBLD = Toolchain temporary BuiLDs Directory
 # TSRC = Toolchain temporary SouRCes Directory
@@ -797,7 +824,7 @@ rad_behave_bootstrap_cross_variables() {
   export HOSTCC=gcc
   export HOSTCXX=g++
 
-  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
+  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires setting)
   export CROSS_COMPILE=$TGT-
 
   export AR=$TGT-gcc-ar
@@ -866,18 +893,21 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check hwids
   rad_behave_check eudev
 
-  if [ $init = finit ]; then
-    rad_behave_check libuev
-    rad_behave_check libite
-    rad_behave_check finit
-  elif [ $init = s6 ]; then
-    rad_behave_check skalibs
-    rad_behave_check execline
-    rad_behave_check s6
-    rad_behave_check s6-linux-init
-    rad_behave_check s6-rc
-    rad_behave_check s6-boot-scripts
-  fi
+  case $init in
+    f | finit)
+      rad_behave_check libuev
+      rad_behave_check libite
+      rad_behave_check finit
+      ;;
+    s | s6)
+      rad_behave_check skalibs
+      rad_behave_check execline
+      rad_behave_check s6
+      rad_behave_check s6-linux-init
+      rad_behave_check s6-rc
+      rad_behave_check s6-boot-scripts
+      ;;
+  esac
 }
 
 rad_behave_bootstrap_cross_prepare() {
@@ -942,18 +972,21 @@ rad_behave_bootstrap_cross_construct() {
   rad_behave_construct cross hwids
   rad_behave_construct cross eudev
 
-  if [ $init = finit ]; then
-    rad_behave_construct cross libuev
-    rad_behave_construct cross libite
-    rad_behave_construct cross finit
-  elif [ $init = s6 ]; then
-    rad_behave_construct cross skalibs
-    rad_behave_construct cross execline
-    rad_behave_construct cross s6
-    rad_behave_construct cross s6-linux-init
-    rad_behave_construct cross s6-rc
-    rad_behave_construct cross s6-boot-scripts
-  fi
+  case $init in
+    f | finit)
+      rad_behave_construct cross libuev
+      rad_behave_construct cross libite
+      rad_behave_construct cross finit
+      ;;
+    s | s6)
+      rad_behave_construct cross skalibs
+      rad_behave_construct cross execline
+      rad_behave_construct cross s6
+      rad_behave_construct cross s6-linux-init
+      rad_behave_construct cross s6-rc
+      rad_behave_construct cross s6-boot-scripts
+      ;;
+  esac
 
   [ $kernel -eq 1 ] && rad_behave_construct cross linux
 }
@@ -1135,7 +1168,11 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_toolchain_release /tmp/toolchain
               ;;
             t | toolchain)
-              [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
+              if [ $sleep -eq 0 ]; then
+                $0 b b r
+              else
+                $0 q b b r
+              fi
 
               rad_open
               rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
@@ -1160,7 +1197,11 @@ while [ $# -ge 0 ]; do
               rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
             x | cross)
-              [ $sleep -eq 0 ] && $0 b b r || $0 q b b r
+              if [ $sleep -eq 0 ]; then
+                $0 b b r
+              else
+                $0 q b b r
+              fi
 
               rad_open
               rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
@@ -1266,11 +1307,13 @@ while [ $# -ge 0 ]; do
         for i in n v u s y c l; do
           [ $sleep -eq 0 ] && $0 c $i $2 || $0 q c $i $2
         done
-      elif [ "$2" = h ] || [ "$2" = -h ] || [ "$2" = --help ]; then
-        rad_ceras_help
-        exit 0
       else
         rad_ceras_help
+        case $2 in
+          h | -h | --help)
+            exit 0
+            ;;
+        esac
         exit 1
       fi
       exit 0
@@ -1288,6 +1331,12 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     v | -v | --version)
+      # Check if /etc/radula.conf got sourced
+      if [ -z $genome ]; then
+        genome=x86-64
+        species=atlanticus
+      fi
+
       rad_version
       exit 0
       ;;
