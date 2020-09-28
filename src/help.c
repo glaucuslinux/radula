@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "help.h"
 
-extern unsigned int sleep;
+#include "help.h"
+#include "radula.h"
 
 void rad_open(char* rad_string) {
   if (sleep == 0)
@@ -53,6 +53,29 @@ void rad_behave_help() {
   rad_open("");
   rad_open("\tbinary    \tPerform binary behavior");
   rad_open("\treproduce \tSame as bootstrap");
+}
+
+void rad_behave_bootstrap_help() {
+  rad_version();
+
+  rad_open("");
+  rad_open("Usage:");
+  rad_open("\tradula -b [ bootstrap | reproduce ] [ Options ]");
+  rad_open("");
+  rad_open("Options:");
+  rad_open("\tclean     \tClean up while preserving sources and backups");
+  rad_open("\tdistclean \tClean up everything");
+  rad_open("");
+  rad_open("\t-h,   help\tDisplay this help message");
+  rad_open("");
+  rad_open("\timage     \tCreate a .img file of the glaucus system");
+  rad_open("\tlist      \tList supported genomes and species");
+  rad_open("\trequire   \tCheck if host has all required packages");
+  rad_open("");
+  rad_open("\trelease   \tRelease a compressed tarball of the toolchain");
+  rad_open("");
+  rad_open("\ttoolchain \tBootstrap a cross compiler toolchain");
+  rad_open("\tcross     \tBootstrap a cross compiled glaucus system");
 }
 
 void rad_behave_envenomate_help() {

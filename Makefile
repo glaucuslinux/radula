@@ -4,7 +4,7 @@ CFLAGS = -Os -s -fomit-frame-pointer -pipe
 TARGET = radula-c
 
 all:
-	$(CC) $(CFLAGS) -o $(TARGET) src/help.c src/radula.c
+	$(CC) $(CFLAGS) -o $(TARGET) src/behave.c src/ceras.c src/help.c src/radula.c
 
 clean:
 	rm -frv *.o
