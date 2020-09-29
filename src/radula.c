@@ -1,17 +1,34 @@
-#include <getopt.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h> 
+#include <unistd.h>
 
 #include "behave.h"
 #include "ceras.h"
 #include "help.h"
+#include "radula.h"
 
 unsigned int ccache = 0;
-unsigned int parallel = 0;
+unsigned int parallel = 1;
 unsigned int quiet = 0;
 
 int main(int argc, char** argv) {
   int opt;
+  struct stat st;
+
+  char GLAD[PATH_MAX];
+
+  if(stat("/usr/cerata", &st) == 0 && S_ISDIR(st.st_mode)) {
+    strcpy(GLAD, "/usr");
+  } else {
+    getcwd(GLAD, sizeof(GLAD));
+  }
+
+  char CERD[PATH_MAX];
+  strcpy(CERD, GLAD);
+  strcat(CERD, "/cerata");
 
   while((opt = getopt(argc, argv, ":b:c:ghqsv")) != -1) {
     switch (opt) {

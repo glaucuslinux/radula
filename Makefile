@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Os -s -fomit-frame-pointer -pipe
+CFLAGS = -Os -s -fomit-frame-pointer -pipe -Wall
 
 TARGET = radula-c
 
