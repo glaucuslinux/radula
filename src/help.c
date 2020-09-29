@@ -3,9 +3,16 @@
 #include "help.h"
 #include "radula.h"
 
-void rad_open(char* rad_string) {
-  if (sleep == 0)
+void rad_open(const char* rad_string) {
+  if (quiet == 0)
     printf("\033[0;34m~~ \033[0m");
+
+  printf("%s\n", rad_string);
+}
+
+void rad_close(const char* rad_string) {
+  if (quiet == 0)
+    printf("\033[0;31m-- \033[0m");
 
   printf("%s\n", rad_string);
 }
@@ -53,6 +60,31 @@ void rad_behave_help() {
   rad_open("");
   rad_open("\tbinary    \tPerform binary behavior");
   rad_open("\treproduce \tSame as bootstrap");
+  rad_open("");
+  rad_open("\t-q, quiet \tDecrease the verbosity level and don't prefix");
+  rad_open("\t          \tthe output with ~~");
+}
+
+void rad_behave_binary_help() {
+  rad_version();
+
+  rad_open("");
+  rad_open("Usage:");
+  rad_open("\tradula -b binary [ Options ] [ Cerata ]");
+  rad_open("");
+  rad_open("Options:");
+  rad_open("\tdecyst    \tRemove binary cerata without preserving their cysts");
+  rad_open("");
+  rad_open("\t-h, help  \tDisplay this help message");
+  rad_open("");
+  rad_open("\tinstall   \tInstall binary cerata (default)");
+  rad_open("");
+  rad_open("\t-q, quiet \tDecrease the verbosity level and don't prefix");
+  rad_open("\t          \tthe output with ~~");
+  rad_open("");
+  rad_open("\tremove    \tRemove binary cerata while preserving their cyst(s)");
+  rad_open("\tsearch    \tSearch for binary cerata within the remote repositories");
+  rad_open("\tupgrade   \tUpgrade binary cerata");
 }
 
 void rad_behave_bootstrap_help() {
@@ -70,6 +102,10 @@ void rad_behave_bootstrap_help() {
   rad_open("");
   rad_open("\timage     \tCreate a .img file of the glaucus system");
   rad_open("\tlist      \tList supported genomes and species");
+  rad_open("");
+  rad_open("\t-q, quiet \tDecrease the verbosity level and don't prefix");
+  rad_open("\t          \tthe output with ~~");
+  rad_open("");
   rad_open("\trequire   \tCheck if host has all required packages");
   rad_open("");
   rad_open("\trelease   \tRelease a compressed tarball of the toolchain");
@@ -91,27 +127,13 @@ void rad_behave_envenomate_help() {
   rad_open("\t-h, help  \tDisplay this help message");
   rad_open("");
   rad_open("\tinstall   \tInstall cerata from source (default)");
+  rad_open("");
+  rad_open("\t-q, quiet \tDecrease the verbosity level and don't prefix");
+  rad_open("\t          \tthe output with ~~");
+  rad_open("");
   rad_open("\tremove    \tRemove cerata while preserving their cyst(s)");
   rad_open("\tsearch    \tSearch for cerata within the cerata directory");
   rad_open("\tupgrade   \tUpgrade cerata");
-}
-
-void rad_behave_binary_help() {
-  rad_version();
-
-  rad_open("");
-  rad_open("Usage:");
-  rad_open("\tradula -b binary [ Options ] [ Cerata ]");
-  rad_open("");
-  rad_open("Options:");
-  rad_open("\tdecyst    \tRemove binary cerata without preserving their cysts");
-  rad_open("");
-  rad_open("\t-h, help  \tDisplay this help message");
-  rad_open("");
-  rad_open("\tinstall   \tInstall binary cerata (default)");
-  rad_open("\tremove    \tRemove binary cerata while preserving their cyst(s)");
-  rad_open("\tsearch    \tSearch for binary cerata within the remote repositories");
-  rad_open("\tupgrade   \tUpgrade binary cerata");
 }
 
 void rad_ceras_help() {
@@ -128,6 +150,10 @@ void rad_ceras_help() {
   rad_open("");
   rad_open("\tl, lic, license, licenses        \tDisplay cerata license(s)");
   rad_open("\tn, nom, name                     \tDisplay cerata name(s)");
+  rad_open("");
+  rad_open("\t-q, quiet                        \tDecrease the verbosity level and don't prefix");
+  rad_open("\t                                 \tthe output with ~~");
+  rad_open("");
   rad_open("\ts, sum, checksum, sha512sum      \tDisplay cerata sha512sum(s)");
   rad_open("\tu, url, source                   \tDisplay cerata source(s)");
   rad_open("\tv, ver, version                  \tDisplay cerata version(s)");

@@ -8,7 +8,7 @@
 
 unsigned int ccache = 0;
 unsigned int parallel = 0;
-unsigned int sleep = 0;
+unsigned int quiet = 0;
 
 int main(int argc, char** argv) {
   int opt;
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         rad_help();
         return 0;
       case 'q':
-        sleep = 1;
+        quiet = 1;
         break;
       case 's':
         rad_open("species isn't available now\n");

@@ -3,6 +3,6 @@
 
 extern unsigned int ccache;
 extern unsigned int parallel;
-extern unsigned int sleep;
+extern unsigned int quiet;
 
 #endif
