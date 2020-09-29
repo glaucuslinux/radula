@@ -34,21 +34,16 @@ CERD=$GLAD/cerata
 
 # Opens the radula (mouth)
 rad_open() {
-  if [ $sleep -eq 0 ]; then
-    printf "\033[0;34m~~\033[0m %b\n" "$1"
-  else
-    printf "%b\n" "$1"
-  fi
+  [ $sleep -eq 0 ] && printf "\033[0;34m~~\033[0m "
+  printf "%b\n" "$1"
 }
 
 # Closes the radula (mouth)
 # Use `exit 1` instead of rad_close when you don't want to print anything
 rad_close() {
-  if [ $sleep -eq 0 ]; then
-    printf "\033[0;31m--\033[0m %b\n" "$1"
-  else
-    printf "%b\n" "$1"
-  fi
+  [ $sleep -eq 0 ] && printf "\033[0;31m--\033[0m "
+  printf "%b\n" "$1"
+
   exit 1
 }
 
