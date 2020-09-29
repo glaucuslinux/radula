@@ -1054,7 +1054,7 @@ rad_behave_bootstrap_cross_variables() {
   export HOSTCC=gcc
   export HOSTCXX=g++
 
-  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires setting)
+  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
   export CROSS_COMPILE=$TGT-
 
   export AR=$TGT-gcc-ar
