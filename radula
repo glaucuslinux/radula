@@ -12,90 +12,82 @@ LANG=C
 LC_ALL=C
 
 #
-# Default Behavior Variables
+# Default Variables
 #
 
-ccache=0
-parallel=1
-sleep=0
+bootstrap=no
+ccache=yes
+genome=x86-64
+init=finit
+kernel=yes
+parallel=yes
+sleep=no
+species=atlanticus
 
-# GLAucus Directory (check if running on a glaucus system or if bootstrapping)
-if [ -d /usr/cerata ]; then
+#
+# Source Configuration File
+#
+
+if [ -f /etc/radula.conf ]; then
+  . /etc/radula.conf
+elif [ -f /etc/rad.conf ]; then
+  . /etc/rad.conf
+elif [ -f radula.conf ]; then
+  . ./radula.conf
+elif [ -f rad.conf ]; then
+  . ./rad.conf
+fi
+
+#
+# Default Directories
+#
+
+if [ $bootstrap = no ]; then
   GLAD=/usr
 else
   GLAD=$PWD/..
 fi
-# CERata Directory
+
 CERD=$GLAD/cerata
 
 #
 # IO Functions
 #
 
-# Opens the radula (mouth)
-rad_open() {
-  [ $sleep -eq 0 ] && printf "\033[0;34m~~\033[0m "
-  printf "%b\n" "$1"
-}
-
-# Closes the radula (mouth)
 # Use `exit 1` instead of rad_close when you don't want to print anything
 rad_close() {
-  [ $sleep -eq 0 ] && printf "\033[0;31m--\033[0m "
+  [ $sleep = no ] && printf "\033[0;31m--\033[0m "
   printf "%b\n" "$1"
 
   exit 1
 }
 
-#
-# Information Functions
-#
-
-rad_version() {
-  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
-  rad_open 'Distributed under the terms of the ISC License'
-  rad_open
-  rad_open "$0 version 1.7.2 ($genome $species)"
+rad_open() {
+  [ $sleep = no ] && printf "\033[0;34m~~\033[0m "
+  printf "%b\n" "$1"
 }
 
-rad_help() {
+#
+# Help Functions
+#
+
+rad_behave_binary_help() {
   rad_version
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ Options ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
   rad_open
   rad_open 'Options:'
-  rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
-  rad_open '\t                \tbinary, bootstrap | reproduce, envenomate'
-  rad_open
-  rad_open '\tc, -c, --ceras  \tDisplay ceras information'
-  rad_open '\tg, -g, --genome \tDisplay current genome'
-  rad_open '\th, -h, --help   \tDisplay this help message'
-  rad_open "\tq, -q, --quiet  \tDecrease the verbosity level and don't prefix"
-  rad_open '\t                \tthe output with ~~'
-  rad_open
-  rad_open '\t       --sleep  \tSame as --quiet'
-  rad_open
-  rad_open '\ts, -s, --species\tDisplay current species'
-  rad_open '\tv, -v, --version\tDisplay current version number'
-}
-
-rad_behave_help() {
-  rad_version
-
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ Options ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\tb, bootstrap \tPerform bootstrap behavior'
-  rad_open '\te, envenomate\tPerform envenomate behavior'
+  rad_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
+  rad_open '\t   delete    \tSame as decyst'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
-  rad_open '\ti, binary    \tPerform binary behavior'
-  rad_open '\tr, reproduce \tSame as bootstrap'
+  rad_open '\ti, install   \tInstall binary cerata (default)'
+  rad_open '\tr, remove    \tRemove binary cerata while preserving their cyst(s)'
+  rad_open '\ts, search    \tSearch for binary cerata within the remote repositories'
+  rad_open '\tu, upgrade   \tUpgrade binary cerata'
 }
 
 rad_behave_bootstrap_help() {
@@ -140,23 +132,21 @@ rad_behave_envenomate_help() {
   rad_open '\tu, upgrade   \tUpgrade cerata'
 }
 
-rad_behave_binary_help() {
+rad_behave_help() {
   rad_version
 
   rad_open
   rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
+  rad_open "\t$0 [ b | -b | --behave ] [ Options ]"
   rad_open
   rad_open 'Options:'
-  rad_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
-  rad_open '\t   delete    \tSame as decyst'
+  rad_open '\tb, bootstrap \tPerform bootstrap behavior'
+  rad_open '\te, envenomate\tPerform envenomate behavior'
   rad_open
   rad_open '\th, -h, --help\tDisplay this help message'
   rad_open
-  rad_open '\ti, install   \tInstall binary cerata (default)'
-  rad_open '\tr, remove    \tRemove binary cerata while preserving their cyst(s)'
-  rad_open '\ts, search    \tSearch for binary cerata within the remote repositories'
-  rad_open '\tu, upgrade   \tUpgrade binary cerata'
+  rad_open '\ti, binary    \tPerform binary behavior'
+  rad_open '\tr, reproduce \tSame as bootstrap'
 }
 
 rad_ceras_help() {
@@ -179,13 +169,43 @@ rad_ceras_help() {
   rad_open "\ty, cys, cyst, cysts              \tDisplay cerata cyst(s)"
 }
 
+rad_help() {
+  rad_version
+
+  rad_open
+  rad_open 'Usage:'
+  rad_open "\t$0 [ Options ]"
+  rad_open
+  rad_open 'Options:'
+  rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
+  rad_open '\t                \tbinary, bootstrap | reproduce, envenomate'
+  rad_open
+  rad_open '\tc, -c, --ceras  \tDisplay ceras information'
+  rad_open '\tg, -g, --genome \tDisplay current genome'
+  rad_open '\th, -h, --help   \tDisplay this help message'
+  rad_open "\tq, -q, --quiet  \tDecrease the verbosity level and don't prefix"
+  rad_open '\t                \tthe output with ~~'
+  rad_open
+  rad_open '\t       --sleep  \tSame as --quiet'
+  rad_open
+  rad_open '\ts, -s, --species\tDisplay current species'
+  rad_open '\tv, -v, --version\tDisplay current version number'
+}
+
+rad_version() {
+  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
+  rad_open 'Distributed under the terms of the ISC License'
+  rad_open
+  rad_open "$0 version 1.8.0 ($genome $species)"
+}
+
 #
 # Common Behavior Variable Functions
 #
 
 # For custom ccache directories (or if host was neither Fedora nor Arch, the
 # user has to specify them in /etc/radula.conf using the `CCCH` variable (along
-# with ccache=1 beforehand).
+# with ccache=yes beforehand).
 rad_behave_ccache_variables() {
   CCCH=${1:-/usr/lib64/ccache:/usr/lib/ccache/bin}
   export PATH=$CCCH:$PATH
@@ -204,16 +224,16 @@ rad_behave_pkg_config_variables() {
 
 # teeth are radula's tools
 rad_behave_teeth_variables() {
-  if [ $sleep -eq 0 ]; then
+  if [ $sleep = no ]; then
     export AUTORECONF='autoreconf -fvis'
     export CHMOD='chmod -Rv'
     export CHOWN='chown -Rv'
     export LN='ln -fnsv'
 
-    if [ $parallel -eq 0 ]; then
-      export MAKE='make -j1 V=1'
+    if [ $parallel = yes ]; then
+      export MAKE="make -j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc ) V=1"
     else
-      export MAKE="make -j$parallel V=1"
+      export MAKE='make -j1 V=1'
     fi
 
     # Full path to not overlap with the install() function in .ceras files
@@ -228,10 +248,10 @@ rad_behave_teeth_variables() {
     export CHOWN='chown -R'
     export LN='ln -fns'
 
-    if [ $parallel -eq 0 ]; then
-      export MAKE='make -j1'
+    if [ $parallel = yes ]; then
+      export MAKE="make -j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc )"
     else
-      export MAKE="make -j$parallel"
+      export MAKE='make -j1'
     fi
 
     export MKDIR='/usr/bin/install -d'
@@ -245,40 +265,6 @@ rad_behave_teeth_variables() {
 #
 # Common Behavior Action Functions
 #
-
-rad_behave_verify() {
-  if [ $sleep -eq 0 ]; then
-    printf "$sum $SRCD/$nom/$1" | sha512sum -c
-  else
-    printf "$sum $SRCD/$nom/$1" | sha512sum -c > /dev/null
-  fi
-}
-
-rad_behave_fetch() {
-  if [ $ver = git ]; then
-    if [ $sleep eq 0 ]; then
-      git clone $url $SRCD/$nom
-    else
-      git clone -q $url $SRCD/$nom
-    fi
-  else
-    $MKDIR $SRCD/$nom
-
-    if [ $sleep -eq 0 ]; then
-      curl -Lo $SRCD/$nom/$1 $url
-    else
-      curl -Lso $SRCD/$nom/$1 $url
-    fi
-
-    rad_behave_verify $1 || rad_close "ceras $nom: verify exited with status $?"
-
-    if [ $sleep -eq 0 ]; then
-      tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
-    else
-      tar xf $SRCD/$nom/$1 -C $SRCD/$nom
-    fi
-  fi
-}
 
 rad_behave_check() {
   . $CERD/$1/ceras
@@ -309,15 +295,49 @@ rad_behave_construct() {
   install || rad_close "ceras $nom: install exited with status $?"
 }
 
+rad_behave_fetch() {
+  if [ $ver = git ]; then
+    if [ $sleep = no ]; then
+      git clone $url $SRCD/$nom
+    else
+      git clone -q $url $SRCD/$nom
+    fi
+  else
+    $MKDIR $SRCD/$nom
+
+    if [ $sleep = no ]; then
+      curl -Lo $SRCD/$nom/$1 $url
+    else
+      curl -Lso $SRCD/$nom/$1 $url
+    fi
+
+    rad_behave_verify $1 || rad_close "ceras $nom: verify exited with status $?"
+
+    if [ $sleep = no ]; then
+      tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
+    else
+      tar xf $SRCD/$nom/$1 -C $SRCD/$nom
+    fi
+  fi
+}
+
 rad_behave_gnu() {
   $RSYNC $CERD/binutils/config.$1 $2
 }
 
 rad_behave_patch() {
-  if [ $sleep -eq 0 ]; then
+  if [ $sleep = no ]; then
     patch -p$1 -i $CERD/$2/patches/$3/$4.patch
   else
     patch -p$1 -si $CERD/$2/patches/$3/$4.patch
+  fi
+}
+
+rad_behave_verify() {
+  if [ $sleep = no ]; then
+    printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c
+  else
+    printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c > /dev/null
   fi
 }
 
@@ -325,52 +345,14 @@ rad_behave_patch() {
 # Bootstrap Behavior Functions
 #
 
-rad_behave_bootstrap_require() {
-  rad_open 'Checking if host has all required packages...'
-  rad_open
-  rad_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
-  rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  [ $ccache -eq 1 ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
-  rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
-  rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
-  rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
-  rad_open "extlinux:  \t$(extlinux --version 2>&1 | cut -d' ' -f2)"
-  rad_open "findutils: \t$(find --version | sed 1q | cut -d' ' -f4)"
-  rad_open "g++:       \t$(g++ --version | sed 1q | cut -d' ' -f3)"
-  rad_open "gawk:      \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
-  rad_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
-  rad_open "git:       \t$(git --version | cut -d' ' -f3)"
-  rad_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
-  rad_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
-  rad_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "linux:     \t$(uname -r)"
-  rad_open "losetup:   \t$(losetup --version | cut -d' ' -f 4)"
-  rad_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
-  rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
-  rad_open "meson:     \t$(meson --version)"
-  rad_open "ninja:     \t$(ninja --version)"
-  rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
-  rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
-  rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
-  rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
-  rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
-  rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
-  rad_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
-  rad_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
-  rad_open "texinfo:   \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
-  rad_open "util-linux:\t$(losetup --version | cut -d' ' -f 4)"
-  rad_open "xz:        \t$(xz --version | sed 1q | cut -d' ' -f4)"
-  rad_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
-}
+rad_behave_bootstrap() {
+  rad_behave_bootstrap_${1}_variables
+  rad_behave_bootstrap_${1}_check
+  rad_behave_bootstrap_${1}_prepare
 
-rad_behave_bootstrap_initialize() {
-  $MKDIR $BAKD
+  rad_behave_bootstrap_${1}_construct
 
-  $MKDIR $SRCD
+  rad_behave_bootstrap_${1}_backup
 }
 
 # Architecture related variables explained (for rad_behave_bootstrap_arch):
@@ -569,6 +551,28 @@ rad_behave_bootstrap_arch_variables() {
   esac
 }
 
+rad_behave_bootstrap_clean() {
+  $RM $CRSD
+
+  $RM $TBLD
+
+  $RM $TLCD
+
+  $RM $XBLD
+}
+
+rad_behave_bootstrap_distclean() {
+  $RM $BAKD
+
+  $RM $GLAD/glaucus.img
+
+  $RM $SRCD
+
+  $RM $TMPD
+
+  rad_behave_bootstrap_clean
+}
+
 rad_behave_bootstrap_flags_variables() {
   # Common flags enabled in all species
   COMMON=-fcommon
@@ -692,11 +696,54 @@ rad_behave_bootstrap_flags_variables() {
   esac
 }
 
-# BAKD = BAcKup Directory
-# CRSD = CRoSs Directory
-# SRCD = SouRCes Directory
-# TMPD = TeMPorary Directory
-# TLCD = TooLChain Directory
+rad_behave_bootstrap_initialize() {
+  $MKDIR $BAKD
+
+  $MKDIR $SRCD
+}
+
+rad_behave_bootstrap_require() {
+  rad_open 'Checking if host has all required packages...'
+  rad_open
+  rad_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
+  rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
+  rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
+  [ $ccache = yes ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+  rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
+  rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
+  rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
+  rad_open "extlinux:  \t$(extlinux --version 2>&1 | cut -d' ' -f2)"
+  rad_open "findutils: \t$(find --version | sed 1q | cut -d' ' -f4)"
+  rad_open "g++:       \t$(g++ --version | sed 1q | cut -d' ' -f3)"
+  rad_open "gawk:      \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
+  rad_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
+  rad_open "git:       \t$(git --version | cut -d' ' -f3)"
+  rad_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
+  rad_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
+  rad_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "linux:     \t$(uname -r)"
+  rad_open "losetup:   \t$(losetup --version | cut -d' ' -f 4)"
+  rad_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
+  rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
+  rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
+  rad_open "meson:     \t$(meson --version)"
+  rad_open "ninja:     \t$(ninja --version)"
+  rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
+  rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
+  rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
+  rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
+  rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
+  rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
+  rad_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
+  rad_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
+  rad_open "texinfo:   \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
+  rad_open "util-linux:\t$(losetup --version | cut -d' ' -f 4)"
+  rad_open "xz:        \t$(xz --version | sed 1q | cut -d' ' -f4)"
+  rad_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
+}
+
 rad_behave_bootstrap_variables() {
   export BAKD=$GLAD/backup
   export CRSD=$GLAD/cross
@@ -709,30 +756,13 @@ rad_behave_bootstrap_variables() {
   rad_behave_teeth_variables
 }
 
-rad_behave_bootstrap() {
-  rad_behave_bootstrap_${1}_variables
-  rad_behave_bootstrap_${1}_check
-  rad_behave_bootstrap_${1}_prepare
-
-  rad_behave_bootstrap_${1}_construct
-
-  rad_behave_bootstrap_${1}_backup
-}
-
 #
 # Toolchain Stage Functions
 #
 
-# TTMP = Toolchain TeMPorary Directory
-# TBLD = Toolchain temporary BuiLDs Directory
-# TSRC = Toolchain temporary SouRCes Directory
-rad_behave_bootstrap_toolchain_variables() {
-  export TTMP=$TMPD/toolchain
-
-  export TSRC=$TTMP/src
-  export TBLD=$TTMP/builds
-
-  export BLD=$($CERD/binutils/config.guess)
+rad_behave_bootstrap_toolchain_backup() {
+  $RSYNC $CRSD $BAKD --delete
+  $RSYNC $TLCD $BAKD --delete
 }
 
 rad_behave_bootstrap_toolchain_check() {
@@ -743,16 +773,6 @@ rad_behave_bootstrap_toolchain_check() {
   rad_behave_check mpc
   rad_behave_check isl
   rad_behave_check gcc
-}
-
-rad_behave_bootstrap_toolchain_prepare() {
-  $MKDIR $CRSD
-
-  $MKDIR $TBLD
-
-  $MKDIR $TSRC
-
-  $MKDIR $TLCD
 }
 
 rad_behave_bootstrap_toolchain_construct() {
@@ -770,9 +790,14 @@ rad_behave_bootstrap_toolchain_construct() {
   esac
 }
 
-rad_behave_bootstrap_toolchain_backup() {
-  $RSYNC $CRSD $BAKD --delete
-  $RSYNC $TLCD $BAKD --delete
+rad_behave_bootstrap_toolchain_prepare() {
+  $MKDIR $CRSD
+
+  $MKDIR $TBLD
+
+  $MKDIR $TSRC
+
+  $MKDIR $TLCD
 }
 
 rad_behave_bootstrap_toolchain_release() {
@@ -800,45 +825,18 @@ rad_behave_bootstrap_toolchain_release() {
   tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' .
 }
 
-#
-# Cross Stage Functions
-#
+rad_behave_bootstrap_toolchain_variables() {
+  export TTMP=$TMPD/toolchain
 
-# XTMP = cross TeMPorary Directory
-# XBLD = Toolchain temporary BuiLDs Directory
-# XSRC = Toolchain temporary SouRCes Directory
-rad_behave_bootstrap_cross_variables() {
-  export XTMP=$TMPD/cross
-
-  export XBLD=$XTMP/builds
-  export XSRC=$XTMP/src
-
-  # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
-  #
-  # HOSTCC and HOSTCXX are optional (used in netbsd-curses for nbperf and tic).
-  export HOSTCC=gcc
-  export HOSTCXX=g++
-
-  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires setting)
-  export CROSS_COMPILE=$TGT-
-
-  export AR=$TGT-gcc-ar
-  export AS=$TGT-as
-  export CC=$TGT-gcc
-  export CPP="$TGT-gcc -E"
-  export CXX=$TGT-g++
-  export LD=$TGT-ld
-  export NM=$TGT-gcc-nm
-  export OBJCOPY=$TGT-objcopy
-  export OBJDUMP=$TGT-objdump
-  export RANLIB=$TGT-gcc-ranlib
-  export READELF=$TGT-readelf
-  export SIZE=$TGT-size
-  export STRINGS=$TGT-strings
-  export STRIP=$TGT-strip
+  export TSRC=$TTMP/src
+  export TBLD=$TTMP/builds
 
   export BLD=$($CERD/binutils/config.guess)
 }
+
+#
+# Cross Stage Functions
+#
 
 rad_behave_bootstrap_cross_check() {
   rad_behave_check iana-etc
@@ -849,6 +847,7 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check libressl
 
   rad_behave_check toybox
+  rad_behave_check bc
   rad_behave_check diffutils
   rad_behave_check file
   rad_behave_check findutils
@@ -905,16 +904,6 @@ rad_behave_bootstrap_cross_check() {
   esac
 }
 
-rad_behave_bootstrap_cross_prepare() {
-  $RSYNC $BAKD/cross $GLAD --delete
-  $RSYNC $BAKD/toolchain $GLAD --delete
-
-  $RM $XBLD
-  $MKDIR $XBLD
-
-  $MKDIR $XSRC
-}
-
 rad_behave_bootstrap_cross_construct() {
   rad_behave_construct cross iana-etc
   rad_behave_construct cross hydroskeleton
@@ -928,6 +917,7 @@ rad_behave_bootstrap_cross_construct() {
   rad_behave_construct cross libressl
 
   rad_behave_construct cross toybox
+  rad_behave_construct cross bc
   rad_behave_construct cross diffutils
   rad_behave_construct cross file
   rad_behave_construct cross findutils
@@ -986,18 +976,6 @@ rad_behave_bootstrap_cross_construct() {
   [ $kernel -eq 1 ] && rad_behave_construct cross linux
 }
 
-rad_behave_bootstrap_cross_strip() {
-  find $CRSD/etc -type d -empty -delete
-
-  find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
-  find $CRSD/usr \( -name *.so* -a ! -name *dbg \) -type f -exec strip \
-    --strip-unneeded -v {} \;
-  find $CRSD/usr -type f -exec strip -sv {} \;
-  find $CRSD/usr -name *.la -delete
-
-  $RM $CRSD/usr/lib/charset.alias
-}
-
 rad_behave_bootstrap_cross_img() {
   # Remove `-S` from rsync (for sudo and IO error)
   RSYNC='rsync -vaHAXx'
@@ -1042,37 +1020,64 @@ rad_behave_bootstrap_cross_img() {
   $RSYNC $1 $BAKD
 }
 
-rad_behave_bootstrap_clean() {
-  $RM $CRSD
-
-  $RM $TBLD
-
-  $RM $TLCD
+rad_behave_bootstrap_cross_prepare() {
+  $RSYNC $BAKD/cross $GLAD --delete
+  $RSYNC $BAKD/toolchain $GLAD --delete
 
   $RM $XBLD
+  $MKDIR $XBLD
+
+  $MKDIR $XSRC
 }
 
-rad_behave_bootstrap_distclean() {
-  $RM $BAKD
+rad_behave_bootstrap_cross_strip() {
+  find $CRSD/etc -type d -empty -delete
 
-  $RM $GLAD/glaucus.img
+  find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
+  find $CRSD/usr \( -name *.so* -a ! -name *dbg \) -type f -exec strip \
+    --strip-unneeded -v {} \;
+  find $CRSD/usr -type f -exec strip -sv {} \;
+  find $CRSD/usr -name *.la -delete
 
-  $RM $SRCD
+  $RM $CRSD/usr/lib/charset.alias
+}
 
-  $RM $TMPD
+rad_behave_bootstrap_cross_variables() {
+  export XTMP=$TMPD/cross
 
-  rad_behave_bootstrap_clean
+  export XBLD=$XTMP/builds
+  export XSRC=$XTMP/src
+
+  # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
+  #
+  # HOSTCC and HOSTCXX are optional (used in netbsd-curses for nbperf and tic).
+  export HOSTCC=gcc
+  export HOSTCXX=g++
+
+  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires setting)
+  export CROSS_COMPILE=$TGT-
+
+  export AR=$TGT-gcc-ar
+  export AS=$TGT-as
+  export CC=$TGT-gcc
+  export CPP="$TGT-gcc -E"
+  export CXX=$TGT-g++
+  export LD=$TGT-ld
+  export NM=$TGT-gcc-nm
+  export OBJCOPY=$TGT-objcopy
+  export OBJDUMP=$TGT-objdump
+  export RANLIB=$TGT-gcc-ranlib
+  export READELF=$TGT-readelf
+  export SIZE=$TGT-size
+  export STRINGS=$TGT-strings
+  export STRIP=$TGT-strip
+
+  export BLD=$($CERD/binutils/config.guess)
 }
 
 #
 # Main
 #
-
-if [ -f /etc/radula.conf ]; then
-  . /etc/radula.conf
-elif [ -f /etc/rad.conf ]; then
-  . /etc/rad.conf
-fi
 
 # Tip: prefix or postfix your options with the letter `q` to correctly silence
 # radula.
@@ -1095,12 +1100,6 @@ while [ $# -ge 0 ]; do
     b | -b | --behave)
       case $2 in
         b | bootstrap | r | reproduce)
-          # Default Bootstrap Variables
-          genome=x86-64
-          init=finit
-          kernel=1
-          species=atlanticus
-
           case $3 in
             c | clean)
               rad_behave_bootstrap_variables
@@ -1163,7 +1162,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_toolchain_release /tmp/toolchain
               ;;
             t | toolchain)
-              if [ $sleep -eq 0 ]; then
+              if [ $sleep = no ]; then
                 $0 b b r
               else
                 $0 q b b r
@@ -1175,7 +1174,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_variables
 
               # Only for the toolchain as we're relying on the host's ccache
-              [ $ccache -eq 1 ] && rad_behave_ccache_variables $CCCH
+              [ $ccache = yes ] && rad_behave_ccache_variables $CCCH
 
               rad_behave_bootstrap_initialize
 
@@ -1192,7 +1191,7 @@ while [ $# -ge 0 ]; do
               rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
             x | cross)
-              if [ $sleep -eq 0 ]; then
+              if [ $sleep = no ]; then
                 $0 b b r
               else
                 $0 q b b r
@@ -1300,7 +1299,11 @@ while [ $# -ge 0 ]; do
         . $CERD/$2/ceras
 
         for i in n v u s y c l; do
-          [ $sleep -eq 0 ] && $0 c $i $2 || $0 q c $i $2
+          if [ $sleep = no ]; then
+            $0 c $i $2
+          else
+            $0 q c $i $2
+          fi
         done
       else
         rad_ceras_help
@@ -1326,12 +1329,6 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     v | -v | --version)
-      # Check if /etc/radula.conf got sourced
-      if [ -z $genome ]; then
-        genome=x86-64
-        species=atlanticus
-      fi
-
       rad_version
       exit 0
       ;;
