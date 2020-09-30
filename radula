@@ -196,7 +196,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.8.0 ($genome $species)"
+  rad_open "$0 version 1.8.1 ($genome $species)"
 }
 
 #
@@ -352,7 +352,7 @@ rad_behave_bootstrap() {
 
   rad_behave_bootstrap_${1}_construct
 
-  rad_behave_bootstrap_${1}_backup
+  [ $1 = toolchain ] && rad_behave_bootstrap_${1}_backup
 }
 
 # Architecture related variables explained (for rad_behave_bootstrap_arch):
@@ -853,7 +853,6 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check findutils
   rad_behave_check grep
   rad_behave_check hostname
-  rad_behave_check rsync
   rad_behave_check sed
   rad_behave_check which
 
@@ -868,6 +867,9 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check pigz
   rad_behave_check zstd
   rad_behave_check libarchive
+
+  # rsync comes after compression related cerata were built
+  rad_behave_check rsync
 
   rad_behave_check netbsd-curses
   rad_behave_check oksh
@@ -923,7 +925,6 @@ rad_behave_bootstrap_cross_construct() {
   rad_behave_construct cross findutils
   rad_behave_construct cross grep
   rad_behave_construct cross hostname
-  rad_behave_construct cross rsync
   rad_behave_construct cross sed
   rad_behave_construct cross which
 
@@ -938,6 +939,9 @@ rad_behave_bootstrap_cross_construct() {
   rad_behave_construct cross pigz
   rad_behave_construct cross zstd
   rad_behave_construct cross libarchive
+
+  # rsync comes after compression related cerata were built
+  rad_behave_construct cross rsync
 
   rad_behave_construct cross netbsd-curses
   rad_behave_construct cross oksh
@@ -973,7 +977,7 @@ rad_behave_bootstrap_cross_construct() {
       ;;
   esac
 
-  [ $kernel -eq 1 ] && rad_behave_construct cross linux
+  [ $kernel = yes ] && rad_behave_construct cross linux
 }
 
 rad_behave_bootstrap_cross_img() {
