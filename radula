@@ -1270,7 +1270,7 @@ while [ $# -ge 0 ]; do
             elif [ $cys_len -eq 1 ]; then
               rad_open "Cyst:        \t$cys"
             else
-              rad_open 'Cyst:        \t~~'
+              rad_open 'Cysts:        \t~~'
             fi
             ;;
           c | cnt | concentrate | concentrates)
@@ -1280,7 +1280,7 @@ while [ $# -ge 0 ]; do
             elif [ $cnt_len -eq 1 ]; then
               rad_open "Concentrate: \t$cnt"
             else
-              rad_open 'Concentrate: \t~~'
+              rad_open 'Concentrates: \t~~'
             fi
             ;;
           l | lic | license | licenses)
