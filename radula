@@ -713,6 +713,7 @@ rad_behave_bootstrap_require() {
   rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
   rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
 
+  # ccache uses cmake for configuration and building as of 4.0
   if [ $ccache = yes ]; then
     rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
     rad_open "cmake:     \t$(cmake --version | sed 1q | cut -d' ' -f3)"
