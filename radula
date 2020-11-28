@@ -196,18 +196,18 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.8.1 ($genome $species)"
+  rad_open "$0 version 1.8.2 ($genome $species)"
 }
 
 #
 # Common Behavior Variable Functions
 #
 
-# For custom ccache directories (or if host was neither Fedora nor Arch, the
+# For custom ccache directories (or if host was neither Arch nor Fedora, the
 # user has to specify them in /etc/radula.conf using the `CCCH` variable (along
 # with ccache=yes beforehand).
 rad_behave_ccache_variables() {
-  CCCH=${1:-/usr/lib64/ccache:/usr/lib/ccache/bin}
+  CCCH=${1:-/usr/lib/ccache/bin:/usr/lib64/ccache}
   export PATH=$CCCH:$PATH
 }
 
@@ -299,8 +299,10 @@ rad_behave_fetch() {
   if [ $ver = git ]; then
     if [ $sleep = no ]; then
       git clone $url $SRCD/$nom
+      git -C $SRCD/$nom checkout $cmt
     else
       git clone -q $url $SRCD/$nom
+      git -C $SRCD/$nom checkout -q $cmt
     fi
   else
     $MKDIR $SRCD/$nom
@@ -710,7 +712,12 @@ rad_behave_bootstrap_require() {
   rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f5)"
   rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
   rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
-  [ $ccache = yes ] && rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+
+  if [ $ccache = yes ]; then
+    rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+    rad_open "cmake:     \t$(cmake --version | sed 1q | cut -d' ' -f3)"
+  fi
+
   rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
   rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
   rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
