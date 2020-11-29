@@ -1069,7 +1069,7 @@ rad_behave_bootstrap_cross_variables() {
   export CC=$TGT-gcc
   export CPP="$TGT-gcc -E"
   export CXX=$TGT-g++
-  export LD=$TGT-ld
+  export LD=$TGT-ld.bfd
   export NM=$TGT-gcc-nm
   export OBJCOPY=$TGT-objcopy
   export OBJDUMP=$TGT-objdump
