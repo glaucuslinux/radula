@@ -196,7 +196,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.8.2 ($genome $species)"
+  rad_open "$0 version 1.8.3 ($genome $species)"
 }
 
 #
@@ -565,11 +565,8 @@ rad_behave_bootstrap_clean() {
 
 rad_behave_bootstrap_distclean() {
   $RM $BAKD
-
   $RM $GLAD/glaucus.img
-
   $RM $SRCD
-
   $RM $TMPD
 
   rad_behave_bootstrap_clean
@@ -700,7 +697,6 @@ rad_behave_bootstrap_flags_variables() {
 
 rad_behave_bootstrap_initialize() {
   $MKDIR $BAKD
-
   $MKDIR $SRCD
 }
 
@@ -802,7 +798,6 @@ rad_behave_bootstrap_toolchain_prepare() {
   $MKDIR $CRSD
 
   $MKDIR $TBLD
-
   $MKDIR $TSRC
 
   $MKDIR $TLCD
@@ -892,7 +887,7 @@ rad_behave_bootstrap_cross_check() {
   rad_behave_check util-linux
   rad_behave_check e2fsprogs
   rad_behave_check kmod
-  # hwids comes after pciutils since we're the final hwdata is provided by hwids
+  # hwids comes after pciutils since the final hwdata is provided by hwids
   rad_behave_check pciutils
   rad_behave_check hwids
   rad_behave_check eudev
@@ -1278,7 +1273,7 @@ while [ $# -ge 0 ]; do
             elif [ $cys_len -eq 1 ]; then
               rad_open "Cyst:        \t$cys"
             else
-              rad_open 'Cysts:        \t~~'
+              rad_open 'Cysts:       \t~~'
             fi
             ;;
           c | cnt | concentrate | concentrates)
@@ -1288,7 +1283,7 @@ while [ $# -ge 0 ]; do
             elif [ $cnt_len -eq 1 ]; then
               rad_open "Concentrate: \t$cnt"
             else
-              rad_open 'Concentrates: \t~~'
+              rad_open 'Concentrates:\t~~'
             fi
             ;;
           l | lic | license | licenses)
@@ -1298,7 +1293,7 @@ while [ $# -ge 0 ]; do
             elif [ $lic_len -eq 1 ]; then
               rad_open "License:     \t$lic"
             else
-              rad_open 'License:     \t~~'
+              rad_open 'Licenses:    \t~~'
             fi
             ;;
           *)
