@@ -700,6 +700,7 @@ rad_behave_bootstrap_flags_variables() {
 
 rad_behave_bootstrap_initialize() {
   $MKDIR $BAKD
+
   $MKDIR $SRCD
 }
 
