@@ -56,8 +56,8 @@ CERD=$GLAD/cerata
 
 # Use `exit 1` instead of rad_close when you don't want to print anything
 rad_close() {
-  [ $sleep = no ] && printf "\033[0;31m--\033[0m "
-  printf "%b\n" "$1"
+  [ $sleep = no ] && printf "\033[0;31m--\033[0m " >&2
+  printf "%b\n" "$1" >&2
 
   exit 1
 }
