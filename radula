@@ -1225,7 +1225,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch_variables
               rad_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap cross || {
+              rad_behave_bootstrap cross > $LOGD/cross.log || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
