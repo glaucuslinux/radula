@@ -568,6 +568,8 @@ rad_behave_bootstrap_distclean() {
 
   $RM $GLAD/glaucus.img
 
+  $RM $LOGD
+
   $RM $SRCD
 
   $RM $TMPD
@@ -701,6 +703,8 @@ rad_behave_bootstrap_flags_variables() {
 rad_behave_bootstrap_initialize() {
   $MKDIR $BAKD
 
+  $MKDIR $LOGD
+
   $MKDIR $SRCD
 }
 
@@ -755,6 +759,7 @@ rad_behave_bootstrap_require() {
 rad_behave_bootstrap_variables() {
   export BAKD=$GLAD/backup
   export CRSD=$GLAD/cross
+  export LOGD=$GLAD/log
   export SRCD=$GLAD/src
   export TMPD=$GLAD/tmp
   export TLCD=$GLAD/toolchain
@@ -1195,7 +1200,7 @@ while [ $# -ge 0 ]; do
               # No rad_behave_bootstrap_flags optimizations for the toolchain
               rad_behave_bootstrap_arch_variables
 
-              rad_behave_bootstrap toolchain || {
+              rad_behave_bootstrap toolchain > $LOGD/toolchain.log || {
                 rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
@@ -1219,7 +1224,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch_variables
               rad_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap cross || {
+              rad_behave_bootstrap cross > $LOGD/cross.log || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
