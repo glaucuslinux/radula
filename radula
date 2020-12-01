@@ -733,6 +733,7 @@ rad_behave_bootstrap_require() {
   rad_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
   rad_open "git:       \t$(git --version | cut -d' ' -f3)"
   rad_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
+  rad_open "gperf:     \t$(gperf --version | sed 1q | cut -d' ' -f3)"
   rad_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
   rad_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
   rad_open "linux:     \t$(uname -r)"
@@ -1224,7 +1225,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch_variables
               rad_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap cross > $LOGD/cross.log || {
+              rad_behave_bootstrap cross || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
