@@ -196,7 +196,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.8.3 ($genome $species)"
+  rad_open "$0 version 1.8.4 ($genome $species)"
 }
 
 #
@@ -746,6 +746,7 @@ rad_behave_bootstrap_require() {
   rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
   rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
   rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
+  rad_open "pkgconf:   \t$(pkgconf --version)"
   rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
   rad_open "samu:      \t$(samu --version)"
   rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
