@@ -231,7 +231,7 @@ rad_behave_teeth_variables() {
     export LN='ln -fnsv'
 
     if [ $parallel = yes ]; then
-      export MAKE="make -j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc) V=1"
+      export MAKE="make -j V=1"
     else
       export MAKE='make -j1 V=1'
     fi
@@ -249,7 +249,7 @@ rad_behave_teeth_variables() {
     export LN='ln -fns'
 
     if [ $parallel = yes ]; then
-      export MAKE="make -j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc)"
+      export MAKE="make -j"
     else
       export MAKE='make -j1'
     fi
