@@ -742,12 +742,12 @@ rad_behave_bootstrap_require() {
   rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
   rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
   rad_open "meson:     \t$(meson --version)"
-  rad_open "ninja:     \t$(ninja --version)"
   rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
   rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
   rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
   rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
   rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
+  rad_open "samu:      \t$(samu --version)"
   rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
   rad_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
   rad_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
@@ -1078,8 +1078,10 @@ rad_behave_bootstrap_cross_variables() {
   export AR=$TGT-gcc-ar
   export AS=$TGT-as
   export CC=$TGT-gcc
+  export CC_LD=bfd
   export CPP="$TGT-gcc -E"
   export CXX=$TGT-g++
+  export CXX_LD=bfd
   export LD=$TGT-ld.bfd
   export NM=$TGT-gcc-nm
   export OBJCOPY=$TGT-objcopy
