@@ -891,7 +891,7 @@ rad_behave_bootstrap_cross_check() {
 
   rad_behave_check libcap
   rad_behave_check iproute2
-  #rad_behave_check iputils
+  rad_behave_check iputils
 
   rad_behave_check psmisc
   rad_behave_check procps-ng
@@ -963,7 +963,7 @@ rad_behave_bootstrap_cross_construct() {
 
   rad_behave_construct cross libcap
   rad_behave_construct cross iproute2
-  #rad_behave_construct cross iputils
+  rad_behave_construct cross iputils
 
   rad_behave_construct cross psmisc
   rad_behave_construct cross procps-ng
