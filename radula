@@ -214,8 +214,8 @@ rad_behave_ccache_variables() {
 rad_behave_pkg_config_variables() {
   # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
   # automatically prefixed to PATH and LIBDIR)
-  export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig:$1/usr/share/pkgconfig
-  export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig:$1/usr/share/pkgconfig
+  export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig
   # The trailing forward slash is important (envenomate on a glaucus system)
   export PKG_CONFIG_SYSROOT_DIR=$1/
   export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$1/usr/include
