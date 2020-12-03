@@ -232,11 +232,8 @@ rad_behave_teeth_variables() {
 
     if [ $parallel = yes ]; then
       export MAKE='make -j V=1'
-      # Building the linux kernel in parallel will freeze your host system
-      export MAKENOPARALLEL='make -j1 V=1'
     else
       export MAKE='make -j1 V=1'
-      export MAKENOPARALLEL="$MAKE"
     fi
 
     # Full path to not overlap with the install() function in .ceras files
@@ -253,11 +250,8 @@ rad_behave_teeth_variables() {
 
     if [ $parallel = yes ]; then
       export MAKE='make -j'
-      # Building the linux kernel in parallel will freeze your host system
-      export MAKENOPARALLEL='make -j1'
     else
       export MAKE='make -j1'
-      export MAKENOPARALLEL="$MAKE"
     fi
 
     export MKDIR='/usr/bin/install -d'
