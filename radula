@@ -231,6 +231,8 @@ rad_behave_teeth_variables() {
     export LN='ln -fnsv'
 
     if [ $parallel = yes ]; then
+      # Don't use anything higher than `nproc + 1` (like `nproc * 1.5` or `-j`
+      # alone) or you'll risk having your host system freeze
       export MAKE="make -j$(printf "%b" "$(expr $(nproc) + 1)\n") V=1"
     else
       export MAKE='make -j1 V=1'
@@ -249,7 +251,8 @@ rad_behave_teeth_variables() {
     export LN='ln -fns'
 
     if [ $parallel = yes ]; then
-      export MAKE='make -j'
+      # Don't use anything higher than `nproc + 1` (like `nproc * 1.5` or `-j`
+      # alone) or you'll risk having your host system freeze
       export MAKE="make -j$(printf "%b" "$(expr $(nproc) + 1)\n")"
     else
       export MAKE='make -j1'
