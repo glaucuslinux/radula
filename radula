@@ -28,14 +28,14 @@ species=atlanticus
 # Source Configuration File
 #
 
-if [ -f /etc/radula.conf ]; then
-  . /etc/radula.conf
-elif [ -f /etc/rad.conf ]; then
+if [ -f /etc/rad.conf ]; then
   . /etc/rad.conf
-elif [ -f radula.conf ]; then
-  . ./radula.conf
+elif [ -f /etc/radula.conf ]; then
+  . /etc/radula.conf
 elif [ -f rad.conf ]; then
   . ./rad.conf
+elif [ -f radula.conf ]; then
+  . ./radula.conf
 fi
 
 #
@@ -196,7 +196,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.8.4 ($genome $species)"
+  rad_open "$0 version 1.8.5 ($genome $species)"
 }
 
 #
