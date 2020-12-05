@@ -196,7 +196,7 @@ rad_version() {
   rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   rad_open 'Distributed under the terms of the ISC License'
   rad_open
-  rad_open "$0 version 1.9.0 ($genome $species)"
+  rad_open "$0 version 1.9.1 ($genome $species)"
 }
 
 #
@@ -224,6 +224,8 @@ rad_behave_pkg_config_variables() {
 
 # teeth are radula's tools
 rad_behave_teeth_variables() {
+  export MAKE=make
+
   if [ $sleep = no ]; then
     export AUTORECONF='autoreconf -fvis'
     export CHMOD='chmod -Rv'
@@ -231,11 +233,11 @@ rad_behave_teeth_variables() {
     export LN='ln -fnsv'
 
     if [ $parallel = yes ]; then
-      # Don't use anything higher than `nproc + 1` (like `nproc * 1.5` or `-j`
-      # alone) or you'll risk having your host system freeze
-      export MAKE="make -j$(printf "%b" "$(expr $(nproc) + 1)\n") V=1"
+      # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
+      # `-j` alone) or you'll risk having your host system freeze.
+      export MAKEFLAGS="-j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc) V=1"
     else
-      export MAKE='make -j1 V=1'
+      export MAKEFLAGS='-j1 V=1'
     fi
 
     # Full path to not overlap with the install() function in .ceras files
@@ -251,11 +253,11 @@ rad_behave_teeth_variables() {
     export LN='ln -fns'
 
     if [ $parallel = yes ]; then
-      # Don't use anything higher than `nproc + 1` (like `nproc * 1.5` or `-j`
-      # alone) or you'll risk having your host system freeze
-      export MAKE="make -j$(printf "%b" "$(expr $(nproc) + 1)\n")"
+      # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
+      # `-j` alone) or you'll risk having your host system freeze.
+      export MAKEFLAGS="-j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc)"
     else
-      export MAKE='make -j1'
+      export MAKEFLAGS=-j1
     fi
 
     export MKDIR='/usr/bin/install -d'
