@@ -295,10 +295,22 @@ rad_behave_construct() {
   . $CERD/$2/ceras
   . $CERD/$nom/$1.ceras
 
-  prepare || rad_close "ceras $nom: prepare exited with status $?"
-  configure || rad_close "ceras $nom: configure exited with status $?"
-  build || rad_close "ceras $nom: build exited with status $?"
-  install || rad_close "ceras $nom: install exited with status $?"
+  rad_open "$nom $ver"
+
+  rad_behave_construct_stage_function $1 prepare || rad_close "ceras $nom: prepare exited with status $?"
+  rad_behave_construct_stage_function $1 configure || rad_close "ceras $nom: configure exited with status $?"
+  rad_behave_construct_stage_function $1 build || rad_close "ceras $nom: build exited with status $?"
+  rad_behave_construct_stage_function $1 install || rad_close "ceras $nom: install exited with status $?"
+
+  rad_open
+}
+
+rad_behave_construct_stage_function() {
+  rad_open $2
+  $MKDIR $LOGD/$1/$nom/$2
+  $2 > $LOGD/$1/$nom/$2/out.log 2> $LOGD/$1/$nom/$2/err.log || \
+    tail $LOGD/$1/$nom/$2/out.log $LOGD/$1/$nom/$2/err.log | sed -e \
+    "s/^/$(printf '\033[0;31m-- ')/" -e "s/$/$(printf '\033[0m')/"
 }
 
 rad_behave_fetch() {
@@ -562,6 +574,8 @@ rad_behave_bootstrap_arch_variables() {
 rad_behave_bootstrap_clean() {
   $RM $CRSD
 
+  $RM $LOGD
+
   $RM $TBLD
 
   $RM $TLCD
@@ -574,13 +588,12 @@ rad_behave_bootstrap_distclean() {
 
   $RM $GLAD/glaucus.img
 
-  $RM $LOGD
-
   $RM $SRCD
 
-  $RM $TMPD
-
   rad_behave_bootstrap_clean
+
+  # Only remove `tmp` completely after `$TBLD` and `$XBLD` are removed
+  $RM $TMPD
 }
 
 rad_behave_bootstrap_flags_variables() {
@@ -709,8 +722,6 @@ rad_behave_bootstrap_flags_variables() {
 rad_behave_bootstrap_initialize() {
   $MKDIR $BAKD
 
-  $MKDIR $LOGD
-
   $MKDIR $SRCD
 }
 
@@ -811,8 +822,11 @@ rad_behave_bootstrap_toolchain_construct() {
   esac
 }
 
+# Remember that rad_behave_bootstrap_clean is run beforehand
 rad_behave_bootstrap_toolchain_prepare() {
   $MKDIR $CRSD
+
+  $MKDIR $TLOG
 
   $MKDIR $TBLD
 
@@ -847,6 +861,8 @@ rad_behave_bootstrap_toolchain_release() {
 }
 
 rad_behave_bootstrap_toolchain_variables() {
+  export TLOG=$LOGD/toolchain
+
   export TTMP=$TMPD/toolchain
 
   export TSRC=$TTMP/src
@@ -1051,6 +1067,9 @@ rad_behave_bootstrap_cross_prepare() {
   $RSYNC $BAKD/cross $GLAD --delete
   $RSYNC $BAKD/toolchain $GLAD --delete
 
+  $RM $XLOG
+  $MKDIR $XLOG
+
   $RM $XBLD
   $MKDIR $XBLD
 
@@ -1070,6 +1089,8 @@ rad_behave_bootstrap_cross_strip() {
 }
 
 rad_behave_bootstrap_cross_variables() {
+  export XLOG=$LOGD/cross
+
   export XTMP=$TMPD/cross
 
   export XBLD=$XTMP/builds
@@ -1215,7 +1236,7 @@ while [ $# -ge 0 ]; do
               # No rad_behave_bootstrap_flags optimizations for the toolchain
               rad_behave_bootstrap_arch_variables
 
-              rad_behave_bootstrap toolchain > $LOGD/toolchain.log || {
+              rad_behave_bootstrap toolchain || {
                 rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
@@ -1239,7 +1260,7 @@ while [ $# -ge 0 ]; do
               rad_behave_bootstrap_arch_variables
               rad_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap cross > $LOGD/cross.log || {
+              rad_behave_bootstrap cross || {
                 rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
