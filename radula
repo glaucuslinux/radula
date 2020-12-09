@@ -22,6 +22,7 @@ init=finit
 kernel=yes
 parallel=yes
 species=atlanticus
+test=no
 
 #
 # Source Configuration File
@@ -277,6 +278,11 @@ radula_behave_construct() {
 
   radula_open 34 \* build
   radula_behave_construct_stage_function $1 build || radula_close "ceras $nom: build exited with status $?"
+
+  if [ test = yes ]; then
+    radula_open 36 ? test
+    radula_behave_construct_stage_function $1 test || radula_close "ceras $nom: test exited with status $?"
+  fi
 
   radula_open 32 \> install
   radula_behave_construct_stage_function $1 install || radula_close "ceras $nom: install exited with status $?"
