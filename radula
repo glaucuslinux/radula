@@ -21,19 +21,14 @@ genome=x86-64
 init=finit
 kernel=yes
 parallel=yes
-sleep=no
 species=atlanticus
 
 #
 # Source Configuration File
 #
 
-if [ -f /etc/rad.conf ]; then
-  . /etc/rad.conf
-elif [ -f /etc/radula.conf ]; then
+if [ -f /etc/radula.conf ]; then
   . /etc/radula.conf
-elif [ -f rad.conf ]; then
-  . ./rad.conf
 elif [ -f radula.conf ]; then
   . ./radula.conf
 fi
@@ -54,149 +49,147 @@ CERD=$GLAD/cerata
 # IO Functions
 #
 
-# Use `exit 1` instead of rad_close when you don't want to print anything
-rad_close() {
-  [ $sleep = no ] && printf "\033[0;31m--\033[0m " >&2
-  printf "%b\n" "$1" >&2
+# Use `exit 1` instead of radula_close when you don't want to print anything
+radula_close() {
+  printf '\033[0;31m--\033[0m %b\n' "$1" >&2
 
   exit 1
 }
 
-rad_open() {
-  [ $sleep = no ] && printf "\033[0;34m~~\033[0m "
-  printf "%b\n" "$1"
+radula_open() {
+  printf "\033[0;34m~~\033[0m "
+  if [ $# -gt 1 ]; then
+    printf "\033[1;${1}m$2\033[0m "
+
+    shift 2
+
+    # The extra trailing space and printf are necessary
+    printf '%b ' "$@"
+    printf '\n'
+  else
+    printf '%b\n' "$1"
+  fi
 }
 
 #
 # Help Functions
 #
 
-rad_behave_binary_help() {
-  rad_version
+radula_behave_binary_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
-  rad_open '\t   delete    \tSame as decyst'
-  rad_open
-  rad_open '\th, -h, --help\tDisplay this help message'
-  rad_open
-  rad_open '\ti, install   \tInstall binary cerata (default)'
-  rad_open '\tr, remove    \tRemove binary cerata while preserving their cyst(s)'
-  rad_open '\ts, search    \tSearch for binary cerata within the remote repositories'
-  rad_open '\tu, upgrade   \tUpgrade binary cerata'
+  radula_open 'Usage:'
+  radula_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
+  radula_open
+  radula_open '\th, -h, --help\tDisplay this help message'
+  radula_open
+  radula_open '\ti, install   \tInstall binary cerata (default)'
+  radula_open '\tr, remove    \tRemove binary cerata while preserving their cyst(s)'
+  radula_open '\ts, search    \tSearch for binary cerata within the remote repositories'
+  radula_open '\tu, upgrade   \tUpgrade binary cerata'
 }
 
-rad_behave_bootstrap_help() {
-  rad_version
+radula_behave_bootstrap_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ b | bootstrap | r | reproduce ] [ Options ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\tc, clean     \tClean up while preserving sources and backups'
-  rad_open '\td, distclean \tClean up everything'
-  rad_open
-  rad_open '\th, -h, --help\tDisplay this help message'
-  rad_open
-  rad_open '\ti, image     \tCreate a .img file of the glaucus system'
-  rad_open '\tl, list      \tList supported genomes and species'
-  rad_open '\tr, require   \tCheck if host has all required packages'
-  rad_open
-  rad_open '\ts, release   \tRelease a compressed tarball of the toolchain'
-  rad_open
-  rad_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
-  rad_open '\tx, cross     \tBootstrap a cross compiled glaucus system'
+  radula_open
+  radula_open 'Usage:'
+  radula_open "\t$0 [ b | -b | --behave ] [ b | bootstrap ] [ Options ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open '\tc, clean     \tClean up while preserving sources and backups'
+  radula_open '\td, distclean \tClean up everything'
+  radula_open
+  radula_open '\th, -h, --help\tDisplay this help message'
+  radula_open
+  radula_open '\ti, image     \tCreate a .img file of the glaucus system'
+  radula_open '\tl, list      \tList supported genomes and species'
+  radula_open '\tr, require   \tCheck if host has all required packages'
+  radula_open '\ts, release   \tRelease a compressed tarball of the toolchain'
+  radula_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
+  radula_open '\tx, cross     \tBootstrap a cross compiled glaucus system'
 }
 
-rad_behave_envenomate_help() {
-  rad_version
+radula_behave_envenomate_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
-  rad_open '\t   delete    \tSame as decyst'
-  rad_open
-  rad_open '\th, -h, --help\tDisplay this help message'
-  rad_open
-  rad_open '\ti, install   \tInstall cerata from source (default)'
-  rad_open '\tr, remove    \tRemove cerata while preserving their cyst(s)'
-  rad_open '\ts, search    \tSearch for cerata within the cerata directory'
-  rad_open '\tu, upgrade   \tUpgrade cerata'
+  radula_open
+  radula_open 'Usage:'
+  radula_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
+  radula_open
+  radula_open '\th, -h, --help\tDisplay this help message'
+  radula_open
+  radula_open '\ti, install   \tInstall cerata from source (default)'
+  radula_open '\tr, remove    \tRemove cerata while preserving their cyst(s)'
+  radula_open '\ts, search    \tSearch for cerata within the cerata directory'
+  radula_open '\tu, upgrade   \tUpgrade cerata'
 }
 
-rad_behave_help() {
-  rad_version
+radula_behave_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ b | -b | --behave ] [ Options ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\tb, bootstrap \tPerform bootstrap behavior'
-  rad_open '\te, envenomate\tPerform envenomate behavior'
-  rad_open
-  rad_open '\th, -h, --help\tDisplay this help message'
-  rad_open
-  rad_open '\ti, binary    \tPerform binary behavior'
-  rad_open '\tr, reproduce \tSame as bootstrap'
+  radula_open
+  radula_open 'Usage:'
+  radula_open "\t$0 [ b | -b | --behave ] [ Options ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open '\tb, bootstrap \tPerform bootstrap behavior'
+  radula_open '\te, envenomate\tPerform envenomate behavior'
+  radula_open
+  radula_open '\th, -h, --help\tDisplay this help message'
+  radula_open
+  radula_open '\ti, binary    \tPerform binary behavior'
 }
 
-rad_ceras_help() {
-  rad_version
+radula_ceras_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Cerata ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
-  rad_open
-  rad_open '\th, -h, --help                    \tDisplay this help message'
-  rad_open
-  rad_open "\tl, lic, license, licenses        \tDisplay cerata license(s)"
-  rad_open "\tn, nom, name                     \tDisplay cerata name(s)"
-  rad_open "\ts, sum, checksum, sha512sum      \tDisplay cerata sha512sum(s)"
-  rad_open "\tu, url, source                   \tDisplay cerata source(s)"
-  rad_open "\tv, ver, version                  \tDisplay cerata version(s)"
-  rad_open "\ty, cys, cyst, cysts              \tDisplay cerata cyst(s)"
+  radula_open
+  radula_open 'Usage:'
+  radula_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Cerata ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
+  radula_open
+  radula_open '\th, -h, --help                    \tDisplay this help message'
+  radula_open
+  radula_open "\tl, lic, license, licenses        \tDisplay cerata license(s)"
+  radula_open "\tn, nom, name                     \tDisplay cerata name(s)"
+  radula_open "\ts, sum, checksum, sha512sum      \tDisplay cerata sha512sum(s)"
+  radula_open "\tu, url, source                   \tDisplay cerata source(s)"
+  radula_open "\tv, ver, version                  \tDisplay cerata version(s)"
+  radula_open "\ty, cys, cyst, cysts              \tDisplay cerata cyst(s)"
 }
 
-rad_help() {
-  rad_version
+radula_help() {
+  radula_version
 
-  rad_open
-  rad_open 'Usage:'
-  rad_open "\t$0 [ Options ]"
-  rad_open
-  rad_open 'Options:'
-  rad_open '\tb, -b, --behave \tPerform any of the following behaviors:'
-  rad_open '\t                \tbinary, bootstrap | reproduce, envenomate'
-  rad_open
-  rad_open '\tc, -c, --ceras  \tDisplay ceras information'
-  rad_open '\tg, -g, --genome \tDisplay current genome'
-  rad_open '\th, -h, --help   \tDisplay this help message'
-  rad_open "\tq, -q, --quiet  \tDecrease the verbosity level and don't prefix"
-  rad_open '\t                \tthe output with ~~'
-  rad_open
-  rad_open '\t       --sleep  \tSame as --quiet'
-  rad_open
-  rad_open '\ts, -s, --species\tDisplay current species'
-  rad_open '\tv, -v, --version\tDisplay current version number'
+  radula_open
+  radula_open 'Usage:'
+  radula_open "\t$0 [ Options ]"
+  radula_open
+  radula_open 'Options:'
+  radula_open '\tb, -b, --behave \tPerform any of the following behaviors:'
+  radula_open '\t                \tbinary, bootstrap, envenomate'
+  radula_open
+  radula_open '\tc, -c, --ceras  \tDisplay ceras information'
+  radula_open '\tg, -g, --genome \tDisplay current genome'
+  radula_open '\th, -h, --help   \tDisplay this help message'
+  radula_open '\ts, -s, --species\tDisplay current species'
+  radula_open '\tv, -v, --version\tDisplay current version number'
 }
 
-rad_version() {
-  rad_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
-  rad_open 'Distributed under the terms of the ISC License'
-  rad_open
-  rad_open "$0 version 1.9.1 ($genome $species)"
+radula_version() {
+  radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
+  radula_open 'Distributed under the terms of the ISC License'
+  radula_open
+  radula_open "$0 version 2.0.0 ($genome $species)"
 }
 
 #
@@ -206,12 +199,12 @@ rad_version() {
 # For custom ccache directories (or if host was neither Arch nor Fedora, the
 # user has to specify them in /etc/radula.conf using the `CCCH` variable (along
 # with ccache=yes beforehand).
-rad_behave_ccache_variables() {
+radula_behave_ccache_variables() {
   CCCH=${1:-/usr/lib/ccache/bin:/usr/lib64/ccache}
   export PATH=$CCCH:$PATH
 }
 
-rad_behave_pkg_config_variables() {
+radula_behave_pkg_config_variables() {
   # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
   # automatically prefixed to PATH and LIBDIR)
   export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig
@@ -223,60 +216,38 @@ rad_behave_pkg_config_variables() {
 }
 
 # teeth are radula's tools
-rad_behave_teeth_variables() {
+radula_behave_teeth_variables() {
+  export AUTORECONF='autoreconf -fvis'
+  export CHMOD='chmod -Rv'
+  export CHOWN='chown -Rv'
+  export LN='ln -fnsv'
   export MAKE=make
 
-  if [ $sleep = no ]; then
-    export AUTORECONF='autoreconf -fvis'
-    export CHMOD='chmod -Rv'
-    export CHOWN='chown -Rv'
-    export LN='ln -fnsv'
-
-    if [ $parallel = yes ]; then
-      # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
-      # `-j` alone) or you'll risk having your host system freeze.
-      export MAKEFLAGS="-j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc) V=1"
-    else
-      export MAKEFLAGS='-j1 V=1'
-    fi
-
-    # Full path to not overlap with the install() function in .ceras files
-    export MKDIR='/usr/bin/install -dv'
-    export MV='mv -v'
-    export RM='rm -frv'
-    export RSYNC='rsync -vaHAXSx'
-    export UMOUNT='umount -fqRv'
+  if [ $parallel = yes ]; then
+    # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
+    # `-j` alone) or you'll risk having your host system freeze.
+    export MAKEFLAGS="-j$(printf '%b' "$(nproc) * 1.5 / 1\n" | bc) V=1"
   else
-    export AUTORECONF='autoreconf -fis'
-    export CHMOD='chmod -R'
-    export CHOWN='chown -R'
-    export LN='ln -fns'
-
-    if [ $parallel = yes ]; then
-      # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
-      # `-j` alone) or you'll risk having your host system freeze.
-      export MAKEFLAGS="-j$(printf "%b" "$(nproc) * 1.5 / 1\n" | bc)"
-    else
-      export MAKEFLAGS=-j1
-    fi
-
-    export MKDIR='/usr/bin/install -d'
-    export MV=mv
-    export RM='rm -fr'
-    export RSYNC='rsync -aHAXSx'
-    export UMOUNT='umount -fqR'
+    export MAKEFLAGS='-j1 V=1'
   fi
+
+  # Full path to not overlap with the install() function in .ceras files
+  export MKDIR='/usr/bin/install -dv'
+  export MV='mv -v'
+  export RM='rm -frv'
+  export RSYNC='rsync -vaHAXSx'
+  export UMOUNT='umount -fqRv'
 }
 
 #
 # Common Behavior Action Functions
 #
 
-rad_behave_check() {
+radula_behave_check() {
   . $CERD/$1/ceras
 
   if [ ! -d $SRCD/$nom ]; then
-    rad_behave_fetch $(basename $url) || rad_close "ceras $nom: fetch exited with status $?"
+    radula_behave_fetch $(basename $url) || radula_close "ceras $nom: fetch exited with status $?"
   # In the case of a directory existing in $SRCD, and only if it's not a git
   # repository, then verify the tarball inside (if the tarball was previously
   # extracted, then verifying it won't matter much because the extracted
@@ -287,95 +258,80 @@ rad_behave_check() {
   # be if the tarball was already broken, but then again it was verified before
   # so how could that happen?
   elif [ $ver != git ]; then
-    rad_behave_verify $(basename $url) || rad_close "ceras $nom: verify exited with status $?"
+    radula_behave_verify $(basename $url) || radula_close "ceras $nom: verify exited with status $?"
   fi
 }
 
-rad_behave_construct() {
+radula_behave_construct() {
   . $CERD/$2/ceras
   . $CERD/$nom/$1.ceras
 
-  rad_open "$nom $ver"
+  radula_open "$nom $ver"
 
-  rad_behave_construct_stage_function $1 prepare || rad_close "ceras $nom: prepare exited with status $?"
-  rad_behave_construct_stage_function $1 configure || rad_close "ceras $nom: configure exited with status $?"
-  rad_behave_construct_stage_function $1 build || rad_close "ceras $nom: build exited with status $?"
-  rad_behave_construct_stage_function $1 install || rad_close "ceras $nom: install exited with status $?"
+  radula_open 33 \< prepare
+  radula_behave_construct_stage_function $1 prepare || radula_close "ceras $nom: prepare exited with status $?"
 
-  rad_open
+  radula_open 35 ! configure
+  radula_behave_construct_stage_function $1 configure || radula_close "ceras $nom: configure exited with status $?"
+
+  radula_open 34 \* build
+  radula_behave_construct_stage_function $1 build || radula_close "ceras $nom: build exited with status $?"
+
+  radula_open 32 \> install
+  radula_behave_construct_stage_function $1 install || radula_close "ceras $nom: install exited with status $?"
+
+  radula_open
 }
 
-rad_behave_construct_stage_function() {
-  rad_open $2
-  $MKDIR $LOGD/$1/$nom/$2
+radula_behave_construct_stage_function() {
+  $MKDIR $LOGD/$1/$nom/$2 > /dev/null
   $2 > $LOGD/$1/$nom/$2/out.log 2> $LOGD/$1/$nom/$2/err.log || \
     tail $LOGD/$1/$nom/$2/out.log $LOGD/$1/$nom/$2/err.log | sed -e \
     "s/^/$(printf '\033[0;31m-- ')/" -e "s/$/$(printf '\033[0m')/"
 }
 
-rad_behave_fetch() {
+radula_behave_fetch() {
   if [ $ver = git ]; then
-    if [ $sleep = no ]; then
-      git clone $url $SRCD/$nom
-      git -C $SRCD/$nom checkout $cmt
-    else
-      git clone -q $url $SRCD/$nom
-      git -C $SRCD/$nom checkout -q $cmt
-    fi
+    git clone $url $SRCD/$nom
+    git -C $SRCD/$nom checkout $cmt
   else
     $MKDIR $SRCD/$nom
 
-    if [ $sleep = no ]; then
-      curl -Lo $SRCD/$nom/$1 $url
-    else
-      curl -Lso $SRCD/$nom/$1 $url
-    fi
+    curl -Lo $SRCD/$nom/$1 $url
 
-    rad_behave_verify $1 || rad_close "ceras $nom: verify exited with status $?"
+    radula_behave_verify $1 || radula_close "ceras $nom: verify exited with status $?"
 
-    if [ $sleep = no ]; then
-      tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
-    else
-      tar xf $SRCD/$nom/$1 -C $SRCD/$nom
-    fi
+    tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
   fi
 }
 
-rad_behave_gnu() {
+radula_behave_gnu() {
   $RSYNC $CERD/binutils/config.$1 $2
 }
 
-rad_behave_patch() {
-  if [ $sleep = no ]; then
-    patch -p$1 -i $CERD/$2/patches/$3/$4.patch
-  else
-    patch -p$1 -si $CERD/$2/patches/$3/$4.patch
-  fi
+radula_behave_patch() {
+  patch -p$1 -i $CERD/$2/patches/$3/$4.patch
 }
 
-rad_behave_verify() {
-  if [ $sleep = no ]; then
-    printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c
-  else
-    printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c > /dev/null
-  fi
+radula_behave_verify() {
+  printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c
 }
 
 #
 # Bootstrap Behavior Functions
 #
 
-rad_behave_bootstrap() {
-  rad_behave_bootstrap_${1}_variables
-  rad_behave_bootstrap_${1}_check
-  rad_behave_bootstrap_${1}_prepare
+radula_behave_bootstrap() {
+  radula_behave_bootstrap_${1}_variables
+  radula_behave_bootstrap_${1}_check
+  radula_behave_bootstrap_${1}_prepare
 
-  rad_behave_bootstrap_${1}_construct
+  radula_behave_bootstrap_${1}_construct
 
-  [ $1 = toolchain ] && rad_behave_bootstrap_${1}_backup
+  [ $1 = toolchain ] && radula_behave_bootstrap_${1}_backup
 }
 
-# Architecture related variables explained (for rad_behave_bootstrap_arch):
+# Architecture related variables explained (for radula_behave_bootstrap_arch):
 #
 # ARCH stands for the technically correct architecture (except for ones with a
 # dash in them '-', then they get turned to underscores '_').
@@ -386,7 +342,7 @@ rad_behave_bootstrap() {
 # variable GCARCH).
 #
 # FARCH stands for Flags ARCH, which means options/flags that are related to a
-# certain architecture and are passed in rad_behave_bootstrap_flags.
+# certain architecture and are passed in radula_behave_bootstrap_flags.
 #
 # GCARCH stands for Gcc Configuration ARCH, which means options/flags that are
 # related to a certain architecture and are passed the `gcc` ceras configure
@@ -406,7 +362,7 @@ rad_behave_bootstrap() {
 #
 # LIARCH stands for Linux Image ARCH, which refers to the directory where
 # `linux` stores its image file after it has been built.
-rad_behave_bootstrap_arch_variables() {
+radula_behave_bootstrap_arch_variables() {
   case $genome in
     aarch64 | armv8-a | arm64)
       export ARCH=aarch64
@@ -416,7 +372,7 @@ rad_behave_bootstrap_arch_variables() {
       export FARCH='-mabi=lp64 -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -march=armv8-a -mtune=generic'
 
       export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
-      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -497,7 +453,7 @@ rad_behave_bootstrap_arch_variables() {
       export FARCH="-mcpu=$ARCH -mabi=elfv2"
 
       export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -518,7 +474,7 @@ rad_behave_bootstrap_arch_variables() {
       export FARCH="-mcpu=$ARCH -mabi=elfv2"
 
       export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64"
 
       export MARCH=powerpc64
 
@@ -536,7 +492,7 @@ rad_behave_bootstrap_arch_variables() {
       export FARCH='-mabi=lp64d -march=rv64imafdc -mtune=rocket'
 
       export GCARCH='--with-arch=rv64imafdc --with-tune=rocket --with-abi=lp64d'
-      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
 
@@ -554,7 +510,7 @@ rad_behave_bootstrap_arch_variables() {
       export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
 
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
-      export GPARCH="rad_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=x86_64
 
@@ -571,32 +527,34 @@ rad_behave_bootstrap_arch_variables() {
   esac
 }
 
-rad_behave_bootstrap_clean() {
-  $RM $CRSD
+radula_behave_bootstrap_clean() {
+  $RM $CRSD > /dev/null
 
-  $RM $LOGD
+  $RM $LOGD > /dev/null
 
-  $RM $TBLD
+  $RM $TBLD > /dev/null
 
-  $RM $TLCD
+  $RM $TLCD > /dev/null
 
-  $RM $XBLD
+  $RM $XBLD > /dev/null
+
+  radula_open 'clean complete'
 }
 
-rad_behave_bootstrap_distclean() {
-  $RM $BAKD
+radula_behave_bootstrap_distclean() {
+  $RM $BAKD > /dev/null
 
   $RM $GLAD/glaucus.img
 
-  $RM $SRCD
+  $RM $SRCD > /dev/null
 
-  rad_behave_bootstrap_clean
+  radula_behave_bootstrap_clean
 
   # Only remove `tmp` completely after `$TBLD` and `$XBLD` are removed
   $RM $TMPD
 }
 
-rad_behave_bootstrap_flags_variables() {
+radula_behave_bootstrap_flags_variables() {
   # Common flags enabled in all species
   COMMON=-fcommon
   DEBUG=-g0
@@ -719,63 +677,63 @@ rad_behave_bootstrap_flags_variables() {
   esac
 }
 
-rad_behave_bootstrap_initialize() {
+radula_behave_bootstrap_initialize() {
   $MKDIR $BAKD
 
   $MKDIR $SRCD
 }
 
-rad_behave_bootstrap_require() {
-  rad_open 'Checking if host has all required packages...'
-  rad_open
-  rad_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
-  rad_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f5)"
-  rad_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
-  rad_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
+radula_behave_bootstrap_require() {
+  radula_open 'Checking if host has all required packages...'
+  radula_open
+  radula_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
+  radula_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
+  radula_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f5)"
+  radula_open "bison:     \t$(bison --version | sed 1q | cut -d' ' -f4)"
+  radula_open "bzip2:     \t$(bzip2 --version 2>&1 < /dev/null | sed 1q | cut -d' ' -f8 | sed s/,//)"
 
   # ccache uses cmake for configuration and building as of 4.0
   if [ $ccache = yes ]; then
-    rad_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
-    rad_open "cmake:     \t$(cmake --version | sed 1q | cut -d' ' -f3)"
+    radula_open "ccache:    \t$(ccache --version | sed 1q | cut -d' ' -f3)"
+    radula_open "cmake:     \t$(cmake --version | sed 1q | cut -d' ' -f3)"
   fi
 
-  rad_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
-  rad_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
-  rad_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
-  rad_open "extlinux:  \t$(extlinux --version 2>&1 | cut -d' ' -f2)"
-  rad_open "findutils: \t$(find --version | sed 1q | cut -d' ' -f4)"
-  rad_open "g++:       \t$(g++ --version | sed 1q | cut -d' ' -f3)"
-  rad_open "gawk:      \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
-  rad_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
-  rad_open "git:       \t$(git --version | cut -d' ' -f3)"
-  rad_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
-  rad_open "gperf:     \t$(gperf --version | sed 1q | cut -d' ' -f3)"
-  rad_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
-  rad_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "linux:     \t$(uname -r)"
-  rad_open "losetup:   \t$(losetup --version | cut -d' ' -f 4)"
-  rad_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
-  rad_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
-  rad_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
-  rad_open "meson:     \t$(meson --version)"
-  rad_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
-  rad_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
-  rad_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
-  rad_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
-  rad_open "pkgconf:   \t$(pkgconf --version)"
-  rad_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
-  rad_open "samu:      \t$(samu --version)"
-  rad_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
-  rad_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
-  rad_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
-  rad_open "texinfo:   \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
-  rad_open "util-linux:\t$(losetup --version | cut -d' ' -f 4)"
-  rad_open "xz:        \t$(xz --version | sed 1q | cut -d' ' -f4)"
-  rad_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
+  radula_open "coreutils: \t$(ls --version | sed 1q | cut -d' ' -f4)"
+  radula_open "curl:      \t$(curl --version | sed 1q | cut -d' ' -f2)"
+  radula_open "diffutils: \t$(diff --version | sed 1q | cut -d' ' -f4)"
+  radula_open "extlinux:  \t$(extlinux --version 2>&1 | cut -d' ' -f2)"
+  radula_open "findutils: \t$(find --version | sed 1q | cut -d' ' -f4)"
+  radula_open "g++:       \t$(g++ --version | sed 1q | cut -d' ' -f3)"
+  radula_open "gawk:      \t$(gawk --version | sed 1q | cut -d' ' -f3 | sed s/,//)"
+  radula_open "gcc:       \t$(gcc --version | sed 1q | cut -d' ' -f3)"
+  radula_open "git:       \t$(git --version | cut -d' ' -f3)"
+  radula_open "glibc:     \t$(/lib/libc.so.6 | sed 1q | cut -d' ' -f9 | sed s/\.$//)"
+  radula_open "gperf:     \t$(gperf --version | sed 1q | cut -d' ' -f3)"
+  radula_open "grep:      \t$(grep --version | sed 1q | cut -d' ' -f4)"
+  radula_open "gzip:      \t$(gzip --version | sed 1q | cut -d' ' -f2)"
+  radula_open "linux:     \t$(uname -r)"
+  radula_open "losetup:   \t$(losetup --version | cut -d' ' -f 4)"
+  radula_open "lzip:      \t$(lzip --version | sed 1q | cut -d' ' -f2)"
+  radula_open "m4:        \t$(m4 --version | sed 1q | cut -d' ' -f4)"
+  radula_open "make:      \t$(make --version | sed 1q | cut -d' ' -f3)"
+  radula_open "meson:     \t$(meson --version)"
+  radula_open "parted:    \t$(parted --version | sed 1q | cut -d' ' -f 4)"
+  radula_open "partx:     \t$(partx --version | cut -d' ' -f 4)"
+  radula_open "patch:     \t$(patch --version | sed 1q | cut -d' ' -f3)"
+  radula_open "perl:      \t$(perl -V:version | cut -d"'" -f2)"
+  radula_open "pkgconf:   \t$(pkgconf --version)"
+  radula_open "rsync:     \t$(rsync --version | sed 1q | cut -d' ' -f4)"
+  radula_open "samu:      \t$(samu --version)"
+  radula_open "sed:       \t$(sed --version | sed 1q | cut -d' ' -f4)"
+  radula_open "syslinux:  \t$(syslinux --version 2>&1 | cut -d' ' -f2)"
+  radula_open "tar:       \t$(tar --version | sed 1q | cut -d' ' -f4)"
+  radula_open "texinfo:   \t$(makeinfo --version | sed 1q | cut -d' ' -f4)"
+  radula_open "util-linux:\t$(losetup --version | cut -d' ' -f 4)"
+  radula_open "xz:        \t$(xz --version | sed 1q | cut -d' ' -f4)"
+  radula_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
 }
 
-rad_behave_bootstrap_variables() {
+radula_behave_bootstrap_variables() {
   export BAKD=$GLAD/bak
   export CRSD=$GLAD/cross
   export LOGD=$GLAD/log
@@ -785,45 +743,45 @@ rad_behave_bootstrap_variables() {
 
   export PATH=$TLCD/bin:$PATH
 
-  rad_behave_teeth_variables
+  radula_behave_teeth_variables
 }
 
 #
 # Toolchain Stage Functions
 #
 
-rad_behave_bootstrap_toolchain_backup() {
+radula_behave_bootstrap_toolchain_backup() {
   $RSYNC $CRSD $BAKD --delete
   $RSYNC $TLCD $BAKD --delete
 }
 
-rad_behave_bootstrap_toolchain_check() {
-  rad_behave_check musl
-  rad_behave_check binutils
-  rad_behave_check gmp
-  rad_behave_check mpfr
-  rad_behave_check mpc
-  rad_behave_check isl
-  rad_behave_check gcc
+radula_behave_bootstrap_toolchain_check() {
+  radula_behave_check musl
+  radula_behave_check binutils
+  radula_behave_check gmp
+  radula_behave_check mpfr
+  radula_behave_check mpc
+  radula_behave_check isl
+  radula_behave_check gcc
 }
 
-rad_behave_bootstrap_toolchain_construct() {
-  rad_behave_construct toolchain musl-headers
-  rad_behave_construct toolchain binutils
-  rad_behave_construct toolchain gcc
-  rad_behave_construct toolchain musl
-  rad_behave_construct toolchain libgcc
-  rad_behave_construct toolchain libstdc++-v3
+radula_behave_bootstrap_toolchain_construct() {
+  radula_behave_construct toolchain musl-headers
+  radula_behave_construct toolchain binutils
+  radula_behave_construct toolchain gcc
+  radula_behave_construct toolchain musl
+  radula_behave_construct toolchain libgcc
+  radula_behave_construct toolchain libstdc++-v3
 
   case $species in
     atlanticus | performance | albino | libre)
-      rad_behave_construct toolchain libgomp
+      radula_behave_construct toolchain libgomp
       ;;
   esac
 }
 
-# Remember that rad_behave_bootstrap_clean is run beforehand
-rad_behave_bootstrap_toolchain_prepare() {
+# Remember that radula_behave_bootstrap_clean is run beforehand
+radula_behave_bootstrap_toolchain_prepare() {
   $MKDIR $CRSD
 
   $MKDIR $TLOG
@@ -835,7 +793,7 @@ rad_behave_bootstrap_toolchain_prepare() {
   $MKDIR $TLCD
 }
 
-rad_behave_bootstrap_toolchain_release() {
+radula_behave_bootstrap_toolchain_release() {
   $MKDIR $1
 
   $RSYNC $BAKD/cross $1 --delete
@@ -860,7 +818,7 @@ rad_behave_bootstrap_toolchain_release() {
   tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' .
 }
 
-rad_behave_bootstrap_toolchain_variables() {
+radula_behave_bootstrap_toolchain_variables() {
   export TLOG=$LOGD/toolchain
 
   export TTMP=$TMPD/toolchain
@@ -875,151 +833,151 @@ rad_behave_bootstrap_toolchain_variables() {
 # Cross Stage Functions
 #
 
-rad_behave_bootstrap_cross_check() {
-  rad_behave_check iana-etc
-  rad_behave_check radula
+radula_behave_bootstrap_cross_check() {
+  radula_behave_check iana-etc
+  radula_behave_check radula
 
-  rad_behave_check linux
-  rad_behave_check shadow
-  rad_behave_check libressl
+  radula_behave_check linux
+  radula_behave_check shadow
+  radula_behave_check libressl
 
-  rad_behave_check toybox
-  rad_behave_check bc
-  rad_behave_check diffutils
-  rad_behave_check file
-  rad_behave_check findutils
-  rad_behave_check grep
-  rad_behave_check hostname
-  rad_behave_check sed
-  rad_behave_check which
+  radula_behave_check toybox
+  radula_behave_check bc
+  radula_behave_check diffutils
+  radula_behave_check file
+  radula_behave_check findutils
+  radula_behave_check grep
+  radula_behave_check hostname
+  radula_behave_check sed
+  radula_behave_check which
 
-  rad_behave_check lbzip2
-  rad_behave_check lbzip2-utils
-  rad_behave_check lz4
-  rad_behave_check lzlib
-  rad_behave_check plzip
-  rad_behave_check xz
+  radula_behave_check lbzip2
+  radula_behave_check lbzip2-utils
+  radula_behave_check lz4
+  radula_behave_check lzlib
+  radula_behave_check plzip
+  radula_behave_check xz
   # zlib-ng should be built before pigz as pigz requires zlib.h
-  rad_behave_check zlib-ng
-  rad_behave_check pigz
-  rad_behave_check zstd
-  rad_behave_check libarchive
+  radula_behave_check zlib-ng
+  radula_behave_check pigz
+  radula_behave_check zstd
+  radula_behave_check libarchive
 
   # rsync comes after compression related cerata were built
-  rad_behave_check rsync
+  radula_behave_check rsync
 
-  rad_behave_check netbsd-curses
-  rad_behave_check oksh
-  rad_behave_check dash
+  radula_behave_check netbsd-curses
+  radula_behave_check oksh
+  radula_behave_check dash
 
-  rad_behave_check libcap
-  rad_behave_check iproute2
-  rad_behave_check iputils
-  rad_behave_check dhcp
+  radula_behave_check libcap
+  radula_behave_check iproute2
+  radula_behave_check iputils
+  radula_behave_check dhcp
 
-  rad_behave_check psmisc
-  rad_behave_check procps-ng
-  rad_behave_check util-linux
-  rad_behave_check e2fsprogs
-  rad_behave_check kmod
+  radula_behave_check psmisc
+  radula_behave_check procps-ng
+  radula_behave_check util-linux
+  radula_behave_check e2fsprogs
+  radula_behave_check kmod
   # hwids comes after pciutils since the final hwdata is provided by hwids
-  rad_behave_check pciutils
-  rad_behave_check hwids
-  rad_behave_check eudev
+  radula_behave_check pciutils
+  radula_behave_check hwids
+  radula_behave_check eudev
 
   case $init in
     f | finit)
-      rad_behave_check libuev
-      rad_behave_check libite
-      rad_behave_check finit
+      radula_behave_check libuev
+      radula_behave_check libite
+      radula_behave_check finit
       ;;
     s | s6)
-      rad_behave_check skalibs
-      rad_behave_check execline
-      rad_behave_check s6
-      rad_behave_check s6-linux-init
-      rad_behave_check s6-rc
-      rad_behave_check s6-boot-scripts
+      radula_behave_check skalibs
+      radula_behave_check execline
+      radula_behave_check s6
+      radula_behave_check s6-linux-init
+      radula_behave_check s6-rc
+      radula_behave_check s6-boot-scripts
       ;;
   esac
 }
 
-rad_behave_bootstrap_cross_construct() {
-  rad_behave_construct cross iana-etc
-  rad_behave_construct cross hydroskeleton
-  rad_behave_construct cross cerata
-  rad_behave_construct cross radula
+radula_behave_bootstrap_cross_construct() {
+  radula_behave_construct cross iana-etc
+  radula_behave_construct cross hydroskeleton
+  radula_behave_construct cross cerata
+  radula_behave_construct cross radula
 
-  rad_behave_construct cross musl-utils
-  rad_behave_construct cross linux-headers
+  radula_behave_construct cross musl-utils
+  radula_behave_construct cross linux-headers
 
-  rad_behave_construct cross shadow
-  rad_behave_construct cross libressl
+  radula_behave_construct cross shadow
+  radula_behave_construct cross libressl
 
-  rad_behave_construct cross toybox
-  rad_behave_construct cross bc
-  rad_behave_construct cross diffutils
-  rad_behave_construct cross file
-  rad_behave_construct cross findutils
-  rad_behave_construct cross grep
-  rad_behave_construct cross hostname
-  rad_behave_construct cross sed
-  rad_behave_construct cross which
+  radula_behave_construct cross toybox
+  radula_behave_construct cross bc
+  radula_behave_construct cross diffutils
+  radula_behave_construct cross file
+  radula_behave_construct cross findutils
+  radula_behave_construct cross grep
+  radula_behave_construct cross hostname
+  radula_behave_construct cross sed
+  radula_behave_construct cross which
 
-  rad_behave_construct cross lbzip2
-  rad_behave_construct cross lbzip2-utils
-  rad_behave_construct cross lz4
-  rad_behave_construct cross lzlib
-  rad_behave_construct cross plzip
-  rad_behave_construct cross xz
+  radula_behave_construct cross lbzip2
+  radula_behave_construct cross lbzip2-utils
+  radula_behave_construct cross lz4
+  radula_behave_construct cross lzlib
+  radula_behave_construct cross plzip
+  radula_behave_construct cross xz
   # zlib-ng should be built before pigz as pigz requires zlib.h
-  rad_behave_construct cross zlib-ng
-  rad_behave_construct cross pigz
-  rad_behave_construct cross zstd
-  rad_behave_construct cross libarchive
+  radula_behave_construct cross zlib-ng
+  radula_behave_construct cross pigz
+  radula_behave_construct cross zstd
+  radula_behave_construct cross libarchive
 
   # rsync comes after compression related cerata were built
-  rad_behave_construct cross rsync
+  radula_behave_construct cross rsync
 
-  rad_behave_construct cross netbsd-curses
-  rad_behave_construct cross oksh
-  rad_behave_construct cross dash
+  radula_behave_construct cross netbsd-curses
+  radula_behave_construct cross oksh
+  radula_behave_construct cross dash
 
-  rad_behave_construct cross libcap
-  rad_behave_construct cross iproute2
-  rad_behave_construct cross iputils
-  rad_behave_construct cross dhcp
+  radula_behave_construct cross libcap
+  radula_behave_construct cross iproute2
+  radula_behave_construct cross iputils
+  radula_behave_construct cross dhcp
 
-  rad_behave_construct cross psmisc
-  rad_behave_construct cross procps-ng
-  rad_behave_construct cross util-linux
-  rad_behave_construct cross e2fsprogs
-  rad_behave_construct cross kmod
+  radula_behave_construct cross psmisc
+  radula_behave_construct cross procps-ng
+  radula_behave_construct cross util-linux
+  radula_behave_construct cross e2fsprogs
+  radula_behave_construct cross kmod
   # hwids comes after pciutils since we're the final hwdata is provided by hwids
-  rad_behave_construct cross pciutils
-  rad_behave_construct cross hwids
-  rad_behave_construct cross eudev
+  radula_behave_construct cross pciutils
+  radula_behave_construct cross hwids
+  radula_behave_construct cross eudev
 
   case $init in
     f | finit)
-      rad_behave_construct cross libuev
-      rad_behave_construct cross libite
-      rad_behave_construct cross finit
+      radula_behave_construct cross libuev
+      radula_behave_construct cross libite
+      radula_behave_construct cross finit
       ;;
     s | s6)
-      rad_behave_construct cross skalibs
-      rad_behave_construct cross execline
-      rad_behave_construct cross s6
-      rad_behave_construct cross s6-linux-init
-      rad_behave_construct cross s6-rc
-      rad_behave_construct cross s6-boot-scripts
+      radula_behave_construct cross skalibs
+      radula_behave_construct cross execline
+      radula_behave_construct cross s6
+      radula_behave_construct cross s6-linux-init
+      radula_behave_construct cross s6-rc
+      radula_behave_construct cross s6-boot-scripts
       ;;
   esac
 
-  [ $kernel = yes ] && rad_behave_construct cross linux
+  [ $kernel = yes ] && radula_behave_construct cross linux
 }
 
-rad_behave_bootstrap_cross_img() {
+radula_behave_bootstrap_cross_img() {
   # Remove `-S` from rsync (for sudo and IO error)
   RSYNC='rsync -vaHAXx'
 
@@ -1046,7 +1004,7 @@ rad_behave_bootstrap_cross_img() {
 
   $RM $4/lost+found
 
-  $RSYNC $CRSD/ $4 || rad_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/ $4 || radula_close 'Please bootstrap a cross compiled glaucus system first!'
 
   $MKDIR $4/boot/extlinux
   $RSYNC other/extlinux.conf.$init $4/boot/extlinux/extlinux.conf
@@ -1063,7 +1021,7 @@ rad_behave_bootstrap_cross_img() {
   $RSYNC $1 $BAKD
 }
 
-rad_behave_bootstrap_cross_prepare() {
+radula_behave_bootstrap_cross_prepare() {
   $RSYNC $BAKD/cross $GLAD --delete
   $RSYNC $BAKD/toolchain $GLAD --delete
 
@@ -1076,7 +1034,7 @@ rad_behave_bootstrap_cross_prepare() {
   $MKDIR $XSRC
 }
 
-rad_behave_bootstrap_cross_strip() {
+radula_behave_bootstrap_cross_strip() {
   find $CRSD/etc -type d -empty -delete
 
   find $CRSD/usr -name *.a -type f -exec strip -gv {} \;
@@ -1088,7 +1046,7 @@ rad_behave_bootstrap_cross_strip() {
   $RM $CRSD/usr/lib/charset.alias
 }
 
-rad_behave_bootstrap_cross_variables() {
+radula_behave_bootstrap_cross_variables() {
   export XLOG=$LOGD/cross
 
   export XTMP=$TMPD/cross
@@ -1132,161 +1090,157 @@ rad_behave_bootstrap_cross_variables() {
 # Main
 #
 
-# Tip: prefix or postfix your options with the letter `q` to correctly silence
-# radula.
-#
-# Currently the flag "require" wrongly turns the quiet signal on since the word
-# "require" has a "q" in it. This needs to be fixed.
-case "$@" in
-  *q* | *-q* | *--quiet* | *--sleep*)
-    sleep=1
-    ;;
-esac
-
-# rad l q [g, s] doesn't work since list expects genome or species
 while [ $# -ge 0 ]; do
   case $1 in
     '')
-      rad_help
+      radula_help
       exit 1
       ;;
     b | -b | --behave)
       case $2 in
-        b | bootstrap | r | reproduce)
+        b | bootstrap)
           case $3 in
             c | clean)
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
-              rad_behave_bootstrap_toolchain_variables
+              radula_behave_bootstrap_toolchain_variables
 
-              rad_behave_bootstrap_cross_variables
+              radula_behave_bootstrap_cross_variables
 
-              rad_behave_bootstrap_clean
+              radula_behave_bootstrap_clean
               ;;
             d | distclean)
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
-              rad_behave_bootstrap_toolchain_variables
+              radula_behave_bootstrap_toolchain_variables
 
-              rad_behave_bootstrap_cross_variables
+              radula_behave_bootstrap_cross_variables
 
-              rad_behave_bootstrap_distclean
+              radula_behave_bootstrap_distclean
               ;;
             h | -h | --help)
-              rad_behave_bootstrap_help
+              radula_behave_bootstrap_help
               ;;
             i | img | image)
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
               if [ $(id -u) -eq 0 ]; then
-                rad_behave_bootstrap_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+                radula_behave_bootstrap_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
               else
-                rad_close 'Please run this script as root!'
+                radula_close 'Please run this script as root!'
               fi
               ;;
             l | list)
-              rad_version
+              radula_version
 
-              rad_open
-              rad_open 'Genomes (Architectures):'
-              rad_open '\taarch64,     armv8-a,    arm64'
-              rad_open '\tarmv6zk,     arm,        bcm2835'
-              rad_open '\ti686,        i386,       x86'
-              rad_open '\tpowerpc,     pmac32,     ppc'
-              rad_open '\tpowerpc64,   g5,         ppc64'
-              rad_open '\tpowerpc64le, powernv,    ppc64le'
-              rad_open '\triscv64,     rv64imafdc, riscv'
-              rad_open '\tx86-64,      x86_64'
-              rad_open
-              rad_open 'Species (Flags):'
-              rad_open '\talbino,     libre'
-              rad_open '\tatlanticus, performance'
-              rad_open '\tbennettae,  size'
-              rad_open '\tmarginatus, sane'
-              rad_open '\tthompsoni,  radiology'
+              radula_open
+              radula_open 'Genomes (Architectures):'
+              radula_open '\taarch64,     armv8-a,    arm64'
+              radula_open '\tarmv6zk,     arm,        bcm2835'
+              radula_open '\ti686,        i386,       x86'
+              radula_open '\tpowerpc,     pmac32,     ppc'
+              radula_open '\tpowerpc64,   g5,         ppc64'
+              radula_open '\tpowerpc64le, powernv,    ppc64le'
+              radula_open '\triscv64,     rv64imafdc, riscv'
+              radula_open '\tx86-64,      x86_64'
+              radula_open
+              radula_open 'Species (Flags):'
+              radula_open '\talbino,     libre'
+              radula_open '\tatlanticus, performance'
+              radula_open '\tbennettae,  size'
+              radula_open '\tmarginatus, sane'
+              radula_open '\tthompsoni,  radiology'
               exit 0
               ;;
             r | require)
-              rad_behave_bootstrap_require
+              radula_behave_bootstrap_require
               ;;
             s | release)
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
-              rad_behave_bootstrap_toolchain_release /tmp/toolchain
+              radula_behave_bootstrap_toolchain_release /tmp/toolchain
               ;;
             t | toolchain)
-              if [ $sleep = no ]; then
-                $0 b b r
-              else
-                $0 q b b r
-              fi
+              $0 b b r
 
-              rad_open
-              rad_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
+              radula_open
+              radula_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
 
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
               # Only for the toolchain as we're relying on the host's ccache
-              [ $ccache = yes ] && rad_behave_ccache_variables $CCCH
+              [ $ccache = yes ] && radula_behave_ccache_variables $CCCH
 
-              rad_behave_bootstrap_initialize
+              radula_behave_bootstrap_initialize
 
-              rad_behave_bootstrap_clean
+              radula_behave_bootstrap_clean
 
-              # No rad_behave_bootstrap_flags optimizations for the toolchain
-              rad_behave_bootstrap_arch_variables
+              # No radula_behave_bootstrap_flags optimizations for the toolchain
+              radula_behave_bootstrap_arch_variables
 
-              rad_behave_bootstrap toolchain || {
-                rad_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
+              radula_behave_bootstrap toolchain || {
+                radula_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
-              rad_open
-              rad_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
+              radula_open
+              radula_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
             x | cross)
-              if [ $sleep = no ]; then
-                $0 b b r
-              else
-                $0 q b b r
-              fi
+              $0 b b r
 
-              rad_open
-              rad_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
+              radula_open
+              radula_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
 
-              rad_behave_bootstrap_variables
+              radula_behave_bootstrap_variables
 
-              rad_behave_pkg_config_variables $CRSD
+              radula_behave_pkg_config_variables $CRSD
 
-              rad_behave_bootstrap_arch_variables
-              rad_behave_bootstrap_flags_variables
+              radula_behave_bootstrap_arch_variables
+              radula_behave_bootstrap_flags_variables
 
-              rad_behave_bootstrap cross || {
-                rad_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
+              radula_behave_bootstrap cross || {
+                radula_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
 
-              rad_open
-              rad_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
+              radula_open
+              radula_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
               ;;
             *)
-              rad_behave_bootstrap_help
+              radula_behave_bootstrap_help
               exit 1
               ;;
           esac
           ;;
         e | envenomate)
-          rad_behave_envenomate_help
-          exit 0
+          case $3 in
+            h | help)
+              radula_behave_envenomate_help
+              exit 0
+              ;;
+            *)
+              radula_behave_envenomate_help
+              exit 1
+              ;;
+          esac
           ;;
         h | -h | --help)
-          rad_behave_help
+          radula_behave_help
           exit 0
           ;;
         i | binary)
-          rad_behave_help
-          exit 0
+          case $3 in
+            h | help)
+              radula_behave_binary_help
+              exit 0
+              ;;
+            *)
+              radula_behave_binary_help
+              exit 1
+              ;;
+          esac
           ;;
         *)
-          rad_behave_help
+          radula_behave_help
           exit 1
           ;;
       esac
@@ -1301,49 +1255,49 @@ while [ $# -ge 0 ]; do
 
         case $2 in
           n | nom | name)
-            rad_open "Name:        \t$nom"
+            radula_open "Name:        \t$nom"
             ;;
           v | ver | version)
-            rad_open "Version:     \t$ver"
+            radula_open "Version:     \t$ver"
             ;;
           u | url | source)
-            rad_open "Source:      \t$url"
+            radula_open "Source:      \t$url"
             ;;
           s | sum | checksum | sha512sum)
-            rad_open "sha512sum:   \t$sum"
+            radula_open "sha512sum:   \t$sum"
             ;;
           y | cys | cyst | cysts)
             cys_len=$(printf "$cys" | wc -w)
             if [ $cys_len -gt 1 ]; then
-              rad_open "Cysts:       \t$(printf "$cys" | sed 's/ /, /g')"
+              radula_open "Cysts:       \t$(printf "$cys" | sed 's/ /, /g')"
             elif [ $cys_len -eq 1 ]; then
-              rad_open "Cyst:        \t$cys"
+              radula_open "Cyst:        \t$cys"
             else
-              rad_open 'Cysts:       \t~~'
+              radula_open 'Cysts:       \t--'
             fi
             ;;
           c | cnt | concentrate | concentrates)
             cnt_len=$(printf "$cnt" | wc -w)
             if [ $cnt_len -gt 1 ]; then
-              rad_open "Concentrates:\t$(printf "$cnt" | sed 's/ /, /g')"
+              radula_open "Concentrates:\t$(printf "$cnt" | sed 's/ /, /g')"
             elif [ $cnt_len -eq 1 ]; then
-              rad_open "Concentrate: \t$cnt"
+              radula_open "Concentrate: \t$cnt"
             else
-              rad_open 'Concentrates:\t~~'
+              radula_open 'Concentrates:\t--'
             fi
             ;;
           l | lic | license | licenses)
             lic_len=$(printf "$lic" | wc -w)
             if [ $lic_len -gt 1 ]; then
-              rad_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
+              radula_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
             elif [ $lic_len -eq 1 ]; then
-              rad_open "License:     \t$lic"
+              radula_open "License:     \t$lic"
             else
-              rad_open 'Licenses:    \t~~'
+              radula_open 'Licenses:    \t--'
             fi
             ;;
           *)
-            rad_ceras_help
+            radula_ceras_help
             exit 1
             ;;
         esac
@@ -1352,14 +1306,10 @@ while [ $# -ge 0 ]; do
         . $CERD/$2/ceras
 
         for i in n v u s y c l; do
-          if [ $sleep = no ]; then
-            $0 c $i $2
-          else
-            $0 q c $i $2
-          fi
+          $0 c $i $2
         done
       else
-        rad_ceras_help
+        radula_ceras_help
         case $2 in
           h | -h | --help)
             exit 0
@@ -1370,19 +1320,19 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     g | -g | --genome)
-      rad_open $genome
+      radula_open $genome
       exit 0
       ;;
     h | -h | --help)
-      rad_help
+      radula_help
       exit 0
       ;;
     s | -s | --species)
-      rad_open $species
+      radula_open $species
       exit 0
       ;;
     v | -v | --version)
-      rad_version
+      radula_version
       exit 0
       ;;
   esac
