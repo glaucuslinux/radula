@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.0.0 ($genome $species)"
+  radula_open "$0 version 2.0.1 ($genome $species)"
 }
 
 #
@@ -266,6 +266,7 @@ radula_behave_construct() {
   . $CERD/$2/ceras
   . $CERD/$nom/$1.ceras
 
+  radula_open
   radula_open "$nom $ver"
 
   radula_open 33 \< prepare
@@ -279,8 +280,6 @@ radula_behave_construct() {
 
   radula_open 32 \> install
   radula_behave_construct_stage_function $1 install || radula_close "ceras $nom: install exited with status $?"
-
-  radula_open
 }
 
 radula_behave_construct_stage_function() {
@@ -295,13 +294,13 @@ radula_behave_fetch() {
     git clone $url $SRCD/$nom
     git -C $SRCD/$nom checkout $cmt
   else
-    $MKDIR $SRCD/$nom
+    $MKDIR $SRCD/$nom > /dev/null
 
     curl -Lo $SRCD/$nom/$1 $url
 
     radula_behave_verify $1 || radula_close "ceras $nom: verify exited with status $?"
 
-    tar xvf $SRCD/$nom/$1 -C $SRCD/$nom
+    tar xvf $SRCD/$nom/$1 -C $SRCD/$nom > /dev/null
   fi
 }
 
@@ -314,7 +313,7 @@ radula_behave_patch() {
 }
 
 radula_behave_verify() {
-  printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c
+  printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c > /dev/null
 }
 
 #
@@ -551,7 +550,7 @@ radula_behave_bootstrap_distclean() {
   radula_behave_bootstrap_clean
 
   # Only remove `tmp` completely after `$TBLD` and `$XBLD` are removed
-  $RM $TMPD
+  $RM $TMPD > /dev/null
 }
 
 radula_behave_bootstrap_flags_variables() {
@@ -678,9 +677,9 @@ radula_behave_bootstrap_flags_variables() {
 }
 
 radula_behave_bootstrap_initialize() {
-  $MKDIR $BAKD
+  $MKDIR $BAKD > /dev/null
 
-  $MKDIR $SRCD
+  $MKDIR $SRCD > /dev/null
 }
 
 radula_behave_bootstrap_require() {
@@ -751,8 +750,8 @@ radula_behave_bootstrap_variables() {
 #
 
 radula_behave_bootstrap_toolchain_backup() {
-  $RSYNC $CRSD $BAKD --delete
-  $RSYNC $TLCD $BAKD --delete
+  $RSYNC $CRSD $BAKD --delete > /dev/null
+  $RSYNC $TLCD $BAKD --delete > /dev/null
 }
 
 radula_behave_bootstrap_toolchain_check() {
@@ -782,26 +781,26 @@ radula_behave_bootstrap_toolchain_construct() {
 
 # Remember that radula_behave_bootstrap_clean is run beforehand
 radula_behave_bootstrap_toolchain_prepare() {
-  $MKDIR $CRSD
+  $MKDIR $CRSD > /dev/null
 
-  $MKDIR $TLOG
+  $MKDIR $TLOG > /dev/null
 
-  $MKDIR $TBLD
+  $MKDIR $TBLD > /dev/null
 
-  $MKDIR $TSRC
+  $MKDIR $TSRC > /dev/null
 
-  $MKDIR $TLCD
+  $MKDIR $TLCD > /dev/null
 }
 
 radula_behave_bootstrap_toolchain_release() {
-  $MKDIR $1
+  $MKDIR $1 > /dev/null
 
-  $RSYNC $BAKD/cross $1 --delete
-  $RSYNC $BAKD/toolchain $1 --delete
+  $RSYNC $BAKD/cross $1 --delete > /dev/null
+  $RSYNC $BAKD/toolchain $1 --delete > /dev/null
 
-  $RM $1/cross/lib64
-  $RM $1/cross/usr/lib64
-  $RM $1/toolchain/lib64
+  $RM $1/cross/lib64 > /dev/null
+  $RM $1/cross/usr/lib64 > /dev/null
+  $RM $1/toolchain/lib64 > /dev/null
 
   find $1 -name "*.la" -delete
 
@@ -811,8 +810,8 @@ radula_behave_bootstrap_toolchain_release() {
   strip --strip-unneeded -v $1/cross/usr/bin/* || true
   strip --strip-unneeded -v $1/toolchain/bin/* || true
 
-  $RM $1/toolchain/share/info
-  $RM $1/toolchain/share/man
+  $RM $1/toolchain/share/info > /dev/null
+  $RM $1/toolchain/share/man > /dev/null
 
   cd $1
   tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' .
@@ -981,7 +980,7 @@ radula_behave_bootstrap_cross_img() {
   # Remove `-S` from rsync (for sudo and IO error)
   RSYNC='rsync -vaHAXx'
 
-  $RM $1
+  $RM $1 > /dev/null
   qemu-img create -f raw $1 $2
   # Write mbr.bin (from SYSLINUX) to the first 440 bytes of our image
   dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1
@@ -998,40 +997,40 @@ radula_behave_bootstrap_cross_img() {
   partx -a $3
   mkfs.ext4 $(printf $3)p1
 
-  $MKDIR $4
+  $MKDIR $4 > /dev/null
 
   mount $(printf $3)p1 $4
 
-  $RM $4/lost+found
+  $RM $4/lost+found > /dev/null
 
-  $RSYNC $CRSD/ $4 || radula_close 'Please bootstrap a cross compiled glaucus system first!'
+  $RSYNC $CRSD/ $4 > /dev/null || radula_close 'Please bootstrap a cross compiled glaucus system first!'
 
-  $MKDIR $4/boot/extlinux
-  $RSYNC other/extlinux.conf.$init $4/boot/extlinux/extlinux.conf
+  $MKDIR $4/boot/extlinux > /dev/null
+  $RSYNC other/extlinux.conf.$init $4/boot/extlinux/extlinux.conf > /dev/null
 
-  $CHOWN -R 0:0 $4
+  $CHOWN -R 0:0 $4 > /dev/null
 
   extlinux --install $4/boot/extlinux
 
   # Clean up
-  $UMOUNT $4
+  $UMOUNT $4 > /dev/null
   partx -d $3
   losetup -d $3
 
-  $RSYNC $1 $BAKD
+  $RSYNC $1 $BAKD > /dev/null
 }
 
 radula_behave_bootstrap_cross_prepare() {
-  $RSYNC $BAKD/cross $GLAD --delete
-  $RSYNC $BAKD/toolchain $GLAD --delete
+  $RSYNC $BAKD/cross $GLAD --delete > /dev/null
+  $RSYNC $BAKD/toolchain $GLAD --delete > /dev/null
 
-  $RM $XLOG
-  $MKDIR $XLOG
+  $RM $XLOG > /dev/null
+  $MKDIR $XLOG > /dev/null
 
-  $RM $XBLD
-  $MKDIR $XBLD
+  $RM $XBLD > /dev/null
+  $MKDIR $XBLD > /dev/null
 
-  $MKDIR $XSRC
+  $MKDIR $XSRC > /dev/null
 }
 
 radula_behave_bootstrap_cross_strip() {
@@ -1043,7 +1042,7 @@ radula_behave_bootstrap_cross_strip() {
   find $CRSD/usr -type f -exec strip -sv {} \;
   find $CRSD/usr -name *.la -delete
 
-  $RM $CRSD/usr/lib/charset.alias
+  $RM $CRSD/usr/lib/charset.alias > /dev/null
 }
 
 radula_behave_bootstrap_cross_variables() {
@@ -1173,6 +1172,7 @@ while [ $# -ge 0 ]; do
 
               radula_behave_bootstrap_initialize
 
+              radula_open
               radula_behave_bootstrap_clean
 
               # No radula_behave_bootstrap_flags optimizations for the toolchain
