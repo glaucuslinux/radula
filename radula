@@ -19,7 +19,6 @@ bootstrap=no
 ccache=yes
 check=no
 genome=x86-64
-init=finit
 kernel=yes
 parallel=yes
 species=atlanticus
@@ -890,21 +889,12 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check hwids
   radula_behave_check eudev
 
-  case $init in
-    f | finit)
-      radula_behave_check libuev
-      radula_behave_check libite
-      radula_behave_check finit
-      ;;
-    s | s6)
-      radula_behave_check skalibs
-      radula_behave_check execline
-      radula_behave_check s6
-      radula_behave_check s6-linux-init
-      radula_behave_check s6-rc
-      radula_behave_check s6-boot-scripts
-      ;;
-  esac
+  radula_behave_check skalibs
+  radula_behave_check execline
+  radula_behave_check s6
+  radula_behave_check s6-linux-init
+  radula_behave_check s6-rc
+  radula_behave_check s6-boot-scripts
 }
 
 radula_behave_bootstrap_cross_construct() {
@@ -963,21 +953,12 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross hwids
   radula_behave_construct cross eudev
 
-  case $init in
-    f | finit)
-      radula_behave_construct cross libuev
-      radula_behave_construct cross libite
-      radula_behave_construct cross finit
-      ;;
-    s | s6)
-      radula_behave_construct cross skalibs
-      radula_behave_construct cross execline
-      radula_behave_construct cross s6
-      radula_behave_construct cross s6-linux-init
-      radula_behave_construct cross s6-rc
-      radula_behave_construct cross s6-boot-scripts
-      ;;
-  esac
+  radula_behave_construct cross skalibs
+  radula_behave_construct cross execline
+  radula_behave_construct cross s6
+  radula_behave_construct cross s6-linux-init
+  radula_behave_construct cross s6-rc
+  radula_behave_construct cross s6-boot-scripts
 
   [ $kernel = yes ] && radula_behave_construct cross linux
 }
@@ -1012,7 +993,7 @@ radula_behave_bootstrap_cross_img() {
   $RSYNC $CRSD/ $4 > /dev/null || radula_close 'Please bootstrap a cross compiled glaucus system first!'
 
   $MKDIR $4/boot/extlinux > /dev/null
-  $RSYNC other/extlinux.conf.$init $4/boot/extlinux/extlinux.conf > /dev/null
+  $RSYNC other/extlinux.conf $4/boot/extlinux > /dev/null
 
   $CHOWN -R 0:0 $4 > /dev/null
 
