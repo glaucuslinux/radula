@@ -892,6 +892,7 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check skalibs
   radula_behave_check execline
   radula_behave_check s6
+  radula_behave_check utmps
   radula_behave_check s6-linux-init
   radula_behave_check s6-rc
   radula_behave_check s6-boot-scripts
@@ -956,6 +957,7 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross skalibs
   radula_behave_construct cross execline
   radula_behave_construct cross s6
+  radula_behave_construct cross utmps
   radula_behave_construct cross s6-linux-init
   radula_behave_construct cross s6-rc
   radula_behave_construct cross s6-boot-scripts
