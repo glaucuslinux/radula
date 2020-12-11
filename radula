@@ -842,6 +842,12 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check radula
 
   radula_behave_check linux
+
+  radula_behave_check skalibs
+  radula_behave_check execline
+  radula_behave_check s6
+  radula_behave_check utmps
+
   radula_behave_check shadow
   radula_behave_check libressl
 
@@ -889,10 +895,6 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check hwids
   radula_behave_check eudev
 
-  radula_behave_check skalibs
-  radula_behave_check execline
-  radula_behave_check s6
-  radula_behave_check utmps
   radula_behave_check s6-linux-init
   radula_behave_check s6-rc
   radula_behave_check s6-boot-scripts
@@ -906,6 +908,11 @@ radula_behave_bootstrap_cross_construct() {
 
   radula_behave_construct cross musl-utils
   radula_behave_construct cross linux-headers
+
+  radula_behave_construct cross skalibs
+  radula_behave_construct cross execline
+  radula_behave_construct cross s6
+  radula_behave_construct cross utmps
 
   radula_behave_construct cross shadow
   radula_behave_construct cross libressl
@@ -954,10 +961,6 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross hwids
   radula_behave_construct cross eudev
 
-  radula_behave_construct cross skalibs
-  radula_behave_construct cross execline
-  radula_behave_construct cross s6
-  radula_behave_construct cross utmps
   radula_behave_construct cross s6-linux-init
   radula_behave_construct cross s6-rc
   radula_behave_construct cross s6-boot-scripts
