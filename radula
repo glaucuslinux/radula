@@ -973,9 +973,9 @@ radula_behave_bootstrap_cross_img() {
   RSYNC='rsync -vaHAXx'
 
   $RM $1 > /dev/null
-  qemu-img create -f raw $1 $2
+  qemu-img create -f raw $1 $2 > /dev/null
   # Write mbr.bin (from SYSLINUX) to the first 440 bytes of our image
-  dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1
+  dd if=other/mbr.bin of=$1 conv=notrunc bs=440 count=1 &> /dev/null
 
   parted -s $1 mklabel msdos
   # Default to ext4 which complies with the generated fstab
@@ -987,7 +987,7 @@ radula_behave_bootstrap_cross_img() {
 
   # Notify the kernel about the new partition
   partx -a $3
-  mkfs.ext4 $(printf $3)p1
+  mkfs.ext4 $(printf $3)p1 &> /dev/null
 
   $MKDIR $4 > /dev/null
 
@@ -1002,14 +1002,16 @@ radula_behave_bootstrap_cross_img() {
 
   $CHOWN -R 0:0 $4 > /dev/null
 
-  extlinux --install $4/boot/extlinux
+  extlinux --install $4/boot/extlinux &> /dev/null
 
   # Clean up
-  $UMOUNT $4 > /dev/null
+  $UMOUNT $4 &> /dev/null
   partx -d $3
   losetup -d $3
 
   $RSYNC $1 $BAKD > /dev/null
+
+  radula_open 'img complete'
 }
 
 radula_behave_bootstrap_cross_prepare() {
