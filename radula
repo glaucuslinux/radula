@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.0.2 ($genome $species)"
+  radula_open "$0 version 2.0.3 ($genome $species)"
 }
 
 #
@@ -541,8 +541,6 @@ radula_behave_bootstrap_clean() {
   $RM $TLCD > /dev/null
 
   $RM $XBLD > /dev/null
-
-  radula_open 'clean complete'
 }
 
 radula_behave_bootstrap_distclean() {
@@ -609,6 +607,7 @@ radula_behave_bootstrap_flags_variables() {
       export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
       export CFLAGSNOLTONOOPENMPNOPLT="$(printf -- "$CFLAGSNOLTO" | sed -e "s/$OPENMP //" -e "s/$PLT //")"
 
+      # CFLAGSNOOPENMP is used inside LDFLAGSNOOPENMP which is used for grub
       export CFLAGSNOOPENMP="$(printf -- "$CFLAGS" | sed "s/$OPENMP //")"
 
       export CXXFLAGS="$CFLAGS"
@@ -633,9 +632,6 @@ radula_behave_bootstrap_flags_variables() {
 
       export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
       export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
-      export CFLAGSFATNODSECTS="$(printf -- "$CFLAGSFAT" | sed "s/$DSECTS //")"
-
-      export CFLAGSNODSECTS="$(printf -- "$CFLAGS" | sed "s/$DSECTS //")"
 
       export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
       export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
@@ -809,17 +805,17 @@ radula_behave_bootstrap_toolchain_release() {
 
   find $1 -name "*.la" -delete
 
-  strip -gv $1/cross/usr/lib/* || true
-  strip -gv $1/toolchain/lib/* || true
+  strip -gv $1/cross/usr/lib/* > /dev/null || true
+  strip -gv $1/toolchain/lib/* &> /dev/null || true
 
-  strip --strip-unneeded -v $1/cross/usr/bin/* || true
-  strip --strip-unneeded -v $1/toolchain/bin/* || true
+  strip --strip-unneeded -v $1/cross/usr/bin/* &> /dev/null || true
+  strip --strip-unneeded -v $1/toolchain/bin/* &> /dev/null || true
 
   $RM $1/toolchain/share/info > /dev/null
   $RM $1/toolchain/share/man > /dev/null
 
   cd $1
-  tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' .
+  tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' . > /dev/null
 }
 
 radula_behave_bootstrap_toolchain_variables() {
@@ -1010,8 +1006,6 @@ radula_behave_bootstrap_cross_img() {
   losetup -d $3
 
   $RSYNC $1 $BAKD > /dev/null
-
-  radula_open 'img complete'
 }
 
 radula_behave_bootstrap_cross_prepare() {
@@ -1101,6 +1095,8 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_cross_variables
 
               radula_behave_bootstrap_clean
+
+              radula_open 'clean complete'
               ;;
             d | distclean)
               radula_behave_bootstrap_variables
@@ -1110,6 +1106,8 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_cross_variables
 
               radula_behave_bootstrap_distclean
+
+              radula_open 'distclean complete'
               ;;
             h | -h | --help)
               radula_behave_bootstrap_help
@@ -1121,6 +1119,8 @@ while [ $# -ge 0 ]; do
                 modprobe loop
 
                 radula_behave_bootstrap_cross_img $GLAD/glaucus.img 128M $(losetup -f) /mnt/glaucus
+
+                radula_open 'img complete'
               else
                 radula_close 'Please run this script as root!'
               fi
@@ -1154,6 +1154,8 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_variables
 
               radula_behave_bootstrap_toolchain_release /tmp/toolchain
+
+              radula_open 'release complete'
               ;;
             t | toolchain)
               $0 b b r
