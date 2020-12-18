@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.1.0 ($genome $species)"
+  radula_open "$0 version 2.1.1 ($genome $species)"
 }
 
 #
@@ -268,22 +268,26 @@ radula_behave_construct() {
 
   radula_open
   radula_open "$nom $ver"
-
   radula_open 33 \< prepare
+
   radula_behave_construct_stage_function $1 prepare || radula_close "ceras $nom: prepare exited with status $?"
 
   radula_open 35 ! configure
+
   radula_behave_construct_stage_function $1 configure || radula_close "ceras $nom: configure exited with status $?"
 
   radula_open 34 \* build
+
   radula_behave_construct_stage_function $1 build || radula_close "ceras $nom: build exited with status $?"
 
   if [ check = yes ]; then
     radula_open 36 ? check
+
     radula_behave_construct_stage_function $1 check || radula_close "ceras $nom: check exited with status $?"
   fi
 
   radula_open 32 \> install
+
   radula_behave_construct_stage_function $1 install || radula_close "ceras $nom: install exited with status $?"
 }
 
@@ -683,9 +687,26 @@ radula_behave_bootstrap_initialize() {
   $MKDIR $SRCD > /dev/null
 }
 
-radula_behave_bootstrap_require() {
-  radula_open 'Checking if host has all required packages...'
+radula_behave_bootstrap_list() {
+  radula_open 'Genomes (Architectures):'
+  radula_open '\taarch64,     armv8-a,    arm64'
+  radula_open '\tarmv6zk,     arm,        bcm2835'
+  radula_open '\ti686,        i386,       x86'
+  radula_open '\tpowerpc,     pmac32,     ppc'
+  radula_open '\tpowerpc64,   g5,         ppc64'
+  radula_open '\tpowerpc64le, powernv,    ppc64le'
+  radula_open '\triscv64,     rv64imafdc, riscv'
+  radula_open '\tx86-64,      x86_64'
   radula_open
+  radula_open 'Species (Flags):'
+  radula_open '\talbino,     libre'
+  radula_open '\tatlanticus, performance'
+  radula_open '\tbennettae,  size'
+  radula_open '\tmarginatus, sane'
+  radula_open '\tthompsoni,  radiology'
+}
+
+radula_behave_bootstrap_require() {
   radula_open "bash:      \t$(bash --version | sed 1q | cut -d' ' -f4)"
   radula_open "bc:        \t$(bc --version | sed 1q | cut -d' ' -f2)"
   radula_open "binutils:  \t$(ld --version | sed 1q | cut -d' ' -f5)"
@@ -1134,24 +1155,13 @@ while [ $# -ge 0 ]; do
               radula_version
 
               radula_open
-              radula_open 'Genomes (Architectures):'
-              radula_open '\taarch64,     armv8-a,    arm64'
-              radula_open '\tarmv6zk,     arm,        bcm2835'
-              radula_open '\ti686,        i386,       x86'
-              radula_open '\tpowerpc,     pmac32,     ppc'
-              radula_open '\tpowerpc64,   g5,         ppc64'
-              radula_open '\tpowerpc64le, powernv,    ppc64le'
-              radula_open '\triscv64,     rv64imafdc, riscv'
-              radula_open '\tx86-64,      x86_64'
-              radula_open
-              radula_open 'Species (Flags):'
-              radula_open '\talbino,     libre'
-              radula_open '\tatlanticus, performance'
-              radula_open '\tbennettae,  size'
-              radula_open '\tmarginatus, sane'
-              radula_open '\tthompsoni,  radiology'
+
+              radula_behave_bootstrap_list
               ;;
             r | require)
+              radula_open 'Checking if host has all required packages...'
+              radula_open
+
               radula_behave_bootstrap_require
               ;;
             s | release)
