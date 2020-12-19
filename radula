@@ -505,8 +505,34 @@ radula_behave_bootstrap_arch_variables() {
       export MARCH=$ARCH
 
       export LARCH=riscv
+      # LCARCH is empty because it uses the regular `defconfig`
       export LCARCH=
       export LIARCH=arch/$LARCH/boot/Image
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    s390x | z | s390)
+      export ARCH=s390x
+
+      export CARCH=--with-gcc-arch=$ARCH
+
+      # -mhard-dfp is the default on z9-ec and higher (e.g. z196)
+      # s390x implies -m64 which in turn implies -mzarch
+      # -mlong-double-128 is needed because 64 bits is the default
+      export FARCH="-march=z196 -mtune=z15 -mlong-double-128"
+
+      # --enable-decimal-float is the default on z9-ec and higher (e.g. z196)
+      # s390x implies -m64 which in turn implies --with-zarch
+      # --with-long-double-128 is needed because 64 bits is the default
+      export GCARCH="--with-arch=z196 --with-tune=z15 --with-long-double-128"
+      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
+
+      export MARCH=$ARCH
+
+      export LARCH=s390
+      # LCARCH is empty because it uses the regular `defconfig`
+      export LCARCH=
+      export LIARCH=arch/$LARCH/boot/bzImage
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
@@ -696,6 +722,7 @@ radula_behave_bootstrap_list() {
   radula_open '\tpowerpc64,   g5,         ppc64'
   radula_open '\tpowerpc64le, powernv,    ppc64le'
   radula_open '\triscv64,     rv64imafdc, riscv'
+  radula_open '\ts390x,       z,          s390'
   radula_open '\tx86-64,      x86_64'
   radula_open
   radula_open 'Species (Flags):'
