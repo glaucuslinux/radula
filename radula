@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.1.1 ($genome $species)"
+  radula_open "$0 version 2.2.0 ($genome $species)"
 }
 
 #
@@ -379,7 +379,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export FARCH='-mabi=lp64 -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -march=armv8-a -mtune=generic'
 
-      export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
+      export GCARCH='--with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419 --with-arch=armv8-a'
       export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
@@ -394,11 +394,11 @@ radula_behave_bootstrap_arch_variables() {
     armv6zk | arm | bcm2835)
       export ARCH=armv6zk
 
-      export CARCH=
+      export CARCH=--with-gcc-arch=$ARCH
 
-      export FARCH="-mabi=aapcs-linux -march=$ARCH -mtune=arm1176jzf-s -mcpu=arm1176jzf-s -mfpu=vfpv2 -mfloat-abi=hard"
+      export FARCH="-mabi=aapcs-linux -mfloat-abi=hard -march=$ARCH -mtune=arm1176jzf-s -mcpu=arm1176jzf-s -mfpu=vfpv2"
 
-      export GCARCH="--with-arch=$ARCH --with-tune=arm1176jzf-s --with-abi=aapcs-linux --with-fpu=vfpv2 --with-float=hard"
+      export GCARCH="--with-float=hard --with-arch=$ARCH --with-tune=arm1176jzf-s --with-abi=aapcs-linux --with-fpu=vfpv2"
       # Doesn't need a pure64 patch for GCC since this isn't a 64 bit
       # architecture; hence, GPARCH is empty.
       export GPARCH=
@@ -432,6 +432,28 @@ radula_behave_bootstrap_arch_variables() {
       export LARCH=$MARCH
       export LCARCH=${MARCH}_
       export LIARCH=arch/x86/boot/bzImage
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    or1k | openrisc)
+      export ARCH=or1k
+
+      # CARCH is empty because there's no -march
+      export CARCH=
+
+      # -mboard defaults to ork1sim (which is what we're using), might consider
+      # changing it to de0_nano
+      export FARCH=-mhard-float
+
+      export GCARCH=--with-float=hard
+      export GPARCH=
+
+      export MARCH=$ARCH
+
+      # Same goes for the kernel.
+      export LARCH=openrisc
+      export LCARCH=${ARCH}sim_
+      export LIARCH=arch/$LARCH/boot/bzImage
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
@@ -718,6 +740,7 @@ radula_behave_bootstrap_list() {
   radula_open '\taarch64,     armv8-a,    arm64'
   radula_open '\tarmv6zk,     arm,        bcm2835'
   radula_open '\ti686,        i386,       x86'
+  radula_open '\tor1k,        openrisc'
   radula_open '\tpowerpc,     pmac32,     ppc'
   radula_open '\tpowerpc64,   g5,         ppc64'
   radula_open '\tpowerpc64le, powernv,    ppc64le'
