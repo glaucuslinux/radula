@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.3.0 ($genome $species)"
+  radula_open "$0 version 2.3.1 ($genome $species)"
 }
 
 #
@@ -791,9 +791,9 @@ radula_behave_bootstrap_list() {
   radula_open '\taarch64,      armv8-a,    arm64'
   radula_open '\tarmv6zk,      arm,        bcm2835'
   radula_open '\ti686,         i386,       x86'
-  radula_open '\tor1k,         openrisc'
   radula_open '\tmicroblaze,   microblazebe, microblazeeb'
   radula_open '\tmicroblazeel, microblazele'
+  radula_open '\tor1k,         openrisc'
   radula_open '\tpowerpc,      pmac32,     ppc'
   radula_open '\tpowerpc64,    g5,         ppc64'
   radula_open '\tpowerpc64le,  powernv,    ppc64le'
