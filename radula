@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 2.2.1 ($genome $species)"
+  radula_open "$0 version 2.3.0 ($genome $species)"
 }
 
 #
@@ -439,6 +439,52 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
+    microblaze | microblazebe | microblazeeb)
+      export ARCH=microblaze
+
+      # The cpu version was chosen from:
+      # https://www.xilinx.com/support/documentation/sw_manuals/xilinx2020_1/ug984-vivado-microblaze-ref.pdf
+      # We have to specify that we want the big endian variant of microblaze
+      export CARCH='-mhard-float -mcpu=v11.0 -mbig-endian'
+
+      export FARCH=
+
+      # --with-cpu isn't supported for this arch
+      # --with-float isn't supported for this arch as well
+      export GCARCH=--with-endian=big
+      export GPARCH=
+
+      export MARCH=$ARCH
+
+      export LARCH=$ARCH
+      export LCARCH=mmu_
+      # The image location needs checking
+      export LIARCH=arch/$ARCH/boot/bzImage
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
+    microblazeel | microblazele)
+      export ARCH=microblazeel
+
+      # We have to specify that we want the little endian variant of microblaze
+      export CARCH="-mhard-float -mcpu=v11.0 -mlittle-endian"
+
+      export FARCH=
+
+      # --with-cpu isn't supported for this arch
+      # --with-float isn't supported for this arch as well
+      export GCARCH=--with-endian=little
+      export GPARCH=
+
+      export MARCH=microblaze
+
+      export LARCH=$MARCH
+      export LCARCH=mmu_
+      # The image location needs checking
+      export LIARCH=arch/$MARCH/boot/bzImage
+
+      export TGT=$ARCH-glaucus-linux-musl
+      ;;
     or1k | openrisc)
       export ARCH=or1k
 
@@ -455,9 +501,9 @@ radula_behave_bootstrap_arch_variables() {
 
       export MARCH=$ARCH
 
-      # Same goes for the kernel.
       export LARCH=openrisc
       export LCARCH=${ARCH}sim_
+      # The image location needs checking
       export LIARCH=arch/$LARCH/boot/bzImage
 
       export TGT=$ARCH-glaucus-linux-musl
@@ -551,7 +597,7 @@ radula_behave_bootstrap_arch_variables() {
       # --enable-decimal-float is the default on z9-ec and higher (e.g. z196)
       # s390x implies -m64 which in turn implies --with-zarch
       # --with-long-double-128 is needed because 64 bits is the default
-      export GCARCH="--with-arch=z196 --with-tune=z15 --with-long-double-128"
+      export GCARCH="--with-arch=z196 --with-tune=zEC12 --with-long-double-128"
       export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
@@ -742,16 +788,18 @@ radula_behave_bootstrap_initialize() {
 
 radula_behave_bootstrap_list() {
   radula_open 'Genomes (Architectures):'
-  radula_open '\taarch64,     armv8-a,    arm64'
-  radula_open '\tarmv6zk,     arm,        bcm2835'
-  radula_open '\ti686,        i386,       x86'
-  radula_open '\tor1k,        openrisc'
-  radula_open '\tpowerpc,     pmac32,     ppc'
-  radula_open '\tpowerpc64,   g5,         ppc64'
-  radula_open '\tpowerpc64le, powernv,    ppc64le'
-  radula_open '\triscv64,     rv64imafdc, riscv'
-  radula_open '\ts390x,       z,          s390'
-  radula_open '\tx86-64,      x86_64'
+  radula_open '\taarch64,      armv8-a,    arm64'
+  radula_open '\tarmv6zk,      arm,        bcm2835'
+  radula_open '\ti686,         i386,       x86'
+  radula_open '\tor1k,         openrisc'
+  radula_open '\tmicroblaze,   microblazebe, microblazeeb'
+  radula_open '\tmicroblazeel, microblazele'
+  radula_open '\tpowerpc,      pmac32,     ppc'
+  radula_open '\tpowerpc64,    g5,         ppc64'
+  radula_open '\tpowerpc64le,  powernv,    ppc64le'
+  radula_open '\triscv64,      rv64imafdc, riscv'
+  radula_open '\ts390x,        z,          s390'
+  radula_open '\tx86-64,       x86_64'
   radula_open
   radula_open 'Species (Flags):'
   radula_open '\talbino,     libre'
@@ -1230,7 +1278,7 @@ while [ $# -ge 0 ]; do
               $0 b b r
 
               radula_open
-              radula_open "Bootstrapping an $genome cross-compiler toolchain targetting musl libc..."
+              radula_open "Bootstrapping the $genome cross-compiler toolchain targetting musl libc..."
 
               radula_behave_bootstrap_variables
 
@@ -1255,7 +1303,7 @@ while [ $# -ge 0 ]; do
               $0 b b r
 
               radula_open
-              radula_open "Bootstrapping an $genome cross-compiled glaucus $species system..."
+              radula_open "Bootstrapping the $genome cross-compiled glaucus $species system..."
 
               radula_behave_bootstrap_variables
 
