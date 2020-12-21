@@ -467,7 +467,7 @@ radula_behave_bootstrap_arch_variables() {
       export ARCH=microblazeel
 
       # We have to specify that we want the little endian variant of microblaze
-      export CARCH="-mhard-float -mcpu=v11.0 -mlittle-endian"
+      export CARCH='-mhard-float -mcpu=v11.0 -mlittle-endian'
 
       export FARCH=
 
