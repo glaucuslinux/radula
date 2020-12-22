@@ -597,7 +597,7 @@ radula_behave_bootstrap_arch_variables() {
       # --enable-decimal-float is the default on z9-ec and higher (e.g. z196)
       # s390x implies -m64 which in turn implies --with-zarch
       # --with-long-double-128 is needed because 64 bits is the default
-      export GCARCH="--with-arch=z196 --with-tune=zEC12 --with-long-double-128"
+      export GCARCH="--with-arch=z196 --with-tune=z15 --with-long-double-128"
       export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export MARCH=$ARCH
