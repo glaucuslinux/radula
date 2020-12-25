@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.0.0 ($genome $species)"
+  radula_open "$0 version 3.0.1 ($genome $species)"
 }
 
 #
@@ -442,6 +442,7 @@ radula_behave_bootstrap_arch_variables() {
     microblaze | microblazebe | microblazeeb)
       export ARCH=microblaze
 
+      # Empty because there's no -march/--with-arch
       export CARCH=
 
       # The cpu version was chosen from:
@@ -466,6 +467,7 @@ radula_behave_bootstrap_arch_variables() {
     microblazeel | microblazele)
       export ARCH=microblazeel
 
+      # Empty because there's no -march/--with-arch
       export CARCH=
 
       # The cpu version was chosen from:
@@ -487,7 +489,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    mips64 | mips64r2)
+    mips64 | mips64r2 | mips | mips64be | mips64eb)
       export ARCH=mips64
 
       export CARCH=--with-gcc-arch=${ARCH}r2
@@ -501,7 +503,8 @@ radula_behave_bootstrap_arch_variables() {
       export MARCH=$ARCH
 
       export LARCH=mips
-      # Other valid options are the "cavium_octeon_" and the "loongson3_"
+      # Another valid options is the "cavium_octeon_" (Don't specify the
+      # "loongson3_" here because all loongson devices are little endian).
       export LCARCH=malta_
       # The image location needs checking
       export LIARCH=vmlinux
@@ -514,10 +517,10 @@ radula_behave_bootstrap_arch_variables() {
       export CARCH=--with-gcc-arch=mips64r2
 
       # We have to specify that we want the little endian variant of mips64
-      export FARCH="-EL -march=mips64r2 -mabi=64 -mhard-float"
+      export FARCH='-EL -march=mips64r2 -mabi=64 -mhard-float'
 
-      export GCARCH="--with-endian=little --with-arch=mips64r2 --with-abi=64 --with-float=hard"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64"
+      export GCARCH='--with-endian=little --with-arch=mips64r2 --with-abi=64 --with-float=hard'
+      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
 
       export MARCH=mips64
 
@@ -538,12 +541,12 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH="-EB -march=$ARCH -mabi=64 -mhard-float -mnan=2008"
 
       export GCARCH="--with-endian=big --with-arch=$ARCH --with-abi=64 --with-float=hard --with-nan=2008"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64"
+      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
 
       export MARCH=mips64
 
       export LARCH=mips
-      # Other valid options are the "cavium_octeon_" and the "loongson3_"
+      # The default configuration we're choosing needs checking
       export LCARCH=malta_
       # The image location needs checking
       export LIARCH=vmlinux
@@ -556,25 +559,25 @@ radula_behave_bootstrap_arch_variables() {
       export CARCH=--with-gcc-arch=mips64r6
 
       # We have to specify that we want the little endian variant of mips64r6
-      export FARCH="-EL -march=mips64r6 -mabi=64 -mhard-float -mnan=2008"
+      export FARCH='-EL -march=mips64r6 -mabi=64 -mhard-float -mnan=2008'
 
-      export GCARCH="--with-endian=little --with-arch=mips64r6 --with-abi=64 --with-float=hard --with-nan=2008"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64"
+      export GCARCH='--with-endian=little --with-arch=mips64r6 --with-abi=64 --with-float=hard --with-nan=2008'
+      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
 
       export MARCH=mips64
 
       export LARCH=mips
-      # Other valid options are the "cavium_octeon_" and the "loongson3_"
+      # The default configuration we're choosing needs checking
       export LCARCH=malta_
       # The image location needs checking
       export LIARCH=vmlinux
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    or1k | openrisc)
+    or1k | openrisc | or1ksim)
       export ARCH=or1k
 
-      # CARCH is empty because there's no -march
+      # CARCH is empty because there's no -march/--with-arch
       export CARCH=
 
       # -mboard defaults to ork1sim (which is what we're using), might consider
@@ -612,7 +615,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    powerpc64 | g5 | ppc64)
+    powerpc64 | g5 | ppc64 | powerpc64be | powerpc64eb | ppc64be | ppc64eb)
       export ARCH=powerpc64
 
       export CARCH=
@@ -641,7 +644,7 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH="-mcpu=$ARCH -mabi=elfv2"
 
       export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64"
+      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64'
 
       export MARCH=powerpc64
 
@@ -670,7 +673,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    s390x | z | z15 | z196 | s390)
+    s390x | z196 | z15 | s390)
       export ARCH=s390x
 
       export CARCH=--with-gcc-arch=z196
@@ -879,16 +882,16 @@ radula_behave_bootstrap_list() {
   radula_open '\ti686,         i386,         x86'
   radula_open '\tmicroblaze,   microblazebe, microblazeeb'
   radula_open '\tmicroblazeel, microblazele'
-  radula_open '\tmips64,       mips64r2'
+  radula_open '\tmips64,       mips64r2,     mips,        mips64be,    mips64eb'
   radula_open '\tmips64el,     mips64le,     mips64r2el,  mips64elr2'
   radula_open '\tmips64r6'
   radula_open '\tmips64r6el,   mips64r6le'
-  radula_open '\tor1k,         openrisc'
+  radula_open '\tor1k,         openrisc,     or1ksim'
   radula_open '\tpowerpc,      pmac32,       ppc'
-  radula_open '\tpowerpc64,    g5,           ppc64'
+  radula_open '\tpowerpc64,    g5,           ppc64,       powerpc64eb, ppc64be, ppc64eb'
   radula_open '\tpowerpc64le,  powernv,      ppc64le'
   radula_open '\triscv64,      rv64imafdc,   riscv'
-  radula_open '\ts390x,        z,            z15,         z196,      s390'
+  radula_open '\ts390x,        z196,         z15,         s390'
   radula_open '\tx86-64,       x86_64'
   radula_open
   radula_open 'Species (Flags):'
