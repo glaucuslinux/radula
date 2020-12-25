@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.0.1 ($genome $species)"
+  radula_open "$0 version 3.0.2 ($genome $species)"
 }
 
 #
@@ -532,15 +532,16 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    mips64r6)
-      export ARCH=mips64r6
+    mipsisa64r6 | mips64r6)
+      # Using mips64r6 won't work as the "real" arch is mipsisa64r6
+      export ARCH=mipsisa64r6
 
-      export CARCH=--with-gcc-arch=$ARCH
+      export CARCH=--with-gcc-arch=mips64r6
 
       # We have to specify that we want the little endian variant of mips64r6
-      export FARCH="-EB -march=$ARCH -mabi=64 -mhard-float -mnan=2008"
+      export FARCH='-EB -march=mips64r6 -mabi=64 -mhard-float -mnan=2008'
 
-      export GCARCH="--with-endian=big --with-arch=$ARCH --with-abi=64 --with-float=hard --with-nan=2008"
+      export GCARCH='--with-endian=big --with-arch=mips64r6 --with-abi=64 --with-float=hard --with-nan=2008'
       export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
 
       export MARCH=mips64
@@ -551,10 +552,12 @@ radula_behave_bootstrap_arch_variables() {
       # The image location needs checking
       export LIARCH=vmlinux
 
+      # Using mips64r6 won't work as the "real" arch is mipsisa64r6
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    mips64r6el | mips64r6le)
-      export ARCH=mips64r6el
+    mipsisa64r6el | mips64r6el | mips64r6le)
+      # Using mips64r6el won't work as the "real" arch is mipsisa64r6el
+      export ARCH=mipsisa64r6el
 
       export CARCH=--with-gcc-arch=mips64r6
 
@@ -572,6 +575,7 @@ radula_behave_bootstrap_arch_variables() {
       # The image location needs checking
       export LIARCH=vmlinux
 
+      # Using mips64r6el won't work as the "real" arch is mipsisa64r6el
       export TGT=$ARCH-glaucus-linux-musl
       ;;
     or1k | openrisc | or1ksim)
@@ -877,22 +881,22 @@ radula_behave_bootstrap_initialize() {
 
 radula_behave_bootstrap_list() {
   radula_open 'Genomes (Architectures):'
-  radula_open '\taarch64,      armv8-a,      arm64'
-  radula_open '\tarmv6zk,      arm,          bcm2835'
-  radula_open '\ti686,         i386,         x86'
-  radula_open '\tmicroblaze,   microblazebe, microblazeeb'
-  radula_open '\tmicroblazeel, microblazele'
-  radula_open '\tmips64,       mips64r2,     mips,        mips64be,    mips64eb'
-  radula_open '\tmips64el,     mips64le,     mips64r2el,  mips64elr2'
-  radula_open '\tmips64r6'
-  radula_open '\tmips64r6el,   mips64r6le'
-  radula_open '\tor1k,         openrisc,     or1ksim'
-  radula_open '\tpowerpc,      pmac32,       ppc'
-  radula_open '\tpowerpc64,    g5,           ppc64,       powerpc64eb, ppc64be, ppc64eb'
-  radula_open '\tpowerpc64le,  powernv,      ppc64le'
-  radula_open '\triscv64,      rv64imafdc,   riscv'
-  radula_open '\ts390x,        z196,         z15,         s390'
-  radula_open '\tx86-64,       x86_64'
+  radula_open '\taarch64,       armv8-a,      arm64'
+  radula_open '\tarmv6zk,       arm,          bcm2835'
+  radula_open '\ti686,          i386,         x86'
+  radula_open '\tmicroblaze,    microblazebe, microblazeeb'
+  radula_open '\tmicroblazeel,  microblazele'
+  radula_open '\tmips64,        mips64r2,     mips,        mips64be,    mips64eb'
+  radula_open '\tmips64el,      mips64le,     mips64r2el,  mips64elr2'
+  radula_open '\tmipsisa64r6,   mips64r6'
+  radula_open '\tmipsisa64r6el, mips64r6el,   mips64r6le'
+  radula_open '\tor1k,          openrisc,     or1ksim'
+  radula_open '\tpowerpc,       pmac32,       ppc'
+  radula_open '\tpowerpc64,     g5,           ppc64,       powerpc64eb, ppc64be, ppc64eb'
+  radula_open '\tpowerpc64le,   powernv,      ppc64le'
+  radula_open '\triscv64,       rv64imafdc,   riscv'
+  radula_open '\ts390x,         z196,         z15,         s390'
+  radula_open '\tx86-64,        x86_64'
   radula_open
   radula_open 'Species (Flags):'
   radula_open '\talbino,     libre'
