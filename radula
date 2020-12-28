@@ -189,7 +189,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.0.2 ($genome $species)"
+  radula_open "$0 version 3.0.3 ($genome $species)"
 }
 
 #
@@ -335,8 +335,6 @@ radula_behave_bootstrap() {
   radula_behave_bootstrap_${1}_prepare
 
   radula_behave_bootstrap_${1}_construct
-
-  [ $1 = toolchain ] && radula_behave_bootstrap_${1}_backup
 }
 
 # Architecture related variables explained (for radula_behave_bootstrap_arch):
@@ -1076,7 +1074,7 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check findutils
   radula_behave_check grep
   radula_behave_check hostname
-  radula_behave_check mlocate
+  radula_behave_check plocate
   radula_behave_check sed
   radula_behave_check which
 
@@ -1143,7 +1141,7 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross findutils
   radula_behave_construct cross grep
   radula_behave_construct cross hostname
-  radula_behave_construct cross mlocate
+  radula_behave_construct cross plocate
   radula_behave_construct cross sed
   radula_behave_construct cross which
 
@@ -1202,6 +1200,7 @@ radula_behave_bootstrap_cross_img() {
   parted -s -a none $1 mkpart primary ext4 0 $2
   parted -s -a none $1 set 1 boot on
 
+  # Remember `modprobe loop` was called before cross_img
   losetup -D
   losetup $3 $1
 
@@ -1395,6 +1394,8 @@ while [ $# -ge 0 ]; do
                 radula_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
               }
 
+              radula_behave_bootstrap_toolchain_backup
+
               radula_open
               radula_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
               ;;
@@ -1414,6 +1415,8 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap cross || {
                 radula_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
               }
+
+              radula_behave_bootstrap_cross_strip
 
               radula_open
               radula_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
