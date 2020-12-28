@@ -3,47 +3,37 @@
 # Copyright (c) 2018-2020, Firas Khalil Khana
 # Distributed under the terms of the ISC License
 
+#
+# Neutralize
+#
+
 set -e
 umask 022
 unalias -a
 
-# Disable unicode
+#
+# Disable Unicode
+#
+
 LANG=C
 LC_ALL=C
 
 #
-# Default Variables
-#
-
-bootstrap=no
-ccache=yes
-check=no
-genome=x86-64
-kernel=yes
-parallel=yes
-species=atlanticus
-
-#
-# Source Configuration File
+# Source Configuration File and Set Default Variables
 #
 
 if [ -f /etc/radula.conf ]; then
   . /etc/radula.conf
 elif [ -f radula.conf ]; then
+  # Don't use `. radula.conf` because it won't work
   . ./radula.conf
-fi
-
-#
-# Default Directories
-#
-
-if [ $bootstrap = no ]; then
-  GLAD=/usr
 else
-  GLAD=$PWD/..
+  ccache=yes
+  check=no
+  genome=x86-64
+  parallel=yes
+  species=atlanticus
 fi
-
-CERD=$GLAD/cerata
 
 #
 # IO Functions
@@ -189,7 +179,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.0.3 ($genome $species)"
+  radula_open "$0 version 3.1.0 ($genome $species)"
 }
 
 #
@@ -953,7 +943,10 @@ radula_behave_bootstrap_require() {
 }
 
 radula_behave_bootstrap_variables() {
+  export GLAD=$PWD/..
+
   export BAKD=$GLAD/bak
+  export CERD=$GLAD/cerata
   export CRSD=$GLAD/cross
   export LOGD=$GLAD/log
   export SRCD=$GLAD/src
@@ -1183,7 +1176,7 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross s6-rc
   radula_behave_construct cross s6-boot-scripts
 
-  [ $kernel = yes ] && radula_behave_construct cross linux
+  radula_behave_construct cross linux
 }
 
 radula_behave_bootstrap_cross_img() {
@@ -1301,7 +1294,7 @@ radula_behave_bootstrap_cross_variables() {
 }
 
 #
-# Main
+# Options Parser
 #
 
 while [ $# -ge 0 ]; do
@@ -1463,6 +1456,10 @@ while [ $# -ge 0 ]; do
       exit 0
       ;;
     c | -c | --ceras)
+      # This will be removed in the future (only here to test `radula -c`
+      # outside of glaucus)
+      CERD=${CERD-../cerata}
+
       # Don't check for the directory $CERD/$4 alone because when $4 is
       # empty it'll resolve to $CERD which does exist and will cause radula
       # to fail.
