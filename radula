@@ -1067,7 +1067,7 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check findutils
   radula_behave_check grep
   radula_behave_check hostname
-  radula_behave_check plocate
+  radula_behave_check mlocate
   radula_behave_check sed
   radula_behave_check which
 
@@ -1134,7 +1134,7 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross findutils
   radula_behave_construct cross grep
   radula_behave_construct cross hostname
-  radula_behave_construct cross plocate
+  radula_behave_construct cross mlocate
   radula_behave_construct cross sed
   radula_behave_construct cross which
 
