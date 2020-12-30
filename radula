@@ -179,7 +179,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2020, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.1.0 ($genome $species)"
+  radula_open "$0 version 3.2.0 ($genome $species)"
 }
 
 #
@@ -1077,18 +1077,24 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check lzlib
   radula_behave_check plzip
   radula_behave_check xz
-  # zlib-ng should be built before pigz as pigz requires zlib.h
+  # zlib-ng should come before pigz as pigz requires zlib.h
   radula_behave_check zlib-ng
   radula_behave_check pigz
   radula_behave_check zstd
   radula_behave_check libarchive
 
-  # rsync comes after compression related cerata were built
+  # rsync comes after compression related cerata
   radula_behave_check rsync
 
   radula_behave_check netbsd-curses
   radula_behave_check oksh
   radula_behave_check dash
+
+  # pcre2 comes after the compression related cerata like lbzip2 and xz
+  radula_behave_check pcre2
+  radula_behave_check less
+  radula_behave_check vim
+  radula_behave_check mandoc
 
   radula_behave_check libcap
   radula_behave_check iproute2
@@ -1156,6 +1162,12 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross netbsd-curses
   radula_behave_construct cross oksh
   radula_behave_construct cross dash
+
+  # pcre2 comes after the compression related cerata lbzip2 and xz
+  radula_behave_construct cross pcre2
+  radula_behave_construct cross less
+  radula_behave_construct cross vim
+  radula_behave_construct cross mandoc
 
   radula_behave_construct cross libcap
   radula_behave_construct cross iproute2
