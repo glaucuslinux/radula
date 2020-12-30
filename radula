@@ -427,7 +427,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    microblaze | microblazebe | microblazeeb)
+    microblaze | mblaze | microblazebe | microblazeeb)
       export ARCH=microblaze
 
       # Empty because there's no -march/--with-arch
@@ -872,7 +872,7 @@ radula_behave_bootstrap_list() {
   radula_open '\taarch64,       armv8-a,      arm64'
   radula_open '\tarmv6zk,       arm,          bcm2835'
   radula_open '\ti686,          i386,         x86'
-  radula_open '\tmicroblaze,    microblazebe, microblazeeb'
+  radula_open '\tmicroblaze,    mblaze,       microblazebe, microblazeeb'
   radula_open '\tmicroblazeel,  microblazele'
   radula_open '\tmips64,        mips64r2,     mips,        mips64be,    mips64eb'
   radula_open '\tmips64el,      mips64le,     mips64r2el,  mips64elr2'
