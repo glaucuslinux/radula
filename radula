@@ -1090,7 +1090,8 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check oksh
   radula_behave_check dash
 
-  # pcre2 comes after the compression related cerata like lbzip2 and xz
+  radula_behave_check libedit
+  # pcre2 comes after bzip2, lbzip2, zlib-ng and libedit
   radula_behave_check pcre2
   radula_behave_check less
   radula_behave_check vim
@@ -1163,7 +1164,8 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross oksh
   radula_behave_construct cross dash
 
-  # pcre2 comes after the compression related cerata lbzip2 and xz
+  radula_behave_construct cross libedit
+  # pcre2 comes after bzip2, lbzip2, zlib-ng and libedit
   radula_behave_construct cross pcre2
   radula_behave_construct cross less
   radula_behave_construct cross vim
