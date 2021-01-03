@@ -1057,6 +1057,8 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check s6
   radula_behave_check utmps
 
+  radula_behave_check attr
+  radula_behave_check acl
   radula_behave_check shadow
   radula_behave_check libressl
 
@@ -1071,6 +1073,7 @@ radula_behave_bootstrap_cross_check() {
   radula_behave_check sed
   radula_behave_check which
 
+  radula_behave_check bzip2
   radula_behave_check lbzip2
   radula_behave_check lbzip2-utils
   radula_behave_check lz4
@@ -1131,6 +1134,8 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross s6
   radula_behave_construct cross utmps
 
+  radula_behave_construct cross attr
+  radula_behave_construct cross acl
   radula_behave_construct cross shadow
   radula_behave_construct cross libressl
 
@@ -1145,6 +1150,7 @@ radula_behave_bootstrap_cross_construct() {
   radula_behave_construct cross sed
   radula_behave_construct cross which
 
+  radula_behave_construct cross bzip2
   radula_behave_construct cross lbzip2
   radula_behave_construct cross lbzip2-utils
   radula_behave_construct cross lz4
