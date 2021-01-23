@@ -179,7 +179,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2021, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.2.0 ($genome $species)"
+  radula_open "$0 version 3.2.1 ($genome $species)"
 }
 
 #
@@ -233,7 +233,7 @@ radula_behave_teeth_variables() {
 # Common Behavior Action Functions
 #
 
-radula_behave_check() {
+radula_behave_swallow() {
   . $CERD/$1/ceras
 
   if [ ! -d $SRCD/$nom ]; then
@@ -321,7 +321,7 @@ radula_behave_verify() {
 
 radula_behave_bootstrap() {
   radula_behave_bootstrap_${1}_variables
-  radula_behave_bootstrap_${1}_check
+  radula_behave_bootstrap_${1}_swallow
   radula_behave_bootstrap_${1}_prepare
 
   radula_behave_bootstrap_${1}_construct
@@ -967,14 +967,14 @@ radula_behave_bootstrap_toolchain_backup() {
   $RSYNC $TLCD $BAKD --delete > /dev/null
 }
 
-radula_behave_bootstrap_toolchain_check() {
-  radula_behave_check musl
-  radula_behave_check binutils
-  radula_behave_check gmp
-  radula_behave_check mpfr
-  radula_behave_check mpc
-  radula_behave_check isl
-  radula_behave_check gcc
+radula_behave_bootstrap_toolchain_swallow() {
+  radula_behave_swallow musl
+  radula_behave_swallow binutils
+  radula_behave_swallow gmp
+  radula_behave_swallow mpfr
+  radula_behave_swallow mpc
+  radula_behave_swallow isl
+  radula_behave_swallow gcc
 }
 
 radula_behave_bootstrap_toolchain_construct() {
@@ -1045,79 +1045,79 @@ radula_behave_bootstrap_toolchain_variables() {
 # Cross Stage Functions
 #
 
-radula_behave_bootstrap_cross_check() {
-  radula_behave_check iana-etc
-  radula_behave_check cerata
-  radula_behave_check radula
+radula_behave_bootstrap_cross_swallow() {
+  radula_behave_swallow iana-etc
+  radula_behave_swallow cerata
+  radula_behave_swallow radula
 
-  radula_behave_check linux
+  radula_behave_swallow linux
 
-  radula_behave_check skalibs
-  radula_behave_check execline
-  radula_behave_check s6
-  radula_behave_check utmps
+  radula_behave_swallow skalibs
+  radula_behave_swallow execline
+  radula_behave_swallow s6
+  radula_behave_swallow utmps
 
-  radula_behave_check attr
-  radula_behave_check acl
-  radula_behave_check shadow
-  radula_behave_check libressl
+  radula_behave_swallow attr
+  radula_behave_swallow acl
+  radula_behave_swallow shadow
+  radula_behave_swallow libressl
 
-  radula_behave_check toybox
-  radula_behave_check bc
-  radula_behave_check diffutils
-  radula_behave_check file
-  radula_behave_check findutils
-  radula_behave_check grep
-  radula_behave_check hostname
-  radula_behave_check mlocate
-  radula_behave_check sed
-  radula_behave_check which
+  radula_behave_swallow toybox
+  radula_behave_swallow bc
+  radula_behave_swallow diffutils
+  radula_behave_swallow file
+  radula_behave_swallow findutils
+  radula_behave_swallow grep
+  radula_behave_swallow hostname
+  radula_behave_swallow mlocate
+  radula_behave_swallow sed
+  radula_behave_swallow which
 
-  radula_behave_check bzip2
-  radula_behave_check lbzip2
-  radula_behave_check lbzip2-utils
-  radula_behave_check lz4
-  radula_behave_check lzlib
-  radula_behave_check plzip
-  radula_behave_check xz
+  radula_behave_swallow bzip2
+  radula_behave_swallow lbzip2
+  radula_behave_swallow lbzip2-utils
+  radula_behave_swallow lz4
+  radula_behave_swallow lzlib
+  radula_behave_swallow plzip
+  radula_behave_swallow xz
   # zlib-ng should come before pigz as pigz requires zlib.h
-  radula_behave_check zlib-ng
-  radula_behave_check pigz
-  radula_behave_check zstd
-  radula_behave_check libarchive
+  radula_behave_swallow zlib-ng
+  radula_behave_swallow pigz
+  radula_behave_swallow zstd
+  radula_behave_swallow libarchive
 
   # rsync comes after compression related cerata
-  radula_behave_check rsync
+  radula_behave_swallow rsync
 
-  radula_behave_check netbsd-curses
-  radula_behave_check oksh
-  radula_behave_check dash
+  radula_behave_swallow netbsd-curses
+  radula_behave_swallow oksh
+  radula_behave_swallow dash
 
-  radula_behave_check libedit
+  radula_behave_swallow libedit
   # pcre2 comes after bzip2, lbzip2, zlib-ng and libedit
-  radula_behave_check pcre2
-  radula_behave_check less
-  radula_behave_check vim
-  radula_behave_check mandoc
+  radula_behave_swallow pcre2
+  radula_behave_swallow less
+  radula_behave_swallow vim
+  radula_behave_swallow mandoc
 
-  radula_behave_check libcap
-  radula_behave_check iproute2
-  radula_behave_check iputils
-  radula_behave_check dhcp
+  radula_behave_swallow libcap
+  radula_behave_swallow iproute2
+  radula_behave_swallow iputils
+  radula_behave_swallow dhcp
 
-  radula_behave_check psmisc
-  radula_behave_check procps-ng
-  radula_behave_check util-linux
-  radula_behave_check e2fsprogs
-  radula_behave_check kmod
+  radula_behave_swallow psmisc
+  radula_behave_swallow procps-ng
+  radula_behave_swallow util-linux
+  radula_behave_swallow e2fsprogs
+  radula_behave_swallow kmod
   # hwids comes after pciutils since the final hwdata is provided by hwids
-  radula_behave_check pciutils
-  radula_behave_check hwids
-  radula_behave_check eudev
+  radula_behave_swallow pciutils
+  radula_behave_swallow hwids
+  radula_behave_swallow eudev
 
-  radula_behave_check s6-linux-init
-  radula_behave_check s6-rc
-  radula_behave_check s6-boot-scripts
+  radula_behave_swallow s6-linux-init
+  radula_behave_swallow s6-rc
+  radula_behave_swallow s6-boot-scripts
 }
 
 radula_behave_bootstrap_cross_construct() {
