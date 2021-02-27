@@ -1236,7 +1236,7 @@ radula_behave_bootstrap_cross_img() {
   extlinux --install $4/boot/extlinux &> /dev/null
 
   # Change all file ownerships on the image to root:root
-  $CHOWN -R 0:0 $4 > /dev/null
+  $CHOWN 0:0 $4 > /dev/null
 
   # Clean up
   $UMOUNT $4 &> /dev/null
