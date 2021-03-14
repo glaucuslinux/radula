@@ -55,10 +55,10 @@ radula_open() {
 
     # The extra trailing space and printf are necessary
     printf '%b ' "$@"
-    printf '\n'
   else
-    printf '%b\n' "$1"
+    printf '%b' "$1"
   fi
+  printf '\n'
 }
 
 #
