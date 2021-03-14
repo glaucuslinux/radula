@@ -68,6 +68,7 @@ radula_open() {
 radula_behave_binary_help() {
   radula_version
 
+  radula_open
   radula_open 'Usage:'
   radula_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
   radula_open
@@ -170,7 +171,9 @@ radula_help() {
   radula_open
   radula_open '\tc, -c, --ceras  \tDisplay ceras information'
   radula_open '\tg, -g, --genome \tDisplay current genome'
+  radula_open
   radula_open '\th, -h, --help   \tDisplay this help message'
+  radula_open
   radula_open '\ts, -s, --species\tDisplay current species'
   radula_open '\tv, -v, --version\tDisplay current version number'
 }
