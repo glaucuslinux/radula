@@ -564,7 +564,7 @@ radula_behave_bootstrap_initialize() {
 
 radula_behave_bootstrap_list() {
   radula_open 'Genomes (Architectures):'
-  radula_open '\tarm64,         aarch64,      armv8-a'
+  radula_open '\taarch64,       arm64,        armv8-a'
   radula_open '\tarm,           armv6zk,      bcm2835'
   radula_open '\ti386,          i686,         x86'
   radula_open '\triscv,         riscv64,      rv64imafdc'
