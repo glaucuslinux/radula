@@ -32,7 +32,6 @@ else
   check=no
   genome=x86-64
   parallel=yes
-  species=atlanticus
 fi
 
 #
@@ -70,7 +69,7 @@ radula_behave_binary_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]"
+  radula_open '\tradula [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]'
   radula_open
   radula_open 'Options:'
   radula_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
@@ -88,7 +87,7 @@ radula_behave_bootstrap_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ b | -b | --behave ] [ b | bootstrap ] [ Options ]"
+  radula_open '\tradula [ b | -b | --behave ] [ b | bootstrap ] [ Options ]'
   radula_open
   radula_open 'Options:'
   radula_open '\tc, clean     \tClean up while preserving sources and backups'
@@ -97,7 +96,7 @@ radula_behave_bootstrap_help() {
   radula_open '\th, -h, --help\tDisplay this help message'
   radula_open
   radula_open '\ti, image     \tCreate a .img file of the glaucus system'
-  radula_open '\tl, list      \tList supported genomes and species'
+  radula_open '\tl, list      \tList supported genomes'
   radula_open '\tr, require   \tCheck if host has all required packages'
   radula_open '\ts, release   \tRelease a compressed tarball of the toolchain'
   radula_open '\tt, toolchain \tBootstrap a cross compiler toolchain'
@@ -109,7 +108,7 @@ radula_behave_envenomate_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]"
+  radula_open '\tradula [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]'
   radula_open
   radula_open 'Options:'
   radula_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
@@ -127,7 +126,7 @@ radula_behave_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ b | -b | --behave ] [ Options ]"
+  radula_open '\tradula [ b | -b | --behave ] [ Options ]'
   radula_open
   radula_open 'Options:'
   radula_open '\tb, bootstrap \tPerform bootstrap behavior'
@@ -143,7 +142,7 @@ radula_ceras_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ c | -c | --ceras ] [ Options ] [ Cerata ]"
+  radula_open '\tradula [ c | -c | --ceras ] [ Options ] [ Cerata ]'
   radula_open
   radula_open 'Options:'
   radula_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
@@ -163,7 +162,7 @@ radula_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open "\t$0 [ Options ]"
+  radula_open '\t$radula [ Options ]'
   radula_open
   radula_open 'Options:'
   radula_open '\tb, -b, --behave \tPerform any of the following behaviors:'
@@ -174,7 +173,6 @@ radula_help() {
   radula_open
   radula_open '\th, -h, --help   \tDisplay this help message'
   radula_open
-  radula_open '\ts, -s, --species\tDisplay current species'
   radula_open '\tv, -v, --version\tDisplay current version number'
 }
 
@@ -182,7 +180,7 @@ radula_version() {
   radula_open 'Copyright (c) 2018-2021, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
   radula_open
-  radula_open "$0 version 3.2.1 ($genome $species)"
+  radula_open "radula version 3.3.0 ($genome)"
 }
 
 #
@@ -367,7 +365,7 @@ radula_behave_bootstrap() {
 # `linux` stores its image file after it has been built.
 radula_behave_bootstrap_arch_variables() {
   case $genome in
-    aarch64 | armv8-a | arm64)
+    aarch64 | arm64 | armv8-a)
       export ARCH=aarch64
 
       export CARCH=--with-gcc-arch=armv8-a
@@ -386,7 +384,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    armv6zk | arm | bcm2835)
+    arm | armv6zk | bcm2835)
       export ARCH=armv6zk
 
       export CARCH=--with-gcc-arch=$ARCH
@@ -408,7 +406,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musleabihf
       ;;
-    i686 | i386 | x86)
+    i386 | i686 | x86)
       # The i686 seems like the most logical 32-bit x86 architecture to optimize
       # for at this point.
       export ARCH=i686
@@ -430,226 +428,7 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    microblaze | mblaze | microblazebe | microblazeeb)
-      export ARCH=microblaze
-
-      # Empty because there's no -march/--with-arch
-      export CARCH=
-
-      # The cpu version was chosen from:
-      # https://www.xilinx.com/support/documentation/sw_manuals/xilinx2020_1/ug984-vivado-microblaze-ref.pdf
-      # We have to specify that we want the big endian variant of microblaze
-      export FARCH='-mhard-float -mcpu=v11.0 -mbig-endian'
-
-      # --with-cpu isn't supported for this arch
-      # --with-float isn't supported for this arch as well
-      export GCARCH=--with-endian=big
-      export GPARCH=
-
-      export MARCH=$ARCH
-
-      export LARCH=$ARCH
-      export LCARCH=mmu_
-      # The image location needs checking
-      export LIARCH=arch/$ARCH/boot/bzImage
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    microblazeel | microblazele)
-      export ARCH=microblazeel
-
-      # Empty because there's no -march/--with-arch
-      export CARCH=
-
-      # The cpu version was chosen from:
-      # https://www.xilinx.com/support/documentation/sw_manuals/xilinx2020_1/ug984-vivado-microblaze-ref.pdf
-      # We have to specify that we want the little endian variant of microblaze
-      export FARCH='-mhard-float -mcpu=v11.0 -mlittle-endian'
-
-      # --with-cpu isn't supported for this arch
-      # --with-float isn't supported for this arch as well
-      export GCARCH=--with-endian=little
-      export GPARCH=
-
-      export MARCH=microblaze
-
-      export LARCH=$MARCH
-      export LCARCH=mmu_
-      # The image location needs checking
-      export LIARCH=arch/$MARCH/boot/bzImage
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    mips64 | mips64r2 | mips | mips64be | mips64eb)
-      export ARCH=mips64
-
-      export CARCH=--with-gcc-arch=${ARCH}r2
-
-      # We have to specify that we want the little endian variant of mips64
-      export FARCH="-EB -march=${ARCH}r2 -mabi=64 -mhard-float"
-
-      export GCARCH="--with-endian=big --with-arch=${ARCH}r2 --with-abi=64 --with-float=hard"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
-
-      export MARCH=$ARCH
-
-      export LARCH=mips
-      # Another valid options is the "cavium_octeon_" (Don't specify the
-      # "loongson3_" here because all loongson devices are little endian).
-      export LCARCH=malta_
-      # The image location needs checking
-      export LIARCH=vmlinux
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    mips64el | mips64le | mips64r2el | mips64elr2)
-      export ARCH=mips64el
-
-      export CARCH=--with-gcc-arch=mips64r2
-
-      # We have to specify that we want the little endian variant of mips64
-      export FARCH='-EL -march=mips64r2 -mabi=64 -mhard-float'
-
-      export GCARCH='--with-endian=little --with-arch=mips64r2 --with-abi=64 --with-float=hard'
-      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
-
-      export MARCH=mips64
-
-      export LARCH=mips
-      # Other valid options are the "cavium_octeon_" and the "loongson3_"
-      export LCARCH=malta_
-      # The image location needs checking
-      export LIARCH=vmlinux
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    mipsisa64r6 | mips64r6)
-      # Using mips64r6 won't work as the "real" arch is mipsisa64r6
-      export ARCH=mipsisa64r6
-
-      export CARCH=--with-gcc-arch=mips64r6
-
-      # We have to specify that we want the little endian variant of mips64r6
-      export FARCH='-EB -march=mips64r6 -mabi=64 -mhard-float -mnan=2008'
-
-      export GCARCH='--with-endian=big --with-arch=mips64r6 --with-abi=64 --with-float=hard --with-nan=2008'
-      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
-
-      export MARCH=mips64
-
-      export LARCH=mips
-      # The default configuration we're choosing needs checking
-      export LCARCH=malta_
-      # The image location needs checking
-      export LIARCH=vmlinux
-
-      # Using mips64r6 won't work as the "real" arch is mipsisa64r6
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    mipsisa64r6el | mips64r6el | mips64r6le)
-      # Using mips64r6el won't work as the "real" arch is mipsisa64r6el
-      export ARCH=mipsisa64r6el
-
-      export CARCH=--with-gcc-arch=mips64r6
-
-      # We have to specify that we want the little endian variant of mips64r6
-      export FARCH='-EL -march=mips64r6 -mabi=64 -mhard-float -mnan=2008'
-
-      export GCARCH='--with-endian=little --with-arch=mips64r6 --with-abi=64 --with-float=hard --with-nan=2008'
-      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-mips64'
-
-      export MARCH=mips64
-
-      export LARCH=mips
-      # The default configuration we're choosing needs checking
-      export LCARCH=malta_
-      # The image location needs checking
-      export LIARCH=vmlinux
-
-      # Using mips64r6el won't work as the "real" arch is mipsisa64r6el
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    or1k | openrisc | or1ksim)
-      export ARCH=or1k
-
-      # CARCH is empty because there's no -march/--with-arch
-      export CARCH=
-
-      # -mboard defaults to ork1sim (which is what we're using), might consider
-      # changing it to de0_nano
-      export FARCH=-mhard-float
-
-      # There's no such option as --with-float=hard for this arch
-      export GCARCH=
-      export GPARCH=
-
-      export MARCH=$ARCH
-
-      export LARCH=openrisc
-      export LCARCH=${ARCH}sim_
-      # The image location needs checking
-      export LIARCH=arch/$LARCH/boot/bzImage
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    powerpc | pmac32 | ppc)
-      export ARCH=powerpc
-
-      export CARCH=
-
-      export FARCH="-mcpu=$ARCH -msecure-plt"
-
-      export GCARCH="--with-cpu=$ARCH --enable-secureplt --without-long-double-128"
-      export GPARCH=
-
-      export MARCH=$ARCH
-
-      export LARCH=$ARCH
-      export LCARCH=pmac32_
-      export LIARCH=vmlinux
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    powerpc64 | g5 | ppc64 | powerpc64be | powerpc64eb | ppc64be | ppc64eb)
-      export ARCH=powerpc64
-
-      export CARCH=
-
-      export FARCH="-mcpu=$ARCH -mabi=elfv2"
-
-      export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
-
-      export MARCH=$ARCH
-
-      export LARCH=powerpc
-      # If you want to optimize the kernel configuration for the PlayStation 3,
-      # you can use `altivec_` for LCARCH (which makes the kernel configure for
-      # `altivec_defconfig`) which is also a powerpc64 architecture.
-      export LCARCH=g5_
-      export LIARCH=vmlinux
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    powerpc64le | powernv | ppc64le)
-      export ARCH=powerpc64le
-
-      export CARCH=
-
-      export FARCH="-mcpu=$ARCH -mabi=elfv2"
-
-      export GCARCH="--with-cpu=$ARCH --with-abi=elfv2"
-      export GPARCH='radula_behave_patch 0 gcc glaucus 0001-pure64-for-powerpc64'
-
-      export MARCH=powerpc64
-
-      export LARCH=powerpc
-      export LCARCH=powernv_
-      export LIARCH=vmlinux
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    riscv64 | rv64imafdc | riscv)
+    riscv | riscv64 | rv64imafdc)
       export ARCH=riscv64
 
       export CARCH=--with-gcc-arch=rv64imafdc
@@ -665,31 +444,6 @@ radula_behave_bootstrap_arch_variables() {
       # LCARCH is empty because it uses the regular `defconfig`
       export LCARCH=
       export LIARCH=arch/$LARCH/boot/Image
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
-    s390x | z196 | z15 | s390)
-      export ARCH=s390x
-
-      export CARCH=--with-gcc-arch=z196
-
-      # -mhard-dfp is the default on z9-ec and higher (e.g. z196)
-      # s390x implies -m64 which in turn implies -mzarch
-      # -mlong-double-128 is needed because 64 bits is the default
-      export FARCH="-mlong-double-128 -march=z196 -mtune=z15"
-
-      # --enable-decimal-float is the default on z9-ec and higher (e.g. z196)
-      # s390x implies -m64 which in turn implies --with-zarch
-      # --with-long-double-128 is needed because 64 bits is the default
-      export GCARCH="--with-arch=z196 --with-tune=z15 --with-long-double-128"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
-
-      export MARCH=$ARCH
-
-      export LARCH=s390
-      # LCARCH is empty because it uses the regular `defconfig`
-      export LCARCH=
-      export LIARCH=arch/$LARCH/boot/bzImage
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
@@ -744,124 +498,62 @@ radula_behave_bootstrap_distclean() {
 }
 
 radula_behave_bootstrap_flags_variables() {
-  # Common flags enabled in all species
-  COMMON=-fcommon
-  DEBUG=-g0
-  FAT=-ffat-lto-objects
-  LTO=-flto
-  PIPE=-pipe
-  STRIP=-s
-
-  case $species in
-    # albino (libre) is the libre version of atlanticus (performance)
-    atlanticus | performance | albino | libre)
-      case $genome in
-        x86-64 | x86_64)
-          ALIGN=-malign-data=cacheline
-          FPMATH=-mfpmath=both
-          TLS=-mtls-dialect=gnu2
-          ;;
-      esac
-      DEVIRT=-fdevirtualize-at-ltrans
-      EXPAND=-fvariable-expansion-in-unroller
-      FINITE=-fno-finite-math-only
-      GCSE='-fgcse-sm -fgcse-las'
-      GRAPHITE='-fgraphite-identity -floop-nest-optimize'
-      IPA=-fipa-pta
-      IRA=-fira-loop-pressure
-      MERGE=-fmerge-all-constants
-      OFAST=-Ofast
-      OPENMP=-fopenmp
-      PGO='-ftracer -funroll-loops'
-      PLT=-fno-plt
-      SEMANTIC=-fno-semantic-interposition
-      SMS='-fmodulo-sched -fmodulo-sched-allow-regmoves'
-
-      export CFLAGS="$PIPE $OPENMP $DEBUG $OFAST $SMS $GCSE $IRA $IPA $GRAPHITE $MERGE $DEVIRT $SEMANTIC $EXPAND $LTO $PGO $STRIP $PLT $FARCH $TLS $FPMATH $ALIGN"
-
-      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
-      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
-
-      export CFLAGSFINITE="$(printf -- "$CFLAGS" | sed "s/$OFAST/& $FINITE/")"
-
-      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
-      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
-
-      export CFLAGSNOFPMATHNOLTO="$(printf -- "$CFLAGS" | sed -e "s/ $FPMATH//" -e "s/$LTO //")"
-
-      export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
-
-      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
-      export CFLAGSNOLTONOOPENMPNOPLT="$(printf -- "$CFLAGSNOLTO" | sed -e "s/$OPENMP //" -e "s/$PLT //")"
-
-      # CFLAGSNOOPENMP is used inside LDFLAGSNOOPENMP which is used for grub
-      export CFLAGSNOOPENMP="$(printf -- "$CFLAGS" | sed "s/$OPENMP //")"
-
-      export CXXFLAGS="$CFLAGS"
-
-      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
-
-      export LDFLAGSNOOPENMP="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGSNOOPENMP"
-
-      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
-      ;;
-    bennettae | size)
-      AUNWIND=-fno-asynchronous-unwind-tables
-      DSECTS=-fdata-sections
-      EXCEPT=-fno-exceptions
-      FSECTS=-ffunction-sections
-      OMIT=-fomit-frame-pointer
-      OS=-Os
-      RTTI=-fno-rtti
-      UNWIND=-fno-unwind-tables
-
-      export CFLAGS="$PIPE $RTTI $DEBUG $OS $OMIT $LTO $FSECTS $DSECTS $STRIP $EXCEPT $UNWIND $AUNWIND $FARCH"
-
-      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
-      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
-
-      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
-      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
-
-      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
-
-      export CXXFLAGS="$CFLAGS"
-
-      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed -Wl,--gc-sections $CFLAGS"
-
-      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
-      ;;
-    # thompsoni (radiology) is based on marginatus (sane)
-    marginatus | sane | thompsoni | radiology)
-      DEVIRT=-fdevirtualize-at-ltrans
-      GRAPHITE='-fgraphite-identity -floop-nest-optimize'
-      IPA=-fipa-pta
-      O3=-O3
-      SEMANTIC=-fno-semantic-interposition
-
-      export CFLAGS="$PIPE $DEBUG $O3 $IPA $GRAPHITE $DEVIRT $SEMANTIC $LTO $STRIP $FARCH"
-
-      export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
-      export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
-
-      export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
-      export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
-
-      export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
-
-      export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
-
-      export CXXFLAGS="$CFLAGS"
-
-      export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
-
-      export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
-      ;;
-    *)
-      $0 l s
-      exit 1
+  case $genome in
+    x86-64 | x86_64)
+      ALIGN=-malign-data=cacheline
+      FPMATH=-mfpmath=both
+      TLS=-mtls-dialect=gnu2
       ;;
   esac
+
+  COMMON=-fcommon
+  DEBUG=-g0
+  DEVIRT=-fdevirtualize-at-ltrans
+  EXPAND=-fvariable-expansion-in-unroller
+  FAT=-ffat-lto-objects
+  FINITE=-fno-finite-math-only
+  GCSE='-fgcse-sm -fgcse-las'
+  GRAPHITE='-fgraphite-identity -floop-nest-optimize'
+  IPA=-fipa-pta
+  IRA=-fira-loop-pressure
+  LTO=-flto
+  MERGE=-fmerge-all-constants
+  OFAST=-Ofast
+  OPENMP=-fopenmp
+  PGO='-ftracer -funroll-loops'
+  PIPE=-pipe
+  PLT=-fno-plt
+  SEMANTIC=-fno-semantic-interposition
+  SMS='-fmodulo-sched -fmodulo-sched-allow-regmoves'
+  STRIP=-s
+
+  export CFLAGS="$PIPE $OPENMP $DEBUG $OFAST $SMS $GCSE $IRA $IPA $GRAPHITE $MERGE $DEVIRT $SEMANTIC $EXPAND $LTO $PGO $STRIP $PLT $FARCH $TLS $FPMATH $ALIGN"
+
+  export CFLAGSFAT="$(printf -- "$CFLAGS" | sed "s/$LTO/& $FAT/")"
+  export CFLAGSFATNOCOMMON="$(printf -- "$CFLAGSFAT" | sed "s/$STRIP /&$COMMON /")"
+
+  export CFLAGSFINITE="$(printf -- "$CFLAGS" | sed "s/$OFAST/& $FINITE/")"
+
+  export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
+  export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
+
+  export CFLAGSNOFPMATHNOLTO="$(printf -- "$CFLAGS" | sed -e "s/ $FPMATH//" -e "s/$LTO //")"
+
+  export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
+
+  export CFLAGSNOLTO="$(printf -- "$CFLAGS" | sed "s/$LTO //")"
+  export CFLAGSNOLTONOOPENMPNOPLT="$(printf -- "$CFLAGSNOLTO" | sed -e "s/$OPENMP //" -e "s/$PLT //")"
+
+  # CFLAGSNOOPENMP is used inside LDFLAGSNOOPENMP which is used for grub
+  export CFLAGSNOOPENMP="$(printf -- "$CFLAGS" | sed "s/$OPENMP //")"
+
+  export CXXFLAGS="$CFLAGS"
+
+  export LDFLAGS="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGS"
+
+  export LDFLAGSNOOPENMP="-Wl,--strip-all -Wl,-z,now,-z,relro -Wl,--as-needed $CFLAGSNOOPENMP"
+
+  export LDFLAGSNORELRO="-Wl,--strip-all -Wl,--as-needed $CFLAGS"
 }
 
 radula_behave_bootstrap_initialize() {
@@ -872,29 +564,11 @@ radula_behave_bootstrap_initialize() {
 
 radula_behave_bootstrap_list() {
   radula_open 'Genomes (Architectures):'
-  radula_open '\taarch64,       armv8-a,      arm64'
-  radula_open '\tarmv6zk,       arm,          bcm2835'
-  radula_open '\ti686,          i386,         x86'
-  radula_open '\tmicroblaze,    mblaze,       microblazebe, microblazeeb'
-  radula_open '\tmicroblazeel,  microblazele'
-  radula_open '\tmips64,        mips64r2,     mips,         mips64be,    mips64eb'
-  radula_open '\tmips64el,      mips64le,     mips64r2el,   mips64elr2'
-  radula_open '\tmipsisa64r6,   mips64r6'
-  radula_open '\tmipsisa64r6el, mips64r6el,   mips64r6le'
-  radula_open '\tor1k,          openrisc,     or1ksim'
-  radula_open '\tpowerpc,       pmac32,       ppc'
-  radula_open '\tpowerpc64,     g5,           ppc64,        powerpc64eb, ppc64be, ppc64eb'
-  radula_open '\tpowerpc64le,   powernv,      ppc64le'
-  radula_open '\triscv64,       rv64imafdc,   riscv'
-  radula_open '\ts390x,         z196,         z15,          s390'
+  radula_open '\tarm64,         aarch64,      armv8-a'
+  radula_open '\tarm,           armv6zk,      bcm2835'
+  radula_open '\ti386,          i686,         x86'
+  radula_open '\triscv,         riscv64,      rv64imafdc'
   radula_open '\tx86-64,        x86_64'
-  radula_open
-  radula_open 'Species (Flags):'
-  radula_open '\talbino,     libre'
-  radula_open '\tatlanticus, performance'
-  radula_open '\tbennettae,  size'
-  radula_open '\tmarginatus, sane'
-  radula_open '\tthompsoni,  radiology'
 }
 
 radula_behave_bootstrap_require() {
@@ -987,12 +661,7 @@ radula_behave_bootstrap_toolchain_construct() {
   radula_behave_construct toolchain musl
   radula_behave_construct toolchain libgcc
   radula_behave_construct toolchain libstdc++-v3
-
-  case $species in
-    atlanticus | performance | albino | libre)
-      radula_behave_construct toolchain libgomp
-      ;;
-  esac
+  radula_behave_construct toolchain libgomp
 }
 
 # Remember that radula_behave_bootstrap_clean is run beforehand
@@ -1392,7 +1061,7 @@ while [ $# -ge 0 ]; do
               $0 b b r
 
               radula_open
-              radula_open "Bootstrapping the $genome cross-compiler toolchain targetting musl libc..."
+              radula_open "Bootstrapping the $genome cross-compiler toolchain targeting musl libc..."
 
               radula_behave_bootstrap_variables
 
@@ -1407,19 +1076,19 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_arch_variables
 
               radula_behave_bootstrap toolchain || {
-                radula_close "Failed to boostrap an $genome cross-compiler toolchain targetting musl libc."
+                radula_close "Failed to boostrap an $genome cross-compiler toolchain targeting musl libc."
               }
 
               radula_behave_bootstrap_toolchain_backup
 
               radula_open
-              radula_open "Successfully bootstrapped an $genome cross-compiler toolchain targetting musl libc!"
+              radula_open "Successfully bootstrapped an $genome cross-compiler toolchain targeting musl libc!"
               ;;
             x | cross)
               $0 b b r
 
               radula_open
-              radula_open "Bootstrapping the $genome cross-compiled glaucus $species system..."
+              radula_open "Bootstrapping the $genome cross-compiled glaucus system..."
 
               radula_behave_bootstrap_variables
 
@@ -1429,13 +1098,13 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_flags_variables
 
               radula_behave_bootstrap cross || {
-                radula_close "Failed to boostrap an $genome cross-compiled glaucus $species system."
+                radula_close "Failed to boostrap an $genome cross-compiled glaucus system."
               }
 
               radula_behave_bootstrap_cross_strip
 
               radula_open
-              radula_open "Successfully bootstrapped an $genome cross-compiled glaucus $species system!"
+              radula_open "Successfully bootstrapped an $genome cross-compiled glaucus system!"
               ;;
             *)
               radula_behave_bootstrap_help
@@ -1561,10 +1230,6 @@ while [ $# -ge 0 ]; do
       ;;
     h | -h | --help)
       radula_help
-      exit 0
-      ;;
-    s | -s | --species)
-      radula_open $species
       exit 0
       ;;
     v | -v | --version)
