@@ -162,7 +162,7 @@ radula_help() {
 
   radula_open
   radula_open 'Usage:'
-  radula_open '\t$radula [ Options ]'
+  radula_open '\tradula [ Options ]'
   radula_open
   radula_open 'Options:'
   radula_open '\tb, -b, --behave \tPerform any of the following behaviors:'
@@ -428,25 +428,6 @@ radula_behave_bootstrap_arch_variables() {
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
-    riscv | riscv64 | rv64imafdc)
-      export ARCH=riscv64
-
-      export CARCH=--with-gcc-arch=rv64imafdc
-
-      export FARCH='-mabi=lp64d -march=rv64imafdc -mtune=rocket'
-
-      export GCARCH='--with-arch=rv64imafdc --with-tune=rocket --with-abi=lp64d'
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
-
-      export MARCH=$ARCH
-
-      export LARCH=riscv
-      # LCARCH is empty because it uses the regular `defconfig`
-      export LCARCH=
-      export LIARCH=arch/$LARCH/boot/Image
-
-      export TGT=$ARCH-glaucus-linux-musl
-      ;;
     x86-64 | x86_64)
       export ARCH=x86-64
 
@@ -567,7 +548,6 @@ radula_behave_bootstrap_list() {
   radula_open '\taarch64,       arm64,        armv8-a'
   radula_open '\tarm,           armv6zk,      bcm2835'
   radula_open '\ti386,          i686,         x86'
-  radula_open '\triscv,         riscv64,      rv64imafdc'
   radula_open '\tx86-64,        x86_64'
 }
 
