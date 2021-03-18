@@ -19,20 +19,13 @@ LANG=C
 LC_ALL=C
 
 #
-# Source Configuration File and Set Default Variables
+# Set Default Variables
 #
 
-if [ -f /etc/radula.conf ]; then
-  . /etc/radula.conf
-elif [ -f radula.conf ]; then
-  # Don't use `. radula.conf` because it won't work
-  . ./radula.conf
-else
-  ccache=yes
-  check=no
-  genome=x86-64
-  parallel=yes
-fi
+ccache=yes
+check=no
+genome=x86-64
+parallel=yes
 
 #
 # IO Functions
@@ -187,12 +180,9 @@ radula_version() {
 # Common Behavior Variable Functions
 #
 
-# For custom ccache directories (or if host was neither Arch nor Fedora, the
-# user has to specify them in /etc/radula.conf using the `CCCH` variable (along
-# with ccache=yes beforehand).
+# Use default ccache directories on Arch and Fedora
 radula_behave_ccache_variables() {
-  CCCH=${1:-/usr/lib/ccache/bin:/usr/lib64/ccache}
-  export PATH=$CCCH:$PATH
+  export PATH="/usr/lib/ccache/bin:/usr/lib64/ccache:$PATH"
 }
 
 radula_behave_pkg_config_variables() {
