@@ -375,12 +375,12 @@ radula_behave_bootstrap_arch_variables() {
       export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
       export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
-      export MARCH=$ARCH
-
       export LARCH=arm64
       # LCARCH is empty because it uses the regular `defconfig`
       export LCARCH=
       export LIARCH=arch/$LARCH/boot/Image
+
+      export MARCH=$ARCH
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
@@ -396,13 +396,13 @@ radula_behave_bootstrap_arch_variables() {
       # architecture; hence, GPARCH is empty.
       export GPARCH=
 
-      export MARCH=arm
-
-      export LARCH=$MARCH
+      export LARCH=arm
       # Optimize the linux configuration for the Raspberry Pi 1 Models A, B, B+,
       # the Compute Module, and the Raspberry Pi Zero.
       export LCARCH=bcm2835_
-      export LIARCH=arch/$MARCH/boot/zImage
+      export LIARCH=arch/$LARCH/boot/zImage
+
+      export MARCH=$LARCH
 
       export TGT=$ARCH-glaucus-linux-musleabihf
       ;;
@@ -418,13 +418,13 @@ radula_behave_bootstrap_arch_variables() {
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
       export GPARCH=
 
-      # musl only knows i386, so we use that to configure it.
-      export MARCH=i386
-
       # Same goes for the kernel.
-      export LARCH=$MARCH
-      export LCARCH=${MARCH}_
+      export LARCH=i386
+      export LCARCH=${LARCH}_
       export LIARCH=arch/x86/boot/bzImage
+
+      # musl only knows i386, so we use that to configure it.
+      export MARCH=$LARCH
 
       export TGT=$ARCH-glaucus-linux-musl
       ;;
@@ -438,13 +438,13 @@ radula_behave_bootstrap_arch_variables() {
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
       export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
-      export MARCH=x86_64
-
-      export LARCH=$MARCH
-      export LCARCH=${MARCH}_
+      export LARCH=x86_64
+      export LCARCH=${LARCH}_
       export LIARCH=arch/x86/boot/bzImage
 
-      export TGT=$MARCH-glaucus-linux-musl
+      export MARCH=$LARCH
+
+      export TGT=$LARCH-glaucus-linux-musl
       ;;
     *)
       $0 l g
