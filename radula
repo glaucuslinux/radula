@@ -354,6 +354,8 @@ radula_behave_bootstrap() {
 # LIARCH stands for Linux Image ARCH, which refers to the directory where
 # `linux` stores its image file after it has been built.
 radula_behave_bootstrap_arch_variables() {
+  export BLD=$($CERD/binutils/config.guess)
+
   case $genome in
     aarch64 | arm64 | armv8-a)
       export ARCH=aarch64
@@ -679,8 +681,6 @@ radula_behave_bootstrap_toolchain_variables() {
 
   export TSRC=$TTMP/src
   export TBLD=$TTMP/builds
-
-  export BLD=$($CERD/binutils/config.guess)
 }
 
 #
@@ -951,8 +951,6 @@ radula_behave_bootstrap_cross_variables() {
   export SIZE=$TGT-size
   export STRINGS=$TGT-strings
   export STRIP=$TGT-strip
-
-  export BLD=$($CERD/binutils/config.guess)
 }
 
 #
