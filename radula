@@ -680,7 +680,7 @@ radula_behave_bootstrap_toolchain_variables() {
   export TTMP=$TMPD/toolchain
 
   export TSRC=$TTMP/src
-  export TBLD=$TTMP/builds
+  export TBLD=$TTMP/bld
 }
 
 #
@@ -919,7 +919,7 @@ radula_behave_bootstrap_cross_variables() {
 
   export XTMP=$TMPD/cross
 
-  export XBLD=$XTMP/builds
+  export XBLD=$XTMP/bld
   export XSRC=$XTMP/src
 
   # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
