@@ -679,8 +679,8 @@ radula_behave_bootstrap_toolchain_variables() {
 
   export TTMP=$TMPD/toolchain
 
-  export TSRC=$TTMP/src
   export TBLD=$TTMP/bld
+  export TSRC=$TTMP/src
 }
 
 #
