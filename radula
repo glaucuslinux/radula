@@ -1132,6 +1132,8 @@ while [ $# -ge 0 ]; do
             ;;
           v | ver | version)
             radula_open "Version:     \t$ver"
+
+            [ $ver = git ] && radula_open "Commit:      \t$cmt"
             ;;
           u | url | source)
             radula_open "Source:      \t$url"
