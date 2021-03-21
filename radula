@@ -671,7 +671,7 @@ radula_behave_bootstrap_toolchain_release() {
   $RM $1/toolchain/share/man > /dev/null
 
   cd $1
-  tar -cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' . > /dev/null
+  tar cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' . > /dev/null
 }
 
 radula_behave_bootstrap_toolchain_variables() {
