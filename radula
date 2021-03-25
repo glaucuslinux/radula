@@ -61,10 +61,10 @@ radula_behave_binary_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ b | -b | --behave ] [ i | binary ] [ Options ] [ Cerata ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ b | -b | --behave ] [ i | binary ] [ OPTIONS ] [ Cerata ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
   radula_open
   radula_open '\th, -h, --help\tDisplay this help message'
@@ -79,10 +79,10 @@ radula_behave_bootstrap_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ b | -b | --behave ] [ b | bootstrap ] [ Options ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ b | -b | --behave ] [ b | bootstrap ] [ OPTIONS ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open '\tc, clean     \tClean up while preserving sources and backups'
   radula_open '\td, distclean \tClean up everything'
   radula_open
@@ -100,10 +100,10 @@ radula_behave_envenomate_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ b | -b | --behave ] [ e | envenomate ] [ Options ] [ Cerata ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ b | -b | --behave ] [ e | envenomate ] [ OPTIONS ] [ Cerata ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
   radula_open
   radula_open '\th, -h, --help\tDisplay this help message'
@@ -118,10 +118,10 @@ radula_behave_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ b | -b | --behave ] [ Options ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ b | -b | --behave ] [ OPTIONS ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open '\tb, bootstrap \tPerform bootstrap behavior'
   radula_open '\te, envenomate\tPerform envenomate behavior'
   radula_open
@@ -134,15 +134,14 @@ radula_ceras_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ c | -c | --ceras ] [ Options ] [ Cerata ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ c | -c | --ceras ] [ OPTIONS ] [ Cerata ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
   radula_open
   radula_open '\th, -h, --help                    \tDisplay this help message'
   radula_open
-  radula_open "\tl, lic, license, licenses        \tDisplay cerata license(s)"
   radula_open "\tn, nom, name                     \tDisplay cerata name(s)"
   radula_open "\ts, sum, checksum, sha512sum      \tDisplay cerata sha512sum(s)"
   radula_open "\tu, url, source                   \tDisplay cerata source(s)"
@@ -154,15 +153,14 @@ radula_help() {
   radula_version
 
   radula_open
-  radula_open 'Usage:'
-  radula_open '\tradula [ Options ]'
+  radula_open 'USAGE:'
+  radula_open '\tradula [ OPTIONS ]'
   radula_open
-  radula_open 'Options:'
+  radula_open 'OPTIONS:'
   radula_open '\tb, -b, --behave \tPerform any of the following behaviors:'
   radula_open '\t                \tbinary, bootstrap, envenomate'
   radula_open
   radula_open '\tc, -c, --ceras  \tDisplay ceras information'
-  radula_open '\tg, -g, --genome \tDisplay current genome'
   radula_open
   radula_open '\th, -h, --help   \tDisplay this help message'
   radula_open
@@ -170,10 +168,10 @@ radula_help() {
 }
 
 radula_version() {
+  radula_open 'radula version 3.4.0'
+  radula_open
   radula_open 'Copyright (c) 2018-2021, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
-  radula_open
-  radula_open 'radula version 3.3.0'
 }
 
 #
@@ -181,11 +179,11 @@ radula_version() {
 #
 
 # Use default ccache directories on Arch and Fedora
-radula_behave_ccache_variables() {
+radula_behave_ccache_environment() {
   export PATH="/usr/lib/ccache/bin:/usr/lib64/ccache:$PATH"
 }
 
-radula_behave_pkg_config_variables() {
+radula_behave_pkg_config_environment() {
   # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
   # automatically prefixed to PATH and LIBDIR)
   export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig
@@ -197,7 +195,7 @@ radula_behave_pkg_config_variables() {
 }
 
 # teeth are radula's tools
-radula_behave_teeth_variables() {
+radula_behave_teeth_environment() {
   export AUTORECONF='autoreconf -fvis'
   export CHMOD='chmod -Rv'
   export CHOWN='chown -Rv'
@@ -207,7 +205,7 @@ radula_behave_teeth_variables() {
   if [ $parallel = yes ]; then
     # Don't use anything higher than `nproc + 1` or `nproc * 1.5` (such as
     # `-j` alone) or you'll risk having your host system freeze.
-    export MAKEFLAGS="-j$(printf '%b' "$(nproc) * 1.5 / 1\n" | bc) V=1"
+    export MAKEFLAGS="-j$(echo "$(nproc) * 1.5 / 1" | bc) V=1"
   else
     export MAKEFLAGS='-j1 V=1'
   fi
@@ -215,6 +213,7 @@ radula_behave_teeth_variables() {
   # Full path to not overlap with the install() function in .ceras files
   export MKDIR='/usr/bin/install -dv'
   export MV='mv -v'
+  export PATCH='patch -v'
   export RM='rm -frv'
   export RSYNC='rsync -vaHAXSx'
   export UMOUNT='umount -fqRv'
@@ -294,14 +293,6 @@ radula_behave_fetch() {
   fi
 }
 
-radula_behave_gnu() {
-  $RSYNC $CERD/binutils/config.$1 $2
-}
-
-radula_behave_patch() {
-  patch -p$1 -i $CERD/$2/patches/$3/$4.patch
-}
-
 radula_behave_verify() {
   printf "%s" "$sum $SRCD/$nom/$1" | sha512sum -c > /dev/null
 }
@@ -311,7 +302,7 @@ radula_behave_verify() {
 #
 
 radula_behave_bootstrap() {
-  radula_behave_bootstrap_${1}_variables
+  radula_behave_bootstrap_${1}_environment
   radula_behave_bootstrap_${1}_swallow
   radula_behave_bootstrap_${1}_prepare
 
@@ -338,9 +329,6 @@ radula_behave_bootstrap() {
 # function. The order of the flags in GCARCH is as mentioned in GCC's configure
 # doc (https://gcc.gnu.org/install/configure.html).
 #
-# GPARCH stands for Gcc Patch ARCH, which refers to the architecture of the
-# pure64 patch by glaucus applied to the `gcc` sources in the prepare function.
-#
 # MARCH stands for Musl ARCH, which refers to the closest architecture
 # recognized by `musl` (located in the `musl/arch` directory).
 #
@@ -349,11 +337,11 @@ radula_behave_bootstrap() {
 #
 # LCARCH stands for Linux Configuration ARCH, which refers to the closest device
 # with a similar architecture that's used to configure the kernel sources (based
-# on what's available in `linux/arch/$genome/configs`).
+# on what's available in `linux/arch/$LARCH/configs`).
 #
 # LIARCH stands for Linux Image ARCH, which refers to the directory where
 # `linux` stores its image file after it has been built.
-radula_behave_bootstrap_arch_variables() {
+radula_behave_bootstrap_arch_environment() {
   export BLD=$($CERD/binutils/config.guess)
 
   case $genome in
@@ -365,7 +353,6 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH='-mabi=lp64 -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -march=armv8-a -mtune=generic'
 
       export GCARCH='--with-arch=armv8-a --with-abi=lp64 --enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419'
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export LARCH=arm64
       # LCARCH is empty because it uses the regular `defconfig`
@@ -384,9 +371,6 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH="-mabi=aapcs-linux -mfloat-abi=hard -march=$ARCH -mtune=arm1176jzf-s -mcpu=arm1176jzf-s -mfpu=vfpv2"
 
       export GCARCH="--with-arch=$ARCH --with-tune=arm1176jzf-s --with-abi=aapcs-linux --with-fpu=vfpv2 --with-float=hard"
-      # Doesn't need a pure64 patch for GCC since this isn't a 64 bit
-      # architecture; hence, GPARCH is empty.
-      export GPARCH=
 
       export LARCH=arm
       # Optimize the linux configuration for the Raspberry Pi 1 Models A, B, B+,
@@ -408,7 +392,6 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
 
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
-      export GPARCH=
 
       # Same goes for the kernel.
       export LARCH=i386
@@ -428,7 +411,6 @@ radula_behave_bootstrap_arch_variables() {
       export FARCH="-march=$ARCH -mtune=generic -mabi=sysv"
 
       export GCARCH="--with-arch=$ARCH --with-tune=generic"
-      export GPARCH="radula_behave_patch 0 gcc glaucus 0001-pure64-for-$ARCH"
 
       export LARCH=x86_64
       export LCARCH=${LARCH}_
@@ -466,11 +448,11 @@ radula_behave_bootstrap_distclean() {
 
   radula_behave_bootstrap_clean
 
-  # Only remove `tmp` completely after `$TBLD` and `$XBLD` are removed
+  # Only remove `$TMPD` completely after `$TBLD` and `$XBLD` are removed
   $RM $TMPD > /dev/null
 }
 
-radula_behave_bootstrap_flags_variables() {
+radula_behave_bootstrap_flags_environment() {
   case $genome in
     x86-64 | x86_64)
       ALIGN=-malign-data=cacheline
@@ -591,7 +573,7 @@ radula_behave_bootstrap_require() {
   radula_open "zstd:      \t$(zstd --version | cut -d' ' -f7 | sed 's/,$//')"
 }
 
-radula_behave_bootstrap_variables() {
+radula_behave_bootstrap_environment() {
   export GLAD=$PWD/..
 
   export BAKD=$GLAD/bak
@@ -604,7 +586,7 @@ radula_behave_bootstrap_variables() {
 
   export PATH=$TLCD/bin:$PATH
 
-  radula_behave_teeth_variables
+  radula_behave_teeth_environment
 }
 
 #
@@ -674,7 +656,7 @@ radula_behave_bootstrap_toolchain_release() {
   tar cvf $GLAD/toolchain-$(date +%d%m%Y).tar.zst -I 'zstd -22 --ultra --long=31 -T0' . > /dev/null
 }
 
-radula_behave_bootstrap_toolchain_variables() {
+radula_behave_bootstrap_toolchain_environment() {
   export TLOG=$LOGD/toolchain
 
   export TTMP=$TMPD/toolchain
@@ -914,7 +896,7 @@ radula_behave_bootstrap_cross_strip() {
   $RM $CRSD/usr/lib/charset.alias > /dev/null
 }
 
-radula_behave_bootstrap_cross_variables() {
+radula_behave_bootstrap_cross_environment() {
   export XLOG=$LOGD/cross
 
   export XTMP=$TMPD/cross
@@ -954,7 +936,7 @@ radula_behave_bootstrap_cross_variables() {
 }
 
 #
-# Options Parser
+# OPTIONS
 #
 
 while [ $# -ge 0 ]; do
@@ -968,22 +950,22 @@ while [ $# -ge 0 ]; do
         b | bootstrap)
           case $3 in
             c | clean)
-              radula_behave_bootstrap_variables
+              radula_behave_bootstrap_environment
 
-              radula_behave_bootstrap_toolchain_variables
+              radula_behave_bootstrap_toolchain_environment
 
-              radula_behave_bootstrap_cross_variables
+              radula_behave_bootstrap_cross_environment
 
               radula_behave_bootstrap_clean
 
               radula_open 'clean complete'
               ;;
             d | distclean)
-              radula_behave_bootstrap_variables
+              radula_behave_bootstrap_environment
 
-              radula_behave_bootstrap_toolchain_variables
+              radula_behave_bootstrap_toolchain_environment
 
-              radula_behave_bootstrap_cross_variables
+              radula_behave_bootstrap_cross_environment
 
               radula_behave_bootstrap_distclean
 
@@ -994,7 +976,7 @@ while [ $# -ge 0 ]; do
               ;;
             i | img | image)
               if [ $(id -u) -eq 0 ]; then
-                radula_behave_bootstrap_variables
+                radula_behave_bootstrap_environment
 
                 modprobe loop
 
@@ -1019,7 +1001,7 @@ while [ $# -ge 0 ]; do
               radula_behave_bootstrap_require
               ;;
             s | release)
-              radula_behave_bootstrap_variables
+              radula_behave_bootstrap_environment
 
               radula_behave_bootstrap_toolchain_release /tmp/toolchain
 
@@ -1031,17 +1013,17 @@ while [ $# -ge 0 ]; do
               radula_open
               radula_open "Bootstrapping the $genome cross-compiler toolchain targeting musl libc..."
 
-              radula_behave_bootstrap_variables
+              radula_behave_bootstrap_environment
 
               # Only for the toolchain as we're relying on the host's ccache
-              [ $ccache = yes ] && radula_behave_ccache_variables $CCCH
+              [ $ccache = yes ] && radula_behave_ccache_environment $CCCH
 
               radula_behave_bootstrap_initialize
 
               radula_behave_bootstrap_clean
 
               # No radula_behave_bootstrap_flags optimizations for the toolchain
-              radula_behave_bootstrap_arch_variables
+              radula_behave_bootstrap_arch_environment
 
               radula_behave_bootstrap toolchain || {
                 radula_close "Failed to boostrap an $genome cross-compiler toolchain targeting musl libc."
@@ -1058,12 +1040,12 @@ while [ $# -ge 0 ]; do
               radula_open
               radula_open "Bootstrapping the $genome cross-compiled glaucus system..."
 
-              radula_behave_bootstrap_variables
+              radula_behave_bootstrap_environment
 
-              radula_behave_pkg_config_variables $CRSD
+              radula_behave_pkg_config_environment $CRSD
 
-              radula_behave_bootstrap_arch_variables
-              radula_behave_bootstrap_flags_variables
+              radula_behave_bootstrap_arch_environment
+              radula_behave_bootstrap_flags_environment
 
               radula_behave_bootstrap cross || {
                 radula_close "Failed to boostrap an $genome cross-compiled glaucus system."
@@ -1161,16 +1143,6 @@ while [ $# -ge 0 ]; do
               radula_open 'Concentrates:\t--'
             fi
             ;;
-          l | lic | license | licenses)
-            lic_len=$(printf "$lic" | wc -w)
-            if [ $lic_len -gt 1 ]; then
-              radula_open "Licenses:    \t$(printf "$lic" | tr '\n' ' ' | sed 's/ /, /g')"
-            elif [ $lic_len -eq 1 ]; then
-              radula_open "License:     \t$lic"
-            else
-              radula_open 'Licenses:    \t--'
-            fi
-            ;;
           *)
             radula_ceras_help
             exit 1
@@ -1192,10 +1164,6 @@ while [ $# -ge 0 ]; do
         esac
         exit 1
       fi
-      exit 0
-      ;;
-    g | -g | --genome)
-      radula_open $genome
       exit 0
       ;;
     h | -h | --help)
