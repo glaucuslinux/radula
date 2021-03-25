@@ -62,7 +62,7 @@ radula_behave_binary_help() {
 
   radula_open
   radula_open 'USAGE:'
-  radula_open '\tradula [ b | -b | --behave ] [ i | binary ] [ OPTIONS ] [ Cerata ]'
+  radula_open '\tradula [ b | -b | --behave ] [ i | binary ] [ OPTIONS ] [ cerata ]'
   radula_open
   radula_open 'OPTIONS:'
   radula_open '\td, decyst    \tRemove binary cerata without preserving their cysts'
@@ -101,7 +101,7 @@ radula_behave_envenomate_help() {
 
   radula_open
   radula_open 'USAGE:'
-  radula_open '\tradula [ b | -b | --behave ] [ e | envenomate ] [ OPTIONS ] [ Cerata ]'
+  radula_open '\tradula [ b | -b | --behave ] [ e | envenomate ] [ OPTIONS ] [ cerata ]'
   radula_open
   radula_open 'OPTIONS:'
   radula_open '\td, decyst    \tRemove cerata without preserving their cyst(s)'
@@ -135,7 +135,7 @@ radula_ceras_help() {
 
   radula_open
   radula_open 'USAGE:'
-  radula_open '\tradula [ c | -c | --ceras ] [ OPTIONS ] [ Cerata ]'
+  radula_open '\tradula [ c | -c | --ceras ] [ OPTIONS ] [ cerata ]'
   radula_open
   radula_open 'OPTIONS:'
   radula_open "\tc, cnt, concentrate, concentrates\tDisplay cerata concentrate(s)"
@@ -168,7 +168,7 @@ radula_help() {
 }
 
 radula_version() {
-  radula_open 'radula version 3.4.0'
+  radula_open 'radula version 3.4.1'
   radula_open
   radula_open 'Copyright (c) 2018-2021, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
@@ -186,8 +186,8 @@ radula_behave_ccache_environment() {
 radula_behave_pkg_config_environment() {
   # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
   # automatically prefixed to PATH and LIBDIR)
-  export PKG_CONFIG_PATH=$1/usr/lib/pkgconfig
   export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig
+  export PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR
   # The trailing forward slash is important (envenomate on a glaucus system)
   export PKG_CONFIG_SYSROOT_DIR=$1/
   export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$1/usr/include
