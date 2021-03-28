@@ -168,7 +168,7 @@ radula_help() {
 }
 
 radula_version() {
-  radula_open 'radula version 3.4.1'
+  radula_open 'radula version 3.4.2'
   radula_open
   radula_open 'Copyright (c) 2018-2021, Firas Khalil Khana'
   radula_open 'Distributed under the terms of the ISC License'
