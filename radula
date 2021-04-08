@@ -904,6 +904,25 @@ radula_behave_bootstrap_cross_environment() {
   export XBLD=$XTMP/bld
   export XSRC=$XTMP/src
 
+  export AR=$TGT-gcc-ar
+  export AS=$TGT-as
+
+  # BUILD_CC is required by cross libcap and dhcp.
+  export BUILD_CC=$HOSTCC
+
+  export CC=$TGT-gcc
+
+  # Required by meson
+  export CC_LD=bfd
+
+  export CPP="$TGT-gcc -E"
+
+  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
+  export CROSS_COMPILE=$TGT-
+
+  export CXX=$TGT-g++
+  export CXX_LD=bfd
+
   # NATIVECC and NATIVECXX were superseded by HOSTCC and HOSTCXX.
   #
   # HOSTCC and HOSTCXX are optional (used in bc and netbsd-curses for nbperf and
@@ -911,22 +930,6 @@ radula_behave_bootstrap_cross_environment() {
   export HOSTCC=gcc
   export HOSTCXX=g++
 
-  # BUILD_CC is required by cross libcap and dhcp.
-  export BUILD_CC=$HOSTCC
-
-  # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
-  export CROSS_COMPILE=$TGT-
-
-  export AR=$TGT-gcc-ar
-  export AS=$TGT-as
-  export CC=$TGT-gcc
-
-  # Required by meson
-  export CC_LD=bfd
-
-  export CPP="$TGT-gcc -E"
-  export CXX=$TGT-g++
-  export CXX_LD=bfd
   export LD=$TGT-ld.bfd
   export NM=$TGT-gcc-nm
   export OBJCOPY=$TGT-objcopy
