@@ -904,7 +904,7 @@ radula_behave_bootstrap_cross_environment() {
   export XBLD=$XTMP/bld
   export XSRC=$XTMP/src
 
-  # NATIVECC and NATIVECXX were superceded by HOSTCC and HOSTCXX.
+  # NATIVECC and NATIVECXX were superseded by HOSTCC and HOSTCXX.
   #
   # HOSTCC and HOSTCXX are optional (used in bc and netbsd-curses for nbperf and
   # tic).
@@ -1020,7 +1020,9 @@ while [ $# -ge 0 ]; do
 
               radula_behave_bootstrap_initialize
 
-              radula_behave_bootstrap_clean
+              radula_open
+
+              $0 b b c
 
               # No radula_behave_bootstrap_flags optimizations for the toolchain
               radula_behave_bootstrap_arch_environment
