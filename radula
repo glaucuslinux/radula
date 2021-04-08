@@ -920,7 +920,10 @@ radula_behave_bootstrap_cross_environment() {
   export AR=$TGT-gcc-ar
   export AS=$TGT-as
   export CC=$TGT-gcc
+
+  # Required by meson
   export CC_LD=bfd
+
   export CPP="$TGT-gcc -E"
   export CXX=$TGT-g++
   export CXX_LD=bfd
