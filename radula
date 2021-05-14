@@ -186,12 +186,12 @@ radula_behave_ccache_environment() {
 radula_behave_pkg_config_environment() {
   # pkgconf and pkg-config don't respect the provided sysroot (it doesn't get
   # automatically prefixed to PATH and LIBDIR)
-  export PKG_CONFIG_LIBDIR=$1/usr/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=$CRSD/usr/lib/pkgconfig
   export PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR
   # The trailing forward slash is important (envenomate on a glaucus system)
-  export PKG_CONFIG_SYSROOT_DIR=$1/
-  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$1/usr/include
-  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$1/usr/lib
+  export PKG_CONFIG_SYSROOT_DIR=$CRSD/
+  export PKG_CONFIG_SYSTEM_INCLUDE_PATH=$CRSD/usr/include
+  export PKG_CONFIG_SYSTEM_LIBRARY_PATH=$CRSD/usr/lib
 }
 
 # teeth are radula's tools
@@ -213,7 +213,7 @@ radula_behave_teeth_environment() {
   # Full path to not overlap with the install() function in .ceras files
   export MKDIR='/usr/bin/install -dv'
   export MV='mv -v'
-  export PATCH='patch -v'
+  export PATCH='patch --verbose'
   export RM='rm -frv'
   export RSYNC='rsync -vaHAXSx'
   export UMOUNT='umount -fqRv'
@@ -452,7 +452,7 @@ radula_behave_bootstrap_distclean() {
   $RM $TMPD > /dev/null
 }
 
-radula_behave_bootstrap_flags_environment() {
+radula_behave_flags_environment() {
   case $genome in
     x86-64 | x86_64)
       ALIGN=-malign-data=cacheline
@@ -492,7 +492,7 @@ radula_behave_bootstrap_flags_environment() {
   export CFLAGSNOCOMMON="$(printf -- "$CFLAGS" | sed "s/$STRIP /&$COMMON /")"
   export CFLAGSNOCOMMONNOLTO="$(printf -- "$CFLAGS" | sed -e "s/$STRIP /&$COMMON /" -e "s/$LTO //")"
 
-  export CFLAGSNOFPMATHNOLTO="$(printf -- "$CFLAGS" | sed -e "s/ $FPMATH//" -e "s/$LTO //")"
+  export CFLAGSNOFPMATH="$(printf -- "$CFLAGS" | sed "s/ $FPMATH//")"
 
   export CFLAGSNOIPANOLTO="$(printf -- "$CFLAGS" | sed -e "s/$IPA //" -e "s/$LTO //")"
 
@@ -908,20 +908,20 @@ radula_behave_bootstrap_cross_environment() {
   export AS=$TGT-as
 
   # BUILD_CC is required by cross libcap and dhcp.
-  export BUILD_CC=$HOSTCC
+  export BUILD_CC=gcc
 
   export CC=$TGT-gcc
 
   # Required by meson
   export CC_LD=bfd
 
-  export CPP="$TGT-gcc -E"
+  export CPP="$CC -E"
 
   # Don't set CROSS_COMPILE for the toolchain stage (only musl requires it)
   export CROSS_COMPILE=$TGT-
 
   export CXX=$TGT-g++
-  export CXX_LD=bfd
+  export CXX_LD=$CC_LD
 
   # NATIVECC and NATIVECXX were superseded by HOSTCC and HOSTCXX.
   #
@@ -930,11 +930,11 @@ radula_behave_bootstrap_cross_environment() {
   export HOSTCC=gcc
   export HOSTCXX=g++
 
-  export LD=$TGT-ld.bfd
-  export NM=$TGT-gcc-nm
+  export LD=$TGT-ld.$CC_LD
+  export NM=$CC-nm
   export OBJCOPY=$TGT-objcopy
   export OBJDUMP=$TGT-objdump
-  export RANLIB=$TGT-gcc-ranlib
+  export RANLIB=$CC-ranlib
   export READELF=$TGT-readelf
   export SIZE=$TGT-size
   export STRINGS=$TGT-strings
@@ -1050,10 +1050,11 @@ while [ $# -ge 0 ]; do
 
               radula_behave_bootstrap_environment
 
-              radula_behave_pkg_config_environment $CRSD
+              radula_behave_pkg_config_environment
 
               radula_behave_bootstrap_arch_environment
-              radula_behave_bootstrap_flags_environment
+
+              radula_behave_flags_environment
 
               radula_behave_bootstrap cross || {
                 radula_close "Failed to boostrap an $genome cross-compiled glaucus system."
@@ -1157,7 +1158,7 @@ while [ $# -ge 0 ]; do
             ;;
         esac
 
-      elif [ ! -z $2 ] && [ -d $CERD/$2 ]; then
+      elif [ -f $CERD/$2/ceras ]; then
         . $CERD/$2/ceras
 
         for i in n v u s y c l; do
